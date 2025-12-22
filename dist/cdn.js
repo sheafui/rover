@@ -14,6 +14,7 @@
         });
         this.$el.addEventListener("input", (e) => {
           e.stopPropagation();
+          console.log(e);
           if (this.__isTyping) {
             this.__open();
           }
