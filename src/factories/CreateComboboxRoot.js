@@ -120,19 +120,6 @@ export default function CreateComboboxRoot({ el, effect }) {
 
             let input = this.$refs.__input;
 
-            // if (input) {
-            //     let value = input.value
-            //     let { selectionStart, selectionEnd, selectionDirection } = input
-            //     input.value = ''
-            //     input.dispatchEvent(new Event('change'))
-            //     input.value = value
-            //     if (selectionDirection !== null) {
-            //         input.setSelectionRange(selectionStart, selectionEnd, selectionDirection)
-            //     } else {
-            //         input.setSelectionRange(selectionStart, selectionEnd)
-            //     }
-            // }
-
             requestAnimationFrame(() => {
                 input.focus({ preventScroll: true });
                 this.__activateSelectedOrFirst();
