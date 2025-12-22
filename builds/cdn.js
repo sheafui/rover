@@ -1,5 +1,5 @@
-import AlpineAnimation from '../src/index'
+import AlpineCombobox from '../src/index'
 
 document.addEventListener('alpine:initializing', () => {
-    AlpineAnimation(window.Alpine)
+    AlpineCombobox(window.Alpine)
 })

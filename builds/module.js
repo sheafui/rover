@@ -1,3 +1,3 @@
-import AlpineAnimation from '../src/index'
+import AlpineCombobox from '../src/index'
 
-export default AlpineAnimation
+export default AlpineCombobox

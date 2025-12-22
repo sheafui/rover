@@ -4,7 +4,10 @@
   "description": "full combobox pattern implementation with alpine for alpine users",
   "main": "index.js",
   "scripts": {
-    "test": "test"
+    "build": "node ./scripts/build.js",
+    "watch": "node ./scripts/build.js --watch",
+    "lint": "eslint .",
+    "lint-fix": "eslint . --fix"
   },
   "repository": {
     "type": "git",

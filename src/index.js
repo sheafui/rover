@@ -1,10 +1,10 @@
 import CreateComboboxInput from "./factories/CreateComboboxInput";
 import CreateComboboxOption from "./factories/CreateComboboxOption";
 import CreateComboboxRoot from "./factories/CreateComboboxRoot";
-import ComboboxOption from "./magics/option";
-
 export default function combobox(Alpine) {
+
     Alpine.directive('combobox', (el, { value, modifiers, expression }, { Alpine, effect, cleanup }) => {
+        
         switch (value) {
             case null: handleRoot(Alpine, el, effect);
                 break;
@@ -30,9 +30,6 @@ export default function combobox(Alpine) {
         }
     });
 
-
-    Alpine.magic('comboboxOption', ComboboxOption)
-
     function handleRoot(Alpine, el, effect) {
         Alpine.bind(el, {
             'x-data'() {
@@ -47,7 +44,6 @@ export default function combobox(Alpine) {
             'x-model': '__searchQuery',
             'x-bind:id'() { return this.$id('combobox-input') },
 
-            // Accessibility attributes...
             'role': 'combobox',
             'tabindex': '0',
             'aria-autocomplete': 'list',
@@ -62,10 +58,7 @@ export default function combobox(Alpine) {
         Alpine.bind(el, {
 
             'x-ref': '__options',
-
             'x-bind:id'() { return this.$id('combobox-options') },
-
-            // A11y..
             'role': 'listbox',
 
             'x-init'() {
@@ -104,7 +97,7 @@ export default function combobox(Alpine) {
             'x-bind:id'() { return this.$id('combobox-options-group') },
             'role': 'option',
             'x-show'() {
-                // we need to hide it if it's doesnt have any   child (maybe emmm)  
+                // we need to hide it if it's doesnt have any child  
                 return true;
             },
         });
