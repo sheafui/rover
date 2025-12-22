@@ -3,7 +3,7 @@ import ComboboxCollection from "../core/ComboboxCollection";
 export default function CreateComboboxRoot({ el, effect }) {
 
     const collection = new ComboboxCollection();
-
+    
     return {
         __state: null,
         __isOpen: false,

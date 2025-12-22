@@ -1,5 +1,5 @@
-import AlpineCombobox from '../src/index'
+import combobox from '../src/index'
 
-document.addEventListener('alpine:initializing', () => {
-    AlpineCombobox(window.Alpine)
+document.addEventListener('alpine:init', () => {
+    combobox(window.Alpine)
 })

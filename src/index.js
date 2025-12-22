@@ -5,6 +5,8 @@ export default function combobox(Alpine) {
 
     Alpine.directive('combobox', (el, { value, modifiers, expression }, { Alpine, effect, cleanup }) => {
         
+        console.log('before:');
+
         switch (value) {
             case null: handleRoot(Alpine, el, effect);
                 break;
@@ -31,6 +33,7 @@ export default function combobox(Alpine) {
     });
 
     function handleRoot(Alpine, el, effect) {
+
         Alpine.bind(el, {
             'x-data'() {
                 return CreateComboboxRoot({ el, effect })

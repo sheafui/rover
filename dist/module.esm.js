@@ -509,6 +509,7 @@ function CreateComboboxRoot({el, effect}) {
 // src/index.js
 function combobox(Alpine2) {
   Alpine2.directive("combobox", (el, {value, modifiers, expression}, {Alpine: Alpine3, effect, cleanup}) => {
+    console.log("before:");
     switch (value) {
       case null:
         handleRoot(Alpine3, el, effect);

@@ -2,7 +2,9 @@
   "name": "combobox",
   "version": "1.0.0",
   "description": "full combobox pattern implementation with alpine for alpine users",
-  "main": "index.js",
+  "main": "dist/module.cjs.js",
+  "module": "dist/module.esm.js",
+  "type": "module",
   "scripts": {
     "build": "node ./scripts/build.js",
     "watch": "node ./scripts/build.js --watch",
