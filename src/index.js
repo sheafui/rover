@@ -1,12 +1,12 @@
 import CreateComboboxInput from "./factories/CreateComboboxInput";
 import CreateComboboxOption from "./factories/CreateComboboxOption";
 import CreateComboboxRoot from "./factories/CreateComboboxRoot";
-export default function combobox(Alpine) {
 
-    Alpine.directive('combobox', (el, { value, modifiers, expression }, { Alpine, effect, cleanup }) => {
+export default function combobox() {
+
+    window.Alpine.directive('combobox', (el, { value, modifiers, expression }, { Alpine, effect, cleanup }) => {
         
         console.log('before:');
-
         switch (value) {
             case null: handleRoot(Alpine, el, effect);
                 break;

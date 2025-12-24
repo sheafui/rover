@@ -508,51 +508,51 @@
   }
 
   // src/index.js
-  function combobox(Alpine2) {
-    Alpine2.directive("combobox", (el, {value, modifiers, expression}, {Alpine: Alpine3, effect, cleanup}) => {
+  function combobox() {
+    window.Alpine.directive("combobox", (el, {value, modifiers, expression}, {Alpine: Alpine2, effect, cleanup}) => {
       console.log("before:");
       switch (value) {
         case null:
-          handleRoot(Alpine3, el, effect);
+          handleRoot(Alpine2, el, effect);
           break;
         case "input":
-          handleInput(Alpine3, el);
+          handleInput(Alpine2, el);
           break;
         case "button":
-          handleButton(Alpine3, el);
+          handleButton(Alpine2, el);
           break;
         case "options":
           handleOptions(el);
           break;
         case "option":
-          handleOption(Alpine3, el, effect);
+          handleOption(Alpine2, el, effect);
           break;
         case "options-group":
-          handleOptionsGroup(Alpine3, el, effect);
+          handleOptionsGroup(Alpine2, el, effect);
           break;
         case "loading":
-          handleIsLoasing(Alpine3, el, modifiers, expression);
+          handleIsLoasing(Alpine2, el, modifiers, expression);
           break;
         case "separator":
-          handleSeparator(Alpine3, el, modifiers, expression);
+          handleSeparator(Alpine2, el, modifiers, expression);
           break;
         case ("empty", "on-empty"):
-          handleEmptyState(Alpine3, el, modifiers, expression);
+          handleEmptyState(Alpine2, el, modifiers, expression);
           break;
         default:
           console.error("invalid x-combobox value", value, "use input, button, option, options or leave mepty for root level instead");
           break;
       }
     });
-    function handleRoot(Alpine3, el, effect) {
-      Alpine3.bind(el, {
+    function handleRoot(Alpine2, el, effect) {
+      Alpine2.bind(el, {
         "x-data"() {
           return CreateComboboxRoot({el, effect});
         }
       });
     }
-    function handleInput(Alpine3, el) {
-      Alpine3.bind(el, {
+    function handleInput(Alpine2, el) {
+      Alpine2.bind(el, {
         "x-ref": "__input",
         "x-model": "__searchQuery",
         "x-bind:id"() {
@@ -567,15 +567,15 @@
       });
     }
     function handleOptions(el) {
-      Alpine2.bind(el, {
+      Alpine.bind(el, {
         "x-ref": "__options",
         "x-bind:id"() {
           return this.$id("combobox-options");
         },
         role: "listbox",
         "x-init"() {
-          this.$data.__static = Alpine2.extractProp(this.$el, "static", false);
-          if (Alpine2.bound(this.$el, "hold")) {
+          this.$data.__static = Alpine.extractProp(this.$el, "static", false);
+          if (Alpine.bound(this.$el, "hold")) {
             this.__keepActivated = true;
           }
           return this.$el.dataset.slot = "options";
@@ -585,8 +585,8 @@
         }
       });
     }
-    function handleOption(Alpine3, el, effect) {
-      Alpine3.bind(el, {
+    function handleOption(Alpine2, el, effect) {
+      Alpine2.bind(el, {
         "x-id"() {
           return ["combobox-option"];
         },
@@ -598,12 +598,12 @@
           return this.$data.__isVisible(this.$el.dataset.key);
         },
         "x-data"() {
-          return CreateComboboxOption(Alpine3, this.__nextId(), effect);
+          return CreateComboboxOption(Alpine2, this.__nextId(), effect);
         }
       });
     }
-    function handleOptionsGroup(Alpine3, el, effect) {
-      Alpine3.bind(el, {
+    function handleOptionsGroup(Alpine2, el, effect) {
+      Alpine2.bind(el, {
         "x-id"() {
           return ["combobox-options-group"];
         },
@@ -616,8 +616,8 @@
         }
       });
     }
-    function handleButton(Alpine3, el) {
-      Alpine3.bind(el, {
+    function handleButton(Alpine2, el) {
+      Alpine2.bind(el, {
         "x-ref": "__button",
         "x-bind:id"() {
           return this.$id("combobox-button");
@@ -638,8 +638,8 @@
         }
       });
     }
-    function handleEmptyState(Alpine3, el) {
-      Alpine3.bind(el, {
+    function handleEmptyState(Alpine2, el) {
+      Alpine2.bind(el, {
         "x-bind:id"() {
           return this.$id("combobox-button");
         },
@@ -650,17 +650,17 @@
         }
       });
     }
-    function handleIsLoasing(Alpine3, el, modifiers) {
-      let data = Alpine3.$data(el);
+    function handleIsLoasing(Alpine2, el, modifiers) {
+      let data = Alpine2.$data(el);
       if (data.__isLoading) {
       }
     }
-    function handleSeparator(Alpine3, el, modifiers) {
+    function handleSeparator(Alpine2, el, modifiers) {
     }
   }
 
   // builds/cdn.js
   document.addEventListener("alpine:init", () => {
-    combobox(window.Alpine);
+    window.Alpine.plugin(combobox);
   });
 })();
