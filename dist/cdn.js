@@ -510,7 +510,6 @@
   // src/index.js
   function combobox(Alpine2) {
     Alpine2.directive("combobox", (el, {value, modifiers, expression}, {Alpine: Alpine3, effect}) => {
-      console.log("directive founded");
       switch (value) {
         case null:
           handleRoot(Alpine3, el, effect);
@@ -660,15 +659,7 @@
   }
 
   // builds/cdn.js
-  var plugin = (Alpine2) => {
-    combobox(Alpine2);
-  };
   document.addEventListener("alpine:init", () => {
-    console.log("dede");
-    Alpine.directive("test", (el, {value, modifiers, expression}, {Alpine: Alpine2, effect}) => {
-      console.log("dede");
-    });
-    window.Alpine.de;
-    window.Alpine.plugin(plugin);
+    window.Alpine.plugin(combobox);
   });
 })();

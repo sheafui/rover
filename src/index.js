@@ -6,8 +6,6 @@ export default function combobox(Alpine) {
 
     Alpine.directive('combobox', (el, { value, modifiers, expression }, { Alpine, effect }) => {
         
-        console.log('directive founded');
-
         switch (value) {
             case null: handleRoot(Alpine, el, effect);
                 break;
