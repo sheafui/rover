@@ -7,14 +7,16 @@
     <title>Document</title>
 
 
-    <script type="module" src="./dist/cdn.js"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="./dist/cdn.js"></script>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="flex mt-20 justify-center bg-neutral-950">
-    <div class="space-y-4">
+
+    <div x-test class="space-y-4">
         <div x-combobox class="w-[360px]">
             <div class="grid grid-cols-[auto_2rem]">
                 <input x-combobox:input placeholder="Search..."

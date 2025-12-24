@@ -2,11 +2,12 @@ import CreateComboboxInput from "./factories/CreateComboboxInput";
 import CreateComboboxOption from "./factories/CreateComboboxOption";
 import CreateComboboxRoot from "./factories/CreateComboboxRoot";
 
-export default function combobox() {
+export default function combobox(Alpine) {
 
-    window.Alpine.directive('combobox', (el, { value, modifiers, expression }, { Alpine, effect, cleanup }) => {
+    Alpine.directive('combobox', (el, { value, modifiers, expression }, { Alpine, effect }) => {
         
-        console.log('before:');
+        console.log('directive founded');
+
         switch (value) {
             case null: handleRoot(Alpine, el, effect);
                 break;
@@ -30,7 +31,7 @@ export default function combobox() {
                 console.error('invalid x-combobox value', value, 'use input, button, option, options or leave mepty for root level instead');
                 break;
         }
-    });
+    }).before('bind');
 
     function handleRoot(Alpine, el, effect) {
 
@@ -67,7 +68,7 @@ export default function combobox() {
             'x-init'() {
                 this.$data.__static = Alpine.extractProp(this.$el, 'static', false);
 
-                if (Alpine.bound(this.$el, 'hold')) {
+                if (Alpine.bound(this.$el, 'keepActivated')) {
                     this.__keepActivated = true;
                 }
 
@@ -88,7 +89,8 @@ export default function combobox() {
                 return this.$data.__isVisible(this.$el.dataset.key);
             },
             'x-data'() {
-                return CreateComboboxOption(Alpine, this.__nextId(), effect)
+                // @todo: move to constructor function here for memory gains
+                return CreateComboboxOption(Alpine, this.__nextId(), effect) 
             },
         });
     }
