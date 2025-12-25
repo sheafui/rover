@@ -3,22 +3,24 @@ import brotliSize from 'brotli-size'
 import esbuild from 'esbuild'
 
 (() => {
-    if (! fs.existsSync(`./dist`)) {
+    if (!fs.existsSync(`./dist`)) {
         fs.mkdirSync(`./dist`, 0o744)
     }
 
-    // Go through each file in the package's "build" directory
-    // and use the appropriate bundling strategy based on its name.
-    
+
+    console.log(fs.readdirSync(`./builds`))
+
     fs.readdirSync(`./builds`).forEach(file => {
         bundleFile(file)
     })
+
 })()
 
 function bundleFile(file) {
-    // Based on the filename, give esbuild a specific configuration to build.
+
+    const tsFile = file.replace('.js', '.ts');
+
     ({
-        // This output file is meant to be loaded in a browser's <script> tag.
         'cdn.js': () => {
             build({
                 entryPoints: [`builds/${file}`],
@@ -27,8 +29,7 @@ function bundleFile(file) {
                 platform: 'browser',
                 define: { CDN: true },
             })
-
-            // Build a minified version.
+            // minified verison for cdn
             build({
                 entryPoints: [`builds/${file}`],
                 outfile: `dist/${file.replace('.js', '.min.js')}`,
@@ -50,7 +51,7 @@ function bundleFile(file) {
                 platform: 'neutral',
                 mainFields: ['main', 'module'],
             })
-
+            // minified version for module
             build({
                 entryPoints: [`builds/${file}`],
                 outfile: `dist/${file.replace('.js', '.cjs.js')}`,
@@ -84,4 +85,4 @@ function bytesToSize(bytes) {
     const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)), 10)
     if (i === 0) return `${bytes} ${sizes[i]}`
     return `${(bytes / (1024 ** i)).toFixed(1)} ${sizes[i]}`
-  }
+}
