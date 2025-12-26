@@ -28,17 +28,17 @@ __export(exports, {
   default: () => module_default
 });
 
-// src/factories/CreateComboboxInput.js
-function CreateComboboxInput() {
+// src/factories/CreateComboboxInput.ts
+function CreateComboboxInput(Alpine2) {
   return {
     init() {
-      let displayValueFn = Alpine.extractProp(this.$el, "display-value");
+      let displayValueFn = Alpine2.extractProp(this.$el, "display-value", "");
       if (displayValueFn)
         this.__displayValue = displayValueFn;
       this.handleEvents();
     },
     handleEvents() {
-      this.$el.addEventListener("focus", (e) => {
+      this.$el.addEventListener("focus", () => {
         this.__startTyping();
       });
       this.$el.addEventListener("input", (e) => {
@@ -87,14 +87,14 @@ function CreateComboboxInput() {
   };
 }
 
-// src/factories/CreateComboboxOption.js
-function CreateComboboxOption(Alpine2, nextId, effect) {
+// src/factories/CreateComboboxOption.ts
+function CreateComboboxOption(Alpine2, nextId) {
   const SLOT_NAME = "option";
   return {
     __uniqueKey: "option-" + nextId,
     init() {
       this.$el.dataset.slot = SLOT_NAME;
-      let value = Alpine2.extractProp(this.$el, "value");
+      let value = Alpine2.extractProp(this.$el, "value", "");
       this.$el.dataset.key = this.__uniqueKey;
       this.$el.dataset.value = value;
       let disabled = Alpine2.extractProp(this.$el, "disabled", false, false);
@@ -554,9 +554,9 @@ function CreateComboboxRoot({el, effect}) {
   };
 }
 
-// src/index.js
+// src/index.ts
 function combobox(Alpine2) {
-  Alpine2.directive("combobox", (el, {value, modifiers, expression}, {Alpine: Alpine3, effect}) => {
+  Alpine2.directive("combobox", (el, {value, modifiers}, {Alpine: Alpine3, effect}) => {
     switch (value) {
       case null:
         handleRoot(Alpine3, el, effect);
@@ -571,19 +571,19 @@ function combobox(Alpine2) {
         handleOptions(el);
         break;
       case "option":
-        handleOption(Alpine3, el, effect);
+        handleOption(Alpine3, el);
         break;
       case "options-group":
-        handleOptionsGroup(Alpine3, el, effect);
+        handleOptionsGroup(Alpine3, el);
         break;
       case "loading":
-        handleIsLoasing(Alpine3, el, modifiers, expression);
+        handleIsLoasing(Alpine3, el, modifiers);
         break;
       case "separator":
-        handleSeparator(Alpine3, el, modifiers, expression);
+        handleSeparator(Alpine3, el);
         break;
-      case ("empty", "on-empty"):
-        handleEmptyState(Alpine3, el, modifiers, expression);
+      case "empty":
+        handleEmptyState(Alpine3, el);
         break;
       default:
         console.error("invalid x-combobox value", value, "use input, button, option, options or leave mepty for root level instead");
@@ -608,7 +608,7 @@ function combobox(Alpine2) {
       tabindex: "0",
       "aria-autocomplete": "list",
       "x-data"() {
-        return CreateComboboxInput();
+        return CreateComboboxInput(Alpine3);
       }
     });
   }
@@ -631,7 +631,7 @@ function combobox(Alpine2) {
       }
     });
   }
-  function handleOption(Alpine3, el, effect) {
+  function handleOption(Alpine3, el) {
     Alpine3.bind(el, {
       "x-id"() {
         return ["combobox-option"];
@@ -644,11 +644,11 @@ function combobox(Alpine2) {
         return this.$data.__isVisible(this.$el.dataset.key);
       },
       "x-data"() {
-        return CreateComboboxOption(Alpine3, this.__nextId(), effect);
+        return CreateComboboxOption(Alpine3, this.__nextId());
       }
     });
   }
-  function handleOptionsGroup(Alpine3, el, effect) {
+  function handleOptionsGroup(Alpine3, el) {
     Alpine3.bind(el, {
       "x-id"() {
         return ["combobox-options-group"];
@@ -698,10 +698,13 @@ function combobox(Alpine2) {
   }
   function handleIsLoasing(Alpine3, el, modifiers) {
     let data = Alpine3.$data(el);
-    if (data.__isLoading) {
+    if (modifiers.filter((item) => item === "hide")) {
+    }
+    if (data) {
     }
   }
-  function handleSeparator(Alpine3, el, modifiers) {
+  function handleSeparator(Alpine3, el) {
+    Alpine3.bind(el, {});
   }
 }
 
