@@ -46,7 +46,7 @@ export default function combobox(Alpine: Alpine): void {
     function handleRoot(
         Alpine: Alpine,
         el: AlpineType.ElementWithXAttributes,
-        effect: <T>(callback: () => T) => AlpineType.ReactiveEffect<T>
+        effect: AlpineType.DirectiveUtilities['effect']
     ) {
 
         Alpine.bind(el, {
@@ -71,7 +71,6 @@ export default function combobox(Alpine: Alpine): void {
             'x-data'() {
                 return CreateComboboxInput(Alpine)
             }
-
         })
     }
 
