@@ -133,7 +133,7 @@ function CreateComboboxOption(Alpine2, nextId) {
   };
 }
 
-// src/core/ComboboxCollection.js
+// src/core/ComboboxCollection.ts
 var _items, _itemsMap, _activeNavPos, _needsReindex, _navIndex, _searchIndex, _lastQuery, _lastResults, _isProcessing, _invalidate, invalidate_fn, _scheduleBatch, scheduleBatch_fn, _rebuildIndexes, rebuildIndexes_fn;
 var ComboboxCollection = class {
   constructor(options = {}, release = () => {

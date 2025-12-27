@@ -104,23 +104,32 @@
     };
   }
 
-  // src/core/ComboboxCollection.js
+  // src/core/ComboboxCollection.ts
   var ComboboxCollection = class {
-    #items = [];
-    #itemsMap = new Map();
-    #activeNavPos = -1;
-    #needsReindex = false;
-    #navIndex = null;
-    #searchIndex = null;
-    #lastQuery = "";
-    #lastResults = null;
-    #isProcessing = false;
     constructor(options = {}, release = () => {
     }) {
+      this.#items = [];
+      this.#itemsMap = new Map();
+      this.#activeNavPos = -1;
+      this.#needsReindex = false;
+      this.#navIndex = null;
+      this.#searchIndex = null;
+      this.#lastQuery = "";
+      this.#lastResults = null;
+      this.#isProcessing = false;
       this.pending = Alpine.reactive({state: false});
       this.activeIndex = Alpine.reactive({value: null});
       this.searchThreshold = options.searchThreshold ?? 500;
     }
+    #items;
+    #itemsMap;
+    #activeNavPos;
+    #needsReindex;
+    #navIndex;
+    #searchIndex;
+    #lastQuery;
+    #lastResults;
+    #isProcessing;
     add(key, value, disabled = false) {
       if (this.#itemsMap.has(key))
         return;
