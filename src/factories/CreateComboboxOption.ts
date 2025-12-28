@@ -1,4 +1,6 @@
-export default function CreateComboboxOption(Alpine, nextId, effect) {
+import type { Alpine as AlpineType } from 'alpinejs';
+
+export default function CreateComboboxOption(Alpine: AlpineType, nextId: string) {
 
     const SLOT_NAME = 'option';
 
@@ -9,8 +11,8 @@ export default function CreateComboboxOption(Alpine, nextId, effect) {
 
             this.$el.dataset.slot = SLOT_NAME;
 
-            let value = Alpine.extractProp(this.$el, 'value');
-            
+            let value = Alpine.extractProp(this.$el, 'value', '');
+
             this.$el.dataset.key = this.__uniqueKey;
 
             this.$el.dataset.value = value;
@@ -22,7 +24,7 @@ export default function CreateComboboxOption(Alpine, nextId, effect) {
             // I am not sure if this is the most efficient way to detect if this is the active or selected element
             // but I will keep as @todo while I am building this project... 
             // let's continue the implementation fist
-            this.$watch('__activedKey', (activeKey) => {
+            this.$watch('__activedKey', (activeKey: string) => {
                 if (activeKey === this.__uniqueKey) {
                     this.$el.setAttribute('data-active', true);
                 } else {
@@ -30,7 +32,7 @@ export default function CreateComboboxOption(Alpine, nextId, effect) {
                 }
             });
 
-            this.$watch('__selectedKeys', (selectedKeys) => {
+            this.$watch('__selectedKeys', (selectedKeys: string) => {
 
                 let thisElHasBeenSelected = false;
 
@@ -50,7 +52,7 @@ export default function CreateComboboxOption(Alpine, nextId, effect) {
                 }
             })
 
-            this.$nextTick(() => {
+            this.$nextTick(():void => {
                 if (disabled) {
                     this.$el.setAttribute('tabindex', -1);
                 }

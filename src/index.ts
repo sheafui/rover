@@ -1,12 +1,24 @@
+import { Alpine } from "alpinejs";
+import type * as AlpineType from "alpinejs";
 import CreateComboboxInput from "./factories/CreateComboboxInput";
 import CreateComboboxOption from "./factories/CreateComboboxOption";
 import CreateComboboxRoot from "./factories/CreateComboboxRoot";
 
-export default function combobox(Alpine) {
+type ComboboxValue =
+    | null
+    | 'input'
+    | 'button'
+    | 'options'
+    | 'option'
+    | 'options-group'
+    | 'loading'
+    | 'separator'
+    | 'empty';
 
-    Alpine.directive('combobox', (el, { value, modifiers, expression }, { Alpine, effect }) => {
-        
-        switch (value) {
+export default function combobox(Alpine: Alpine): void {
+
+    Alpine.directive('combobox', (el: AlpineType.ElementWithXAttributes, { value, modifiers }: AlpineType.DirectiveData, { Alpine, effect }: AlpineType.DirectiveUtilities) => {
+        switch (value as ComboboxValue) {
             case null: handleRoot(Alpine, el, effect);
                 break;
             case 'input': handleInput(Alpine, el);
@@ -15,15 +27,15 @@ export default function combobox(Alpine) {
                 break;
             case 'options': handleOptions(el);
                 break;
-            case 'option': handleOption(Alpine, el, effect);
+            case 'option': handleOption(Alpine, el);
                 break;
-            case 'options-group': handleOptionsGroup(Alpine, el, effect);
+            case 'options-group': handleOptionsGroup(Alpine, el);
                 break;
-            case 'loading': handleIsLoasing(Alpine, el, modifiers, expression);
+            case 'loading': handleIsLoasing(Alpine, el, modifiers);
                 break;
-            case 'separator': handleSeparator(Alpine, el, modifiers, expression);
+            case 'separator': handleSeparator(Alpine, el);
                 break;
-            case 'empty', 'on-empty': handleEmptyState(Alpine, el, modifiers, expression);
+            case 'empty': handleEmptyState(Alpine, el);
                 break;
             default:
                 console.error('invalid x-combobox value', value, 'use input, button, option, options or leave mepty for root level instead');
@@ -31,7 +43,11 @@ export default function combobox(Alpine) {
         }
     }).before('bind');
 
-    function handleRoot(Alpine, el, effect) {
+    function handleRoot(
+        Alpine: Alpine,
+        el: AlpineType.ElementWithXAttributes,
+        effect: AlpineType.DirectiveUtilities['effect']
+    ) {
 
         Alpine.bind(el, {
             'x-data'() {
@@ -40,7 +56,10 @@ export default function combobox(Alpine) {
         })
     }
 
-    function handleInput(Alpine, el) {
+    function handleInput(
+        Alpine: Alpine,
+        el: AlpineType.ElementWithXAttributes
+    ): void {
         Alpine.bind(el, {
             'x-ref': '__input',
             'x-model': '__searchQuery',
@@ -50,13 +69,12 @@ export default function combobox(Alpine) {
             'tabindex': '0',
             'aria-autocomplete': 'list',
             'x-data'() {
-                return CreateComboboxInput()
+                return CreateComboboxInput(Alpine)
             }
-
         })
     }
 
-    function handleOptions(el) {
+    function handleOptions(el: AlpineType.ElementWithXAttributes) {
         Alpine.bind(el, {
 
             'x-ref': '__options',
@@ -77,7 +95,7 @@ export default function combobox(Alpine) {
         })
     }
 
-    function handleOption(Alpine, el, effect) {
+    function handleOption(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
 
         Alpine.bind(el, {
             'x-id'() { return ['combobox-option'] },
@@ -88,12 +106,12 @@ export default function combobox(Alpine) {
             },
             'x-data'() {
                 // @todo: move to constructor function here for memory gains
-                return CreateComboboxOption(Alpine, this.__nextId(), effect) 
+                return CreateComboboxOption(Alpine, this.__nextId())
             },
         });
     }
 
-    function handleOptionsGroup(Alpine, el, effect) {
+    function handleOptionsGroup(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
 
         Alpine.bind(el, {
             'x-id'() { return ['combobox-options-group'] },
@@ -106,7 +124,7 @@ export default function combobox(Alpine) {
         });
     }
 
-    function handleButton(Alpine, el) {
+    function handleButton(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
 
         Alpine.bind(el, {
             'x-ref': '__button',
@@ -132,7 +150,7 @@ export default function combobox(Alpine) {
         })
     }
 
-    function handleEmptyState(Alpine, el) {
+    function handleEmptyState(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
         Alpine.bind(el, {
             'x-bind:id'() { return this.$id('combobox-button') },
 
@@ -145,19 +163,26 @@ export default function combobox(Alpine) {
         });
     }
 
-    function handleIsLoasing(Alpine, el, modifiers) {
+    function handleIsLoasing(Alpine: Alpine, el: AlpineType.ElementWithXAttributes, modifiers: AlpineType.DirectiveData['modifiers']) {
 
         // get the current alpine scope of the el.
         let data = Alpine.$data(el);
 
-        if (data.__isLoading) {
+        if (modifiers.filter((item: string) => item === 'hide')) {
+            // 
+        }
+
+        if (data) {
             // @todo
         }
 
     }
 
-    function handleSeparator(Alpine, el, modifiers) {
+    function handleSeparator(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
         // when the search is happening if there is any items above it that hidden (filtered out), we need to hide this separator
         // as well as we need to do the same thing if the items the below it hidden 
+        Alpine.bind(el, {
+            // @todo
+        });
     }
 }

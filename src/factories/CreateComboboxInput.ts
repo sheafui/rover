@@ -1,8 +1,10 @@
-export default function CreateComboboxInput() {
+import { Alpine as AlpineType } from "alpinejs";
+
+export default function CreateComboboxInput(Alpine: AlpineType) {
 
     return {
         init() {
-            let displayValueFn = Alpine.extractProp(this.$el, 'display-value');
+            let displayValueFn = Alpine.extractProp(this.$el, 'display-value', '');
 
             if (displayValueFn) this.__displayValue = displayValueFn;
 
@@ -11,13 +13,13 @@ export default function CreateComboboxInput() {
 
         handleEvents() {
 
-            this.$el.addEventListener('focus', (e) => {
+            this.$el.addEventListener('focus', () => {
                 // on flat variant we need to activate the first key as
                 //  soon as the user focus the input
                 this.__startTyping();
             })
 
-            this.$el.addEventListener('input', (e) => {
+            this.$el.addEventListener('input', (e: InputEvent) => {
                 e.stopPropagation();
 
                 console.log(e)
@@ -31,7 +33,7 @@ export default function CreateComboboxInput() {
                 this.__stopTyping();
             });
 
-            this.$el.addEventListener('keydown', (e) => {
+            this.$el.addEventListener('keydown', (e: KeyboardEvent) => {
 
                 switch (e.key) {
                     case 'ArrowDown':
