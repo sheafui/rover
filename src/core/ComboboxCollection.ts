@@ -4,12 +4,21 @@ interface Options {
     searchThreshold?: number
 }
 
+interface Item {
+    key: string,
+    value: string,
+    disabled: boolean
+}
+
+type Pending = { state: boolean };
+type ActiveIndex = { value: null | number };
+
 export default class ComboboxCollection {
 
-    private items = []
-    private itemsMap = new Map()
+    private items: Item[] = [];
+    private itemsMap = new Map<string, Item>()
 
-    private activeNavPos = -1
+    private activeNavPos = -1;
 
     private needsReindex = false;
     private navIndex = null;
@@ -20,26 +29,26 @@ export default class ComboboxCollection {
 
     private isProcessing = false;
 
-    public pending: { state: boolean };
+    public pending: Pending;
 
-    public activeIndex;
+    public activeIndex: ActiveIndex;
 
     public searchThreshold: number;
 
-    constructor(options: Options) {
+    public constructor(options: Options = {}) {
 
-        this.pending = Alpine.reactive({ state: false });
+        this.pending = Alpine.reactive<Pending>({ state: false });
 
-        this.activeIndex = Alpine.reactive({ value: null });
+        this.activeIndex = Alpine.reactive<ActiveIndex>({ value: null });
 
-        this.searchThreshold = options.searchThreshold ?? 500
+        this.searchThreshold = options.searchThreshold ?? 500;
     }
 
     /* ----------------------------------------
      * Mutation
      * ------------------------------------- */
 
-    add(key, value, disabled = false) {
+    public add(key: string, value: string, disabled = false): void {
         if (this.itemsMap.has(key)) return
 
         const item = { key, value, disabled }
@@ -47,39 +56,39 @@ export default class ComboboxCollection {
         this.items.push(item)
         this.itemsMap.set(key, item)
 
-        this.#invalidate()
+        this.invalidate()
     }
 
-    forget(key: string) {
-        const item = this.itemsMap.get(key)
-        if (!item) return
+    public forget(key: string): void {
+        const item = this.itemsMap.get(key);
+        if (!item) return;
 
-        const index = this.items.indexOf(item)
+        const index = this.items.indexOf(item);
 
-        this.itemsMap.delete(key)
-        this.items.splice(index, 1)
+        this.itemsMap.delete(key);
+        this.items.splice(index, 1);
 
         if (this.activeIndex.value === index) {
             this.activeIndex.value = null
             this.activeNavPos = -1
-        } else if (this.activeIndex.value > index) {
+        } else if (this.activeIndex.value && this.activeIndex.value > index) {
             this.activeIndex.value--
         }
 
-        this.#invalidate()
+        this.invalidate()
     }
 
     /* ----------------------------------------
      * Activation
      * ------------------------------------- */
 
-    activate(key) {
+    activate(key: string) {
 
         const item = this.get(key)
 
         if (!item || item.disabled) return
 
-        this.#rebuildIndexes()
+        this.rebuildIndexes()
 
         const index = this.items.indexOf(item)
 
@@ -95,7 +104,7 @@ export default class ComboboxCollection {
         this.activeNavPos = -1
     }
 
-    isActivated(key) {
+    isActivated(key: string) {
 
         const item = this.get(key)
 
@@ -115,21 +124,21 @@ export default class ComboboxCollection {
      * ------------------------------------- */
 
     activateFirst() {
-        this.#rebuildIndexes()
+        this.rebuildIndexes()
         if (!this.navIndex.length) return
         this.activeIndex.value = this.navIndex[0]
         this.activeNavPos = 0
     }
 
     activateLast() {
-        this.#rebuildIndexes()
+        this.rebuildIndexes()
         if (!this.navIndex.length) return
         this.activeNavPos = this.navIndex.length - 1
         this.activeIndex.value = this.navIndex[this.activeNavPos]
     }
 
     activateNext() {
-        this.#rebuildIndexes()
+        this.rebuildIndexes()
         if (!this.navIndex.length) return
 
         if (this.activeNavPos === -1) {
@@ -144,7 +153,7 @@ export default class ComboboxCollection {
     }
 
     activatePrev() {
-        this.#rebuildIndexes()
+        this.rebuildIndexes()
         if (!this.navIndex.length) return
 
         if (this.activeNavPos === -1) {
@@ -164,21 +173,21 @@ export default class ComboboxCollection {
      * Indexing
      * ------------------------------------- */
 
-    #invalidate() {
+    private invalidate() {
         this.needsReindex = true
         this.lastQuery = ''
         this.lastResults = null
-        this.#scheduleBatch()
+        this.scheduleBatch()
     }
 
-    #scheduleBatch() {
+    private scheduleBatch() {
         if (this.isProcessing) return
 
         this.isProcessing = true
         this.pending.state = true
 
         queueMicrotask(() => {
-            this.#rebuildIndexes()
+            this.rebuildIndexes()
             this.isProcessing = false
             this.pending.state = false
         })
@@ -188,7 +197,7 @@ export default class ComboboxCollection {
         this.pending.state = !this.pending.state;
     }
 
-    #rebuildIndexes() {
+    private rebuildIndexes() {
         if (!this.needsReindex) return
 
         this.navIndex = []
