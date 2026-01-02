@@ -28,7 +28,7 @@ export default class ComboboxCollection {
 
     private searchIndex: SearchIndex[];
     private lastQuery = '';
-    private lastResults: Item[] | null = null;
+    private lastResults: Item[];
 
     private isProcessing = false;
 
@@ -230,7 +230,7 @@ export default class ComboboxCollection {
         }
 
         if (this.items.length >= this.searchThreshold) {
-            
+
             this.searchIndex = this.items.map(item => ({
                 key: item.key,
                 value: String(item.value)
@@ -241,7 +241,7 @@ export default class ComboboxCollection {
         } else {
 
             this.searchIndex = []
-        
+
         }
 
         this.needsReindex = false
@@ -280,7 +280,8 @@ export default class ComboboxCollection {
                 .normalize('NFD')
                 .replace(/[\u0300-\u036f]/g, '')
 
-            results = []
+            results = [];
+
             for (const { key, value } of this.searchIndex) {
                 if (value.includes(normalized)) {
                     results.push(this.itemsMap.get(key))
@@ -292,9 +293,11 @@ export default class ComboboxCollection {
             )
         }
 
-        this.lastQuery = q
-        this.lastResults = results
-        return results
+        this.lastQuery = q;
+        
+        this.lastResults = results;
+
+        return results;
     }
 
     /* ----------------------------------------

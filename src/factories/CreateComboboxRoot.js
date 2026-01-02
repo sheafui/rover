@@ -94,9 +94,9 @@ export default function CreateComboboxRoot({ el, effect }) {
 
 
 
-            this.__isMultiple = Alpine.extractProp(el, 'multiple', false)
+            this.__isMultiple = Alpine.extractProp(el, 'multiple', false);
 
-            this.__isDisabled = Alpine.extractProp(el, 'disabled', false)
+            this.__isDisabled = Alpine.extractProp(el, 'disabled', false);
 
             if (this.__isMultiple) {
                 this.__selectedKeys = [];
@@ -142,7 +142,7 @@ export default function CreateComboboxRoot({ el, effect }) {
                 if (keyToActivate) {
                     this.__activate(keyToActivate);
 
-                    // Scroll into the view'ss container port... @todo
+                    //@todo: Scroll into the view'ss container port... 
                     return;
                 }
             }

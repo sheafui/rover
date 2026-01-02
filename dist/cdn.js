@@ -113,7 +113,6 @@
       this.needsReindex = false;
       this.navIndex = [];
       this.lastQuery = "";
-      this.lastResults = null;
       this.isProcessing = false;
       this.pending = Alpine.reactive({state: false});
       this.activeIndex = Alpine.reactive({value: void 0});

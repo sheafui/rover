@@ -125,7 +125,6 @@ var ComboboxCollection = class {
     this.needsReindex = false;
     this.navIndex = [];
     this.lastQuery = "";
-    this.lastResults = null;
     this.isProcessing = false;
     var _a;
     this.pending = Alpine.reactive({state: false});
