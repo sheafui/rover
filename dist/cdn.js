@@ -6,9 +6,9 @@
         let displayValueFn = Alpine2.extractProp(this.$el, "display-value", "");
         if (displayValueFn)
           this.__displayValue = displayValueFn;
-        this.handleEvents();
+        this.__handleEvents();
       },
-      handleEvents() {
+      __handleEvents() {
         this.$el.addEventListener("focus", () => {
           this.__startTyping();
         });
@@ -72,7 +72,7 @@
         this.__add(this.__uniqueKey, value, disabled);
         this.$watch("__activedKey", (activeKey) => {
           if (activeKey === this.__uniqueKey) {
-            this.$el.setAttribute("data-active", true);
+            this.$el.setAttribute("data-active", "true");
           } else {
             this.$el.removeAttribute("data-active");
           }
@@ -82,19 +82,19 @@
           if (!this.__isMultiple) {
             thisElHasBeenSelected = selectedKeys === this.__uniqueKey;
           } else {
-            thisElHasBeenSelected = selectedKeys.includes(this.__uniqueKey);
+            thisElHasBeenSelected = Array.isArray(selectedKeys) && selectedKeys.includes(this.__uniqueKey);
           }
           if (thisElHasBeenSelected) {
-            this.$el.setAttribute("aria-selected", true);
-            this.$el.setAttribute("data-selected", true);
+            this.$el.setAttribute("aria-selected", "true");
+            this.$el.setAttribute("data-selected", "true");
           } else {
-            this.$el.setAttribute("aria-selected", false);
+            this.$el.setAttribute("aria-selected", "false");
             this.$el.removeAttribute("data-selected");
           }
         });
         this.$nextTick(() => {
           if (disabled) {
-            this.$el.setAttribute("tabindex", -1);
+            this.$el.setAttribute("tabindex", "-1");
           }
         });
       },
@@ -294,7 +294,7 @@
   };
   var ComboboxCollection_default = ComboboxCollection;
 
-  // src/factories/CreateComboboxRoot.js
+  // src/factories/CreateComboboxRoot.ts
   function CreateComboboxRoot({el, effect}) {
     const collection = new ComboboxCollection_default();
     return {
@@ -311,6 +311,7 @@
       __activedKey: void 0,
       __selectedKeys: void 0,
       __filteredKeys: null,
+      __isDisabled: false,
       __searchQuery: "",
       __add: (k, v, d) => collection.add(k, v, d),
       __forget: (k) => collection.forget(k),
@@ -318,7 +319,6 @@
       __isActive: (k) => collection.isActivated(k),
       __deactivate: () => collection.deactivate(),
       __getValueByKey: (k) => collection.getValueByKey(k),
-      __getElementByKey: (k) => collection.getElementByKey(k),
       __activateNext: () => collection.activateNext(),
       __activatePrev: () => collection.activatePrev(),
       __activateFirst: () => collection.activateFirst(),
@@ -351,16 +351,17 @@
             collection.activate(this.__filteredKeys[0]);
           }
         });
-        this.__isMultiple = Alpine.extractProp(el, "multiple", false);
-        this.__isDisabled = Alpine.extractProp(el, "disabled", false);
         if (this.__isMultiple) {
           this.__selectedKeys = [];
         } else {
           this.__selectedKeys = null;
         }
-        this.__compareBy = Alpine.extractProp(el, "by");
-        let defaultValue = Alpine.extractProp(el, "default-value", this.__isMultiple ? [] : null);
-        this.__state = defaultValue;
+        this.__isMultiple = Alpine.extractProp(el, "multiple", false);
+        this.__isDisabled = Alpine.extractProp(el, "disabled", false);
+        this.__compareBy = Alpine.extractProp(el, "by", "");
+        const initialValueFallback = this.__isMultiple ? [] : "";
+        let initialValue = Alpine.extractProp(el, "initial-value", initialValueFallback);
+        this.__state = initialValue;
         this.__registerEventsDelector();
       },
       __open() {
@@ -403,6 +404,7 @@
             this.__state = value;
           }
           if (!this.__static) {
+            this.__close();
           }
           return;
         }
@@ -451,15 +453,17 @@
       },
       __compare(a, b) {
         let by = this.__compareBy;
-        if (!by)
+        if (!this.__compareBy) {
           by = (a2, b2) => Alpine.raw(a2) === Alpine.raw(b2);
-        if (typeof by === "string") {
-          let property = by;
+        } else if (typeof this.__compareBy === "string") {
+          const property = this.__compareBy;
           by = (a2, b2) => {
             if (!a2 || typeof a2 !== "object" || (!b2 || typeof b2 !== "object")) {
               return Alpine.raw(a2) === Alpine.raw(b2);
             }
-            return a2[property] === b2[property];
+            const objA = a2;
+            const objB = b2;
+            return objA[property] === objB[property];
           };
         }
         return by(a, b);
@@ -472,6 +476,8 @@
         const delegate = (handler) => {
           return function(e) {
             e.stopPropagation();
+            if (!(e.target instanceof Element))
+              return;
             const optionEl = findClosestOption(e.target);
             if (!optionEl)
               return;
@@ -483,6 +489,8 @@
           if (!this.__optionsEl)
             return;
           this.__optionsEl.addEventListener("click", delegate((optionEl) => {
+            if (!optionEl.dataset.key)
+              return;
             this.__handleSelection(optionEl.dataset.key);
             if (!this.__isMultiple && !this.__static) {
               this.__close();
@@ -491,10 +499,14 @@
             this.$nextTick(() => this.$refs.__input.focus({preventScroll: true}));
           }));
           this.__optionsEl.addEventListener("mouseover", delegate((optionEl) => {
+            if (!optionEl.dataset.key)
+              return;
             this.__activate(optionEl.dataset.key);
           }));
           this.__optionsEl.addEventListener("mousemove", delegate((optionEl) => {
-            if (this.__isActive())
+            if (this.__isActive(optionEl.dataset.key || ""))
+              return;
+            if (!optionEl.dataset.key)
               return;
             this.__activate(optionEl.dataset.key);
           }));

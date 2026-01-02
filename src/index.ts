@@ -1,5 +1,5 @@
 import { Alpine } from "alpinejs";
-import type * as AlpineType from "alpinejs";
+import type { default as AlpineType } from "alpinejs";
 import CreateComboboxInput from "./factories/CreateComboboxInput";
 import CreateComboboxOption from "./factories/CreateComboboxOption";
 import CreateComboboxRoot from "./factories/CreateComboboxRoot";

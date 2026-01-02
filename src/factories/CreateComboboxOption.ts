@@ -1,62 +1,60 @@
 import type { Alpine as AlpineType } from 'alpinejs';
+import { ComboboxOptionData, ComboboxOptionContext } from 'src/types';
 
-export default function CreateComboboxOption(Alpine: AlpineType, nextId: string) {
+export default function CreateComboboxOption(Alpine: AlpineType, nextId: string): ComboboxOptionData {
 
     const SLOT_NAME = 'option';
 
     return {
         __uniqueKey: 'option-' + nextId,
 
-        init() {
+        init(this: ComboboxOptionContext) {
 
             this.$el.dataset.slot = SLOT_NAME;
 
-            let value = Alpine.extractProp(this.$el, 'value', '');
+            let value = Alpine.extractProp(this.$el, 'value', '') as string;
 
             this.$el.dataset.key = this.__uniqueKey;
 
             this.$el.dataset.value = value;
 
-            let disabled = Alpine.extractProp(this.$el, 'disabled', false, false);
+            let disabled = Alpine.extractProp(this.$el, 'disabled', false, false) as boolean;
 
             this.__add(this.__uniqueKey, value, disabled);
 
-            // I am not sure if this is the most efficient way to detect if this is the active or selected element
-            // but I will keep as @todo while I am building this project... 
-            // let's continue the implementation fist
             this.$watch('__activedKey', (activeKey: string) => {
                 if (activeKey === this.__uniqueKey) {
-                    this.$el.setAttribute('data-active', true);
+                    // ✅ Convert boolean to string
+                    this.$el.setAttribute('data-active', 'true');
                 } else {
                     this.$el.removeAttribute('data-active');
                 }
             });
 
-            this.$watch('__selectedKeys', (selectedKeys: string) => {
+            this.$watch('__selectedKeys', (selectedKeys: string | string[]) => {
 
                 let thisElHasBeenSelected = false;
 
                 if (!this.__isMultiple) {
                     thisElHasBeenSelected = selectedKeys === this.__uniqueKey;
                 } else {
-                    thisElHasBeenSelected = selectedKeys.includes(this.__uniqueKey);
+                    thisElHasBeenSelected = Array.isArray(selectedKeys) && selectedKeys.includes(this.__uniqueKey);
                 }
 
                 if (thisElHasBeenSelected) {
-                    this.$el.setAttribute('aria-selected', true);
-                    this.$el.setAttribute('data-selected', true);
+                    this.$el.setAttribute('aria-selected', 'true');
+                    this.$el.setAttribute('data-selected', 'true');
                 } else {
-                    this.$el.setAttribute('aria-selected', false);
+                    this.$el.setAttribute('aria-selected', 'false');
                     this.$el.removeAttribute('data-selected');
-
                 }
-            })
+            });
 
-            this.$nextTick(():void => {
+            this.$nextTick((): void => {
                 if (disabled) {
-                    this.$el.setAttribute('tabindex', -1);
+                    this.$el.setAttribute('tabindex', '-1');
                 }
-            })
+            });
         },
 
         destroy() {

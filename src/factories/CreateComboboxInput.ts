@@ -1,6 +1,7 @@
 import { Alpine as AlpineType } from "alpinejs";
+import { ComboboxInputData, ComboboxInputContext } from "src/types";
 
-export default function CreateComboboxInput(Alpine: AlpineType) {
+export default function CreateComboboxInput(Alpine: AlpineType): ComboboxInputData {
 
     return {
         init() {
@@ -8,10 +9,10 @@ export default function CreateComboboxInput(Alpine: AlpineType) {
 
             if (displayValueFn) this.__displayValue = displayValueFn;
 
-            this.handleEvents();
+            this.__handleEvents();
         },
 
-        handleEvents() {
+        __handleEvents(this: ComboboxInputContext) {
 
             this.$el.addEventListener('focus', () => {
                 // on flat variant we need to activate the first key as

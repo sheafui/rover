@@ -266,9 +266,9 @@ export default class ComboboxCollection {
 
             for (const { key, value } of this.searchIndex) {
                 if (value.includes(normalized)) {
-                    
+
                     const item = this.itemsMap.get(key);
-                    
+
                     if (item) results.push(item);
                 }
             }
@@ -299,7 +299,7 @@ export default class ComboboxCollection {
         return this.get(key)?.value;
     }
 
-    getKeyByIndex(index: number) {
+    getKeyByIndex(index: number | null | undefined) {
         return index == null ? null : this.items[index]?.key ?? null
     }
 
