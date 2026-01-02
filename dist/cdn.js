@@ -264,7 +264,9 @@
         results = [];
         for (const {key, value} of this.searchIndex) {
           if (value.includes(normalized)) {
-            results.push(this.itemsMap.get(key));
+            const item = this.itemsMap.get(key);
+            if (item)
+              results.push(item);
           }
         }
       } else {

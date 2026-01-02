@@ -1,23 +1,9 @@
+import type { Item, Options, Pending, ActiveIndex, SearchIndex } from "src/types";
 
-
-interface Options {
-    searchThreshold?: number
-}
-
-interface Item {
-    key: string,
-    value: string,
-    disabled: boolean
-}
-
-type Pending = { state: boolean };
-type ActiveIndex = { value: undefined | number };
-
-type SearchIndex = Omit<Item, 'disabled'>;
 
 export default class ComboboxCollection {
 
-    private items: Item[] = [];
+    private items: Array<Item> = [];
     private itemsMap = new Map<string, Item>()
 
     private activeNavPos: number = -1;
@@ -28,7 +14,7 @@ export default class ComboboxCollection {
 
     private searchIndex: SearchIndex[];
     private lastQuery = '';
-    private lastResults: Item[];
+    private lastResults: Array<Item>;
 
     private isProcessing = false;
 
@@ -47,10 +33,6 @@ export default class ComboboxCollection {
 
         this.searchThreshold = options.searchThreshold ?? 500;
     }
-
-    /* ----------------------------------------
-     * Mutation
-     * ------------------------------------- */
 
     public add(key: string, value: string, disabled = false): void {
 
@@ -251,7 +233,7 @@ export default class ComboboxCollection {
      * Search
      * ------------------------------------- */
 
-    search(query: string) {
+    search(query: string): Item[] {
         if (!query) {
             this.lastQuery = ''
             this.lastResults = []
@@ -273,7 +255,7 @@ export default class ComboboxCollection {
             return filtered
         }
 
-        let results
+        let results: Item[];
 
         if (this.searchIndex) {
             const normalized = q
@@ -284,17 +266,21 @@ export default class ComboboxCollection {
 
             for (const { key, value } of this.searchIndex) {
                 if (value.includes(normalized)) {
-                    results.push(this.itemsMap.get(key))
+                    
+                    const item = this.itemsMap.get(key);
+                    
+                    if (item) results.push(item);
                 }
             }
+
         } else {
             results = this.items.filter(item =>
                 String(item.value).toLowerCase().includes(q)
-            )
+            );
         }
 
         this.lastQuery = q;
-        
+
         this.lastResults = results;
 
         return results;
@@ -312,10 +298,6 @@ export default class ComboboxCollection {
 
         return this.get(key)?.value;
     }
-
-    // getElementByKey(key) {
-    //     return this.get(key).el;
-    // }
 
     getKeyByIndex(index: number) {
         return index == null ? null : this.items[index]?.key ?? null
