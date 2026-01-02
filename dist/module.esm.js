@@ -110,13 +110,13 @@ var ComboboxCollection = class {
     this.itemsMap = new Map();
     this.activeNavPos = -1;
     this.needsReindex = false;
-    this.navIndex = null;
+    this.navIndex = [];
     this.searchIndex = null;
     this.lastQuery = "";
     this.lastResults = null;
     this.isProcessing = false;
     this.pending = Alpine.reactive({state: false});
-    this.activeIndex = Alpine.reactive({value: null});
+    this.activeIndex = Alpine.reactive({value: void 0});
     this.searchThreshold = options.searchThreshold ?? 500;
   }
   add(key, value, disabled = false) {
@@ -135,7 +135,7 @@ var ComboboxCollection = class {
     this.itemsMap.delete(key);
     this.items.splice(index, 1);
     if (this.activeIndex.value === index) {
-      this.activeIndex.value = null;
+      this.activeIndex.value = void 0;
       this.activeNavPos = -1;
     } else if (this.activeIndex.value && this.activeIndex.value > index) {
       this.activeIndex.value--;
@@ -154,7 +154,7 @@ var ComboboxCollection = class {
     this.activeNavPos = this.navIndex.indexOf(index);
   }
   deactivate() {
-    this.activeIndex.value = null;
+    this.activeIndex.value = void 0;
     this.activeNavPos = -1;
   }
   isActivated(key) {
@@ -164,13 +164,15 @@ var ComboboxCollection = class {
     return this.items.indexOf(item) === this.activeIndex.value;
   }
   getActiveItem() {
-    return this.activeIndex.value === null ? null : this.items[this.activeIndex.value];
+    return this.activeIndex.value === void 0 ? null : this.items[this.activeIndex.value];
   }
   activateFirst() {
     this.rebuildIndexes();
     if (!this.navIndex.length)
       return;
-    this.activeIndex.value = this.navIndex[0];
+    if (this.navIndex[0]) {
+      this.activeIndex.value = this.navIndex[0];
+    }
     this.activeNavPos = 0;
   }
   activateLast() {
@@ -178,7 +180,10 @@ var ComboboxCollection = class {
     if (!this.navIndex.length)
       return;
     this.activeNavPos = this.navIndex.length - 1;
-    this.activeIndex.value = this.navIndex[this.activeNavPos];
+    const activeIndex = this.navIndex[this.activeNavPos];
+    if (typeof activeIndex === "number") {
+      this.activeIndex.value = activeIndex;
+    }
   }
   activateNext() {
     this.rebuildIndexes();
@@ -274,10 +279,7 @@ var ComboboxCollection = class {
     return this.itemsMap.get(key);
   }
   getValueByKey(key) {
-    return this.get(key).value;
-  }
-  getElementByKey(key) {
-    return this.get(key).el;
+    return this.get(key)?.value;
   }
   getKeyByIndex(index) {
     return index == null ? null : this.items[index]?.key ?? null;

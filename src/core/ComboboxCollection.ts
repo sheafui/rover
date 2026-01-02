@@ -11,17 +11,18 @@ interface Item {
 }
 
 type Pending = { state: boolean };
-type ActiveIndex = { value: null | number };
+type ActiveIndex = { value: undefined | number };
 
 export default class ComboboxCollection {
 
     private items: Item[] = [];
     private itemsMap = new Map<string, Item>()
 
-    private activeNavPos = -1;
+    private activeNavPos: number = -1;
 
-    private needsReindex = false;
-    private navIndex = null;
+    private needsReindex: boolean = false;
+
+    private navIndex: Array<number> = [];
 
     private searchIndex = null;
     private lastQuery = '';
@@ -31,6 +32,7 @@ export default class ComboboxCollection {
 
     public pending: Pending;
 
+    // used to track the reactivity system on the component proxy 
     public activeIndex: ActiveIndex;
 
     public searchThreshold: number;
@@ -39,7 +41,7 @@ export default class ComboboxCollection {
 
         this.pending = Alpine.reactive<Pending>({ state: false });
 
-        this.activeIndex = Alpine.reactive<ActiveIndex>({ value: null });
+        this.activeIndex = Alpine.reactive<ActiveIndex>({ value: undefined });
 
         this.searchThreshold = options.searchThreshold ?? 500;
     }
@@ -49,18 +51,22 @@ export default class ComboboxCollection {
      * ------------------------------------- */
 
     public add(key: string, value: string, disabled = false): void {
+
         if (this.itemsMap.has(key)) return
 
         const item = { key, value, disabled }
 
         this.items.push(item)
+
         this.itemsMap.set(key, item)
 
         this.invalidate()
     }
 
     public forget(key: string): void {
+
         const item = this.itemsMap.get(key);
+
         if (!item) return;
 
         const index = this.items.indexOf(item);
@@ -69,10 +75,10 @@ export default class ComboboxCollection {
         this.items.splice(index, 1);
 
         if (this.activeIndex.value === index) {
-            this.activeIndex.value = null
-            this.activeNavPos = -1
+            this.activeIndex.value = undefined;
+            this.activeNavPos = -1;
         } else if (this.activeIndex.value && this.activeIndex.value > index) {
-            this.activeIndex.value--
+            this.activeIndex.value--;
         }
 
         this.invalidate()
@@ -100,7 +106,7 @@ export default class ComboboxCollection {
     }
 
     deactivate() {
-        this.activeIndex.value = null
+        this.activeIndex.value = undefined
         this.activeNavPos = -1
     }
 
@@ -114,7 +120,7 @@ export default class ComboboxCollection {
     }
 
     getActiveItem() {
-        return this.activeIndex.value === null
+        return this.activeIndex.value === undefined
             ? null
             : this.items[this.activeIndex.value]
     }
@@ -125,29 +131,42 @@ export default class ComboboxCollection {
 
     activateFirst() {
         this.rebuildIndexes()
-        if (!this.navIndex.length) return
-        this.activeIndex.value = this.navIndex[0]
-        this.activeNavPos = 0
+
+        if (!this.navIndex.length) return;
+
+        if (this.navIndex[0]) {
+            this.activeIndex.value = this.navIndex[0];
+        }
+
+        this.activeNavPos = 0;
     }
 
     activateLast() {
         this.rebuildIndexes()
+
         if (!this.navIndex.length) return
+
         this.activeNavPos = this.navIndex.length - 1
-        this.activeIndex.value = this.navIndex[this.activeNavPos]
+
+        const activeIndex = this.navIndex[this.activeNavPos];
+
+        if (typeof activeIndex === 'number') {
+            this.activeIndex.value = activeIndex;
+        }
     }
 
     activateNext() {
-        this.rebuildIndexes()
-        if (!this.navIndex.length) return
+
+        this.rebuildIndexes();
+
+        if (!this.navIndex.length) return;
 
         if (this.activeNavPos === -1) {
-            this.activateFirst()
-            return
+            this.activateFirst();
+            return;
         }
 
-        this.activeNavPos =
-            (this.activeNavPos + 1) % this.navIndex.length
+        this.activeNavPos = (this.activeNavPos + 1) % this.navIndex.length
 
         this.activeIndex.value = this.navIndex[this.activeNavPos]
     }
@@ -200,7 +219,7 @@ export default class ComboboxCollection {
     private rebuildIndexes() {
         if (!this.needsReindex) return
 
-        this.navIndex = []
+        this.navIndex = [];
         for (let i = 0; i < this.items.length; i++) {
             if (!this.items[i].disabled) {
                 this.navIndex.push(i)
@@ -276,25 +295,18 @@ export default class ComboboxCollection {
      * Queries
      * ------------------------------------- */
 
-    get(key) {
+    get(key: string): Item | undefined {
         return this.itemsMap.get(key)
     }
 
-    getValueByKey(key) {
+    getValueByKey(key: string): Item['value'] | undefined {
 
-        // this.pending.state = true;
-
-        // Wait for 500ms to mimic expensive work
-        // await new Promise(resolve => setTimeout(resolve, 500));
-
-        // this.pending.state = false;
-
-        return this.get(key).value;
+        return this.get(key)?.value;
     }
 
-    getElementByKey(key) {
-        return this.get(key).el;
-    }
+    // getElementByKey(key) {
+    //     return this.get(key).el;
+    // }
 
     getKeyByIndex(index) {
         return index == null ? null : this.items[index]?.key ?? null
