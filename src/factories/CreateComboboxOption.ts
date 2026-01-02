@@ -24,7 +24,6 @@ export default function CreateComboboxOption(Alpine: AlpineType, nextId: string)
 
             this.$watch('__activedKey', (activeKey: string) => {
                 if (activeKey === this.__uniqueKey) {
-                    // ✅ Convert boolean to string
                     this.$el.setAttribute('data-active', 'true');
                 } else {
                     this.$el.removeAttribute('data-active');

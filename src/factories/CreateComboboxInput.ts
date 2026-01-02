@@ -22,8 +22,7 @@ export default function CreateComboboxInput(Alpine: AlpineType): ComboboxInputDa
 
             this.$el.addEventListener('input', (e: InputEvent) => {
                 e.stopPropagation();
-
-                console.log(e)
+                
                 if (this.__isTyping) {
                     this.__open();
                 }
