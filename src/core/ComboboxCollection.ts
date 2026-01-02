@@ -13,6 +13,8 @@ interface Item {
 type Pending = { state: boolean };
 type ActiveIndex = { value: undefined | number };
 
+type SearchIndex = Omit<Item, 'disabled'>;
+
 export default class ComboboxCollection {
 
     private items: Item[] = [];
@@ -24,9 +26,9 @@ export default class ComboboxCollection {
 
     private navIndex: Array<number> = [];
 
-    private searchIndex = null;
+    private searchIndex: SearchIndex[];
     private lastQuery = '';
-    private lastResults = null;
+    private lastResults: Item[] | null = null;
 
     private isProcessing = false;
 
@@ -195,7 +197,7 @@ export default class ComboboxCollection {
     private invalidate() {
         this.needsReindex = true
         this.lastQuery = ''
-        this.lastResults = null
+        this.lastResults = []
         this.scheduleBatch()
     }
 
@@ -220,13 +222,15 @@ export default class ComboboxCollection {
         if (!this.needsReindex) return
 
         this.navIndex = [];
+
         for (let i = 0; i < this.items.length; i++) {
-            if (!this.items[i].disabled) {
+            if (!this.items[i]?.disabled) {
                 this.navIndex.push(i)
             }
         }
 
         if (this.items.length >= this.searchThreshold) {
+            
             this.searchIndex = this.items.map(item => ({
                 key: item.key,
                 value: String(item.value)
@@ -235,7 +239,9 @@ export default class ComboboxCollection {
                     .replace(/[\u0300-\u036f]/g, '')
             }))
         } else {
-            this.searchIndex = null
+
+            this.searchIndex = []
+        
         }
 
         this.needsReindex = false
@@ -245,10 +251,10 @@ export default class ComboboxCollection {
      * Search
      * ------------------------------------- */
 
-    search(query) {
+    search(query: string) {
         if (!query) {
             this.lastQuery = ''
-            this.lastResults = null
+            this.lastResults = []
             return this.items
         }
 
@@ -308,7 +314,7 @@ export default class ComboboxCollection {
     //     return this.get(key).el;
     // }
 
-    getKeyByIndex(index) {
+    getKeyByIndex(index: number) {
         return index == null ? null : this.items[index]?.key ?? null
     }
 

@@ -111,7 +111,6 @@ var ComboboxCollection = class {
     this.activeNavPos = -1;
     this.needsReindex = false;
     this.navIndex = [];
-    this.searchIndex = null;
     this.lastQuery = "";
     this.lastResults = null;
     this.isProcessing = false;
@@ -210,7 +209,7 @@ var ComboboxCollection = class {
   invalidate() {
     this.needsReindex = true;
     this.lastQuery = "";
-    this.lastResults = null;
+    this.lastResults = [];
     this.scheduleBatch();
   }
   scheduleBatch() {
@@ -232,7 +231,7 @@ var ComboboxCollection = class {
       return;
     this.navIndex = [];
     for (let i = 0; i < this.items.length; i++) {
-      if (!this.items[i].disabled) {
+      if (!this.items[i]?.disabled) {
         this.navIndex.push(i);
       }
     }
@@ -242,14 +241,14 @@ var ComboboxCollection = class {
         value: String(item.value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
       }));
     } else {
-      this.searchIndex = null;
+      this.searchIndex = [];
     }
     this.needsReindex = false;
   }
   search(query) {
     if (!query) {
       this.lastQuery = "";
-      this.lastResults = null;
+      this.lastResults = [];
       return this.items;
     }
     const q = query.toLowerCase();
