@@ -6,9 +6,9 @@
         let displayValueFn = Alpine2.extractProp(this.$el, "display-value", "");
         if (displayValueFn)
           this.__displayValue = displayValueFn;
-        this.handleEvents();
+        this.__handleEvents();
       },
-      handleEvents() {
+      __handleEvents() {
         this.$el.addEventListener("focus", () => {
           this.__startTyping();
         });
@@ -72,7 +72,7 @@
         this.__add(this.__uniqueKey, value, disabled);
         this.$watch("__activedKey", (activeKey) => {
           if (activeKey === this.__uniqueKey) {
-            this.$el.setAttribute("data-active", true);
+            this.$el.setAttribute("data-active", "true");
           } else {
             this.$el.removeAttribute("data-active");
           }
@@ -82,19 +82,19 @@
           if (!this.__isMultiple) {
             thisElHasBeenSelected = selectedKeys === this.__uniqueKey;
           } else {
-            thisElHasBeenSelected = selectedKeys.includes(this.__uniqueKey);
+            thisElHasBeenSelected = Array.isArray(selectedKeys) && selectedKeys.includes(this.__uniqueKey);
           }
           if (thisElHasBeenSelected) {
-            this.$el.setAttribute("aria-selected", true);
-            this.$el.setAttribute("data-selected", true);
+            this.$el.setAttribute("aria-selected", "true");
+            this.$el.setAttribute("data-selected", "true");
           } else {
-            this.$el.setAttribute("aria-selected", false);
+            this.$el.setAttribute("aria-selected", "false");
             this.$el.removeAttribute("data-selected");
           }
         });
         this.$nextTick(() => {
           if (disabled) {
-            this.$el.setAttribute("tabindex", -1);
+            this.$el.setAttribute("tabindex", "-1");
           }
         });
       },
@@ -106,203 +106,195 @@
 
   // src/core/ComboboxCollection.ts
   var ComboboxCollection = class {
-    constructor(options = {}, release = () => {
-    }) {
-      this.#items = [];
-      this.#itemsMap = new Map();
-      this.#activeNavPos = -1;
-      this.#needsReindex = false;
-      this.#navIndex = null;
-      this.#searchIndex = null;
-      this.#lastQuery = "";
-      this.#lastResults = null;
-      this.#isProcessing = false;
+    constructor(options = {}) {
+      this.items = [];
+      this.itemsMap = new Map();
+      this.activeNavPos = -1;
+      this.needsReindex = false;
+      this.navIndex = [];
+      this.lastQuery = "";
+      this.isProcessing = false;
       this.pending = Alpine.reactive({state: false});
-      this.activeIndex = Alpine.reactive({value: null});
+      this.activeIndex = Alpine.reactive({value: void 0});
       this.searchThreshold = options.searchThreshold ?? 500;
     }
-    #items;
-    #itemsMap;
-    #activeNavPos;
-    #needsReindex;
-    #navIndex;
-    #searchIndex;
-    #lastQuery;
-    #lastResults;
-    #isProcessing;
     add(key, value, disabled = false) {
-      if (this.#itemsMap.has(key))
+      if (this.itemsMap.has(key))
         return;
       const item = {key, value, disabled};
-      this.#items.push(item);
-      this.#itemsMap.set(key, item);
-      this.#invalidate();
+      this.items.push(item);
+      this.itemsMap.set(key, item);
+      this.invalidate();
     }
     forget(key) {
-      const item = this.#itemsMap.get(key);
+      const item = this.itemsMap.get(key);
       if (!item)
         return;
-      const index = this.#items.indexOf(item);
-      this.#itemsMap.delete(key);
-      this.#items.splice(index, 1);
+      const index = this.items.indexOf(item);
+      this.itemsMap.delete(key);
+      this.items.splice(index, 1);
       if (this.activeIndex.value === index) {
-        this.activeIndex.value = null;
-        this.#activeNavPos = -1;
-      } else if (this.activeIndex.value > index) {
+        this.activeIndex.value = void 0;
+        this.activeNavPos = -1;
+      } else if (this.activeIndex.value && this.activeIndex.value > index) {
         this.activeIndex.value--;
       }
-      this.#invalidate();
+      this.invalidate();
     }
     activate(key) {
       const item = this.get(key);
       if (!item || item.disabled)
         return;
-      this.#rebuildIndexes();
-      const index = this.#items.indexOf(item);
+      this.rebuildIndexes();
+      const index = this.items.indexOf(item);
       if (this.activeIndex.value === index)
         return;
       this.activeIndex.value = index;
-      this.#activeNavPos = this.#navIndex.indexOf(index);
+      this.activeNavPos = this.navIndex.indexOf(index);
     }
     deactivate() {
-      this.activeIndex.value = null;
-      this.#activeNavPos = -1;
+      this.activeIndex.value = void 0;
+      this.activeNavPos = -1;
     }
     isActivated(key) {
       const item = this.get(key);
       if (!item)
         return false;
-      return this.#items.indexOf(item) === this.activeIndex.value;
+      return this.items.indexOf(item) === this.activeIndex.value;
     }
     getActiveItem() {
-      return this.activeIndex.value === null ? null : this.#items[this.activeIndex.value];
+      return this.activeIndex.value === void 0 ? null : this.items[this.activeIndex.value];
     }
     activateFirst() {
-      this.#rebuildIndexes();
-      if (!this.#navIndex.length)
+      this.rebuildIndexes();
+      if (!this.navIndex.length)
         return;
-      this.activeIndex.value = this.#navIndex[0];
-      this.#activeNavPos = 0;
+      if (this.navIndex[0]) {
+        this.activeIndex.value = this.navIndex[0];
+      }
+      this.activeNavPos = 0;
     }
     activateLast() {
-      this.#rebuildIndexes();
-      if (!this.#navIndex.length)
+      this.rebuildIndexes();
+      if (!this.navIndex.length)
         return;
-      this.#activeNavPos = this.#navIndex.length - 1;
-      this.activeIndex.value = this.#navIndex[this.#activeNavPos];
+      this.activeNavPos = this.navIndex.length - 1;
+      const activeIndex = this.navIndex[this.activeNavPos];
+      if (typeof activeIndex === "number") {
+        this.activeIndex.value = activeIndex;
+      }
     }
     activateNext() {
-      this.#rebuildIndexes();
-      if (!this.#navIndex.length)
+      this.rebuildIndexes();
+      if (!this.navIndex.length)
         return;
-      if (this.#activeNavPos === -1) {
+      if (this.activeNavPos === -1) {
         this.activateFirst();
         return;
       }
-      this.#activeNavPos = (this.#activeNavPos + 1) % this.#navIndex.length;
-      this.activeIndex.value = this.#navIndex[this.#activeNavPos];
+      this.activeNavPos = (this.activeNavPos + 1) % this.navIndex.length;
+      this.activeIndex.value = this.navIndex[this.activeNavPos];
     }
     activatePrev() {
-      this.#rebuildIndexes();
-      if (!this.#navIndex.length)
+      this.rebuildIndexes();
+      if (!this.navIndex.length)
         return;
-      if (this.#activeNavPos === -1) {
+      if (this.activeNavPos === -1) {
         this.activateLast();
         return;
       }
-      this.#activeNavPos = this.#activeNavPos === 0 ? this.#navIndex.length - 1 : this.#activeNavPos - 1;
-      this.activeIndex.value = this.#navIndex[this.#activeNavPos];
+      this.activeNavPos = this.activeNavPos === 0 ? this.navIndex.length - 1 : this.activeNavPos - 1;
+      this.activeIndex.value = this.navIndex[this.activeNavPos];
     }
-    #invalidate() {
-      this.#needsReindex = true;
-      this.#lastQuery = "";
-      this.#lastResults = null;
-      this.#scheduleBatch();
+    invalidate() {
+      this.needsReindex = true;
+      this.lastQuery = "";
+      this.lastResults = [];
+      this.scheduleBatch();
     }
-    #scheduleBatch() {
-      if (this.#isProcessing)
+    scheduleBatch() {
+      if (this.isProcessing)
         return;
-      this.#isProcessing = true;
+      this.isProcessing = true;
       this.pending.state = true;
       queueMicrotask(() => {
-        this.#rebuildIndexes();
-        this.#isProcessing = false;
+        this.rebuildIndexes();
+        this.isProcessing = false;
         this.pending.state = false;
       });
     }
     toggleIsPending() {
       this.pending.state = !this.pending.state;
     }
-    #rebuildIndexes() {
-      if (!this.#needsReindex)
+    rebuildIndexes() {
+      if (!this.needsReindex)
         return;
-      this.#navIndex = [];
-      for (let i = 0; i < this.#items.length; i++) {
-        if (!this.#items[i].disabled) {
-          this.#navIndex.push(i);
+      this.navIndex = [];
+      for (let i = 0; i < this.items.length; i++) {
+        if (!this.items[i]?.disabled) {
+          this.navIndex.push(i);
         }
       }
-      if (this.#items.length >= this.searchThreshold) {
-        this.#searchIndex = this.#items.map((item) => ({
+      if (this.items.length >= this.searchThreshold) {
+        this.searchIndex = this.items.map((item) => ({
           key: item.key,
           value: String(item.value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
         }));
       } else {
-        this.#searchIndex = null;
+        this.searchIndex = [];
       }
-      this.#needsReindex = false;
+      this.needsReindex = false;
     }
     search(query) {
       if (!query) {
-        this.#lastQuery = "";
-        this.#lastResults = null;
-        return this.#items;
+        this.lastQuery = "";
+        this.lastResults = [];
+        return this.items;
       }
       const q = query.toLowerCase();
-      if (this.#lastQuery && q.startsWith(this.#lastQuery) && this.#lastResults) {
-        const filtered = this.#lastResults.filter((item) => String(item.value).toLowerCase().includes(q));
-        this.#lastQuery = q;
-        this.#lastResults = filtered;
+      if (this.lastQuery && q.startsWith(this.lastQuery) && this.lastResults) {
+        const filtered = this.lastResults.filter((item) => String(item.value).toLowerCase().includes(q));
+        this.lastQuery = q;
+        this.lastResults = filtered;
         return filtered;
       }
       let results;
-      if (this.#searchIndex) {
+      if (this.searchIndex) {
         const normalized = q.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         results = [];
-        for (const {key, value} of this.#searchIndex) {
+        for (const {key, value} of this.searchIndex) {
           if (value.includes(normalized)) {
-            results.push(this.#itemsMap.get(key));
+            const item = this.itemsMap.get(key);
+            if (item)
+              results.push(item);
           }
         }
       } else {
-        results = this.#items.filter((item) => String(item.value).toLowerCase().includes(q));
+        results = this.items.filter((item) => String(item.value).toLowerCase().includes(q));
       }
-      this.#lastQuery = q;
-      this.#lastResults = results;
+      this.lastQuery = q;
+      this.lastResults = results;
       return results;
     }
     get(key) {
-      return this.#itemsMap.get(key);
+      return this.itemsMap.get(key);
     }
     getValueByKey(key) {
-      return this.get(key).value;
-    }
-    getElementByKey(key) {
-      return this.get(key).el;
+      return this.get(key)?.value;
     }
     getKeyByIndex(index) {
-      return index == null ? null : this.#items[index]?.key ?? null;
+      return index == null ? null : this.items[index]?.key ?? null;
     }
     all() {
-      return this.#items;
+      return this.items;
     }
     get size() {
-      return this.#items.length;
+      return this.items.length;
     }
   };
   var ComboboxCollection_default = ComboboxCollection;
 
-  // src/factories/CreateComboboxRoot.js
+  // src/factories/CreateComboboxRoot.ts
   function CreateComboboxRoot({el, effect}) {
     const collection = new ComboboxCollection_default();
     return {
@@ -319,6 +311,7 @@
       __activedKey: void 0,
       __selectedKeys: void 0,
       __filteredKeys: null,
+      __isDisabled: false,
       __searchQuery: "",
       __add: (k, v, d) => collection.add(k, v, d),
       __forget: (k) => collection.forget(k),
@@ -326,7 +319,6 @@
       __isActive: (k) => collection.isActivated(k),
       __deactivate: () => collection.deactivate(),
       __getValueByKey: (k) => collection.getValueByKey(k),
-      __getElementByKey: (k) => collection.getElementByKey(k),
       __activateNext: () => collection.activateNext(),
       __activatePrev: () => collection.activatePrev(),
       __activateFirst: () => collection.activateFirst(),
@@ -359,16 +351,17 @@
             collection.activate(this.__filteredKeys[0]);
           }
         });
-        this.__isMultiple = Alpine.extractProp(el, "multiple", false);
-        this.__isDisabled = Alpine.extractProp(el, "disabled", false);
         if (this.__isMultiple) {
           this.__selectedKeys = [];
         } else {
           this.__selectedKeys = null;
         }
-        this.__compareBy = Alpine.extractProp(el, "by");
-        let defaultValue = Alpine.extractProp(el, "default-value", this.__isMultiple ? [] : null);
-        this.__state = defaultValue;
+        this.__isMultiple = Alpine.extractProp(el, "multiple", false);
+        this.__isDisabled = Alpine.extractProp(el, "disabled", false);
+        this.__compareBy = Alpine.extractProp(el, "by", "");
+        const initialValueFallback = this.__isMultiple ? [] : "";
+        let initialValue = Alpine.extractProp(el, "initial-value", initialValueFallback);
+        this.__state = initialValue;
         this.__registerEventsDelector();
       },
       __open() {
@@ -411,6 +404,7 @@
             this.__state = value;
           }
           if (!this.__static) {
+            this.__close();
           }
           return;
         }
@@ -459,15 +453,17 @@
       },
       __compare(a, b) {
         let by = this.__compareBy;
-        if (!by)
+        if (!this.__compareBy) {
           by = (a2, b2) => Alpine.raw(a2) === Alpine.raw(b2);
-        if (typeof by === "string") {
-          let property = by;
+        } else if (typeof this.__compareBy === "string") {
+          const property = this.__compareBy;
           by = (a2, b2) => {
             if (!a2 || typeof a2 !== "object" || (!b2 || typeof b2 !== "object")) {
               return Alpine.raw(a2) === Alpine.raw(b2);
             }
-            return a2[property] === b2[property];
+            const objA = a2;
+            const objB = b2;
+            return objA[property] === objB[property];
           };
         }
         return by(a, b);
@@ -480,6 +476,8 @@
         const delegate = (handler) => {
           return function(e) {
             e.stopPropagation();
+            if (!(e.target instanceof Element))
+              return;
             const optionEl = findClosestOption(e.target);
             if (!optionEl)
               return;
@@ -491,6 +489,8 @@
           if (!this.__optionsEl)
             return;
           this.__optionsEl.addEventListener("click", delegate((optionEl) => {
+            if (!optionEl.dataset.key)
+              return;
             this.__handleSelection(optionEl.dataset.key);
             if (!this.__isMultiple && !this.__static) {
               this.__close();
@@ -499,10 +499,14 @@
             this.$nextTick(() => this.$refs.__input.focus({preventScroll: true}));
           }));
           this.__optionsEl.addEventListener("mouseover", delegate((optionEl) => {
+            if (!optionEl.dataset.key)
+              return;
             this.__activate(optionEl.dataset.key);
           }));
           this.__optionsEl.addEventListener("mousemove", delegate((optionEl) => {
-            if (this.__isActive())
+            if (this.__isActive(optionEl.dataset.key || ""))
+              return;
+            if (!optionEl.dataset.key)
               return;
             this.__activate(optionEl.dataset.key);
           }));

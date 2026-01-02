@@ -1,9 +1,17 @@
 import ComboboxCollection from "../core/ComboboxCollection";
 
-export default function CreateComboboxRoot({ el, effect }) {
+import type { default as AlpineType } from "alpinejs";
+import { ComboboxRootData } from "src/types";
+
+export default function CreateComboboxRoot(
+    { el, effect }: { el: AlpineType.ElementWithXAttributes, effect: AlpineType.DirectiveUtilities['effect'] }
+): ComboboxRootData {
 
     const collection = new ComboboxCollection();
-    
+
+    type CompareByFn = (a: unknown, b: unknown) => boolean;
+
+
     return {
         __state: null,
         __isOpen: false,
@@ -25,17 +33,17 @@ export default function CreateComboboxRoot({ el, effect }) {
         __activedKey: undefined,
         __selectedKeys: undefined,
         __filteredKeys: null,
+        __isDisabled: false,
 
         // search 
         __searchQuery: '',
 
-        __add: (k, v, d) => collection.add(k, v, d),
-        __forget: (k) => collection.forget(k),
-        __activate: (k) => collection.activate(k),
-        __isActive: (k) => collection.isActivated(k),
+        __add: (k: string, v: string, d: boolean) => collection.add(k, v, d),
+        __forget: (k: string) => collection.forget(k),
+        __activate: (k: string) => collection.activate(k),
+        __isActive: (k: string) => collection.isActivated(k),
         __deactivate: () => collection.deactivate(),
-        __getValueByKey: (k) => collection.getValueByKey(k),
-        __getElementByKey: (k) => collection.getElementByKey(k),
+        __getValueByKey: (k: string) => collection.getValueByKey(k),
 
         // navigation:
         __activateNext: () => collection.activateNext(),
@@ -44,7 +52,7 @@ export default function CreateComboboxRoot({ el, effect }) {
         __activateLast: () => collection.activateLast(),
 
         // visibilty
-        __isVisible(key) {
+        __isVisible(key: string) {
 
             // if the search isn't active always show all options
             if (this.__searchQuery === '') return true;
@@ -94,21 +102,24 @@ export default function CreateComboboxRoot({ el, effect }) {
 
 
 
-            this.__isMultiple = Alpine.extractProp(el, 'multiple', false)
-
-            this.__isDisabled = Alpine.extractProp(el, 'disabled', false)
-
             if (this.__isMultiple) {
                 this.__selectedKeys = [];
             } else {
                 this.__selectedKeys = null;
             }
 
-            this.__compareBy = Alpine.extractProp(el, 'by')
+            this.__isMultiple = Alpine.extractProp(el, 'multiple', false) as boolean;
 
-            let defaultValue = Alpine.extractProp(el, 'default-value', this.__isMultiple ? [] : null)
+            this.__isDisabled = Alpine.extractProp(el, 'disabled', false) as boolean;
 
-            this.__state = defaultValue;
+            this.__compareBy = Alpine.extractProp(el, 'by', '') as string;
+
+            const initialValueFallback: Array<string> | string = this.__isMultiple ? [] : '';
+
+            // @ts-expect-error - Alpine.extractProp types are too restrictive, awaiting fix
+            let initialValue = Alpine.extractProp(el, 'initial-value', initialValueFallback);
+
+            this.__state = initialValue;
 
             this.__registerEventsDelector();
         },
@@ -142,7 +153,7 @@ export default function CreateComboboxRoot({ el, effect }) {
                 if (keyToActivate) {
                     this.__activate(keyToActivate);
 
-                    // Scroll into the view'ss container port... @todo
+                    //@todo: Scroll into the view'ss container port... 
                     return;
                 }
             }
@@ -157,7 +168,7 @@ export default function CreateComboboxRoot({ el, effect }) {
             this.__deactivate()
         },
 
-        __handleSelection(key) {
+        __handleSelection(key: string) {
             let value = this.__getValueByKey(key);
 
             if (!this.__isMultiple) {
@@ -171,7 +182,7 @@ export default function CreateComboboxRoot({ el, effect }) {
                 }
 
                 if (!this.__static) {
-                    // this.__close();
+                    this.__close();
                 }
 
                 return;
@@ -185,7 +196,7 @@ export default function CreateComboboxRoot({ el, effect }) {
                 this.__state = [];
             }
 
-            let index = this.__state.findIndex(j => this.__compare(j, value));
+            let index = this.__state.findIndex((j: unknown) => this.__compare(j, value));
 
             let keyIndex = this.__selectedKeys.indexOf(key);
 
@@ -231,25 +242,29 @@ export default function CreateComboboxRoot({ el, effect }) {
             return ''
         },
 
-        __compare(a, b) {
+        __compare(a: unknown, b: unknown): boolean {
+            let by: CompareByFn = this.__compareBy as CompareByFn;
 
-            let by = this.__compareBy;
-
-            if (!by) by = (a, b) => Alpine.raw(a) === Alpine.raw(b)
-
-            if (typeof by === 'string') {
-                let property = by
-                by = (a, b) => {
-                    if ((!a || typeof a !== 'object') || (!b || typeof b !== 'object')) {
-                        return Alpine.raw(a) === Alpine.raw(b)
-                    }
-
-
-                    return a[property] === b[property];
-                }
+            if (!this.__compareBy) {
+                by = (a: unknown, b: unknown) => Alpine.raw(a) === Alpine.raw(b);
             }
 
-            return by(a, b)
+            else if (typeof this.__compareBy === 'string') {
+                const property = this.__compareBy;
+                by = (a: unknown, b: unknown) => {
+
+                    if ((!a || typeof a !== 'object') || (!b || typeof b !== 'object')) {
+                        return Alpine.raw(a) === Alpine.raw(b);
+                    }
+
+                    const objA = a as Record<string, unknown>;
+                    const objB = b as Record<string, unknown>;
+
+                    return objA[property] === objB[property];
+                };
+            }
+
+            return by(a, b);
         },
 
         __nextId() {
@@ -258,17 +273,19 @@ export default function CreateComboboxRoot({ el, effect }) {
 
         __registerEventsDelector() {
 
-            const findClosestOption = (el) => Alpine.findClosest(el, node => node.dataset.slot === 'option');
+            const findClosestOption = (el: Element) => Alpine.findClosest(el, node => node.dataset.slot === 'option');
 
-            const delegate = (handler) => {
-                return function (e) {
+            const delegate = (handler: (optionEl: HTMLElement) => void) => {
+                return function (e: Event) {
                     e.stopPropagation();
+
+                    if (!(e.target instanceof Element)) return;
 
                     const optionEl = findClosestOption(e.target);
 
                     if (!optionEl) return;
 
-                    handler(optionEl);
+                    handler(optionEl as HTMLElement);
                 };
             };
 
@@ -276,11 +293,11 @@ export default function CreateComboboxRoot({ el, effect }) {
 
                 this.__optionsEl = this.$refs.__options;
 
-
                 if (!this.__optionsEl) return;
 
                 this.__optionsEl.addEventListener('click',
                     delegate((optionEl) => {
+                        if (!optionEl.dataset.key) return;  // Add safety check
 
                         this.__handleSelection(optionEl.dataset.key);
 
@@ -295,23 +312,22 @@ export default function CreateComboboxRoot({ el, effect }) {
 
                 this.__optionsEl.addEventListener('mouseover',
                     delegate((optionEl) => {
+                        if (!optionEl.dataset.key) return;
                         this.__activate(optionEl.dataset.key);
                     })
                 );
 
                 this.__optionsEl.addEventListener('mousemove',
                     delegate((optionEl) => {
-                        if (this.__isActive()) return;
-
+                        if (this.__isActive(optionEl.dataset.key || '')) return;
+                        if (!optionEl.dataset.key) return;
                         this.__activate(optionEl.dataset.key);
                     })
                 );
 
                 this.__optionsEl.addEventListener('mouseout',
                     delegate(() => {
-
                         if (this.__keepActivated) return;
-
                         this.__deactivate();
                     })
                 );
