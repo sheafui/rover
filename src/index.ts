@@ -106,7 +106,7 @@ export default function combobox(Alpine: Alpine): void {
             },
             'x-data'() {
                 // @todo: move to constructor function here for memory gains
-                return CreateComboboxOption(Alpine, this.__nextId())
+                return CreateComboboxOption(Alpine, this.__nextId());
             },
         });
     }

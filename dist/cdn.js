@@ -229,7 +229,6 @@
       if (!this.needsReindex)
         return;
       this.navIndex = [];
-      console.log("called");
       for (let i = 0; i < this.items.length; i++) {
         if (!this.items[i]?.disabled) {
           this.navIndex.push(i);

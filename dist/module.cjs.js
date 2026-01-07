@@ -243,7 +243,6 @@ var ComboboxCollection = class {
     if (!this.needsReindex)
       return;
     this.navIndex = [];
-    console.log("called");
     for (let i = 0; i < this.items.length; i++) {
       if (!((_a = this.items[i]) == null ? void 0 : _a.disabled)) {
         this.navIndex.push(i);
