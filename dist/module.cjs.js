@@ -243,19 +243,16 @@ var ComboboxCollection = class {
     if (!this.needsReindex)
       return;
     this.navIndex = [];
+    console.log("called");
     for (let i = 0; i < this.items.length; i++) {
       if (!((_a = this.items[i]) == null ? void 0 : _a.disabled)) {
         this.navIndex.push(i);
       }
     }
-    if (this.items.length >= this.searchThreshold) {
-      this.searchIndex = this.items.map((item) => ({
-        key: item.key,
-        value: String(item.value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      }));
-    } else {
-      this.searchIndex = [];
-    }
+    this.searchIndex = this.items.map((item) => ({
+      key: item.key,
+      value: String(item.value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    }));
     this.needsReindex = false;
   }
   search(query) {
@@ -275,6 +272,7 @@ var ComboboxCollection = class {
     if (this.searchIndex) {
       const normalized = q.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       results = [];
+      console.log("inside search index", this.searchIndex);
       for (const {key, value} of this.searchIndex) {
         if (value.includes(normalized)) {
           const item = this.itemsMap.get(key);

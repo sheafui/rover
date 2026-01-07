@@ -20,7 +20,6 @@ export default class ComboboxCollection {
 
     public pending: Pending;
 
-    // used to track the reactivity system on the component proxy 
     public activeIndex: ActiveIndex;
 
     public searchThreshold: number;
@@ -90,23 +89,21 @@ export default class ComboboxCollection {
     }
 
     deactivate() {
-        this.activeIndex.value = undefined
-        this.activeNavPos = -1
+        this.activeIndex.value = undefined;
+        this.activeNavPos = -1;
     }
 
     isActivated(key: string) {
 
-        const item = this.get(key)
+        const item = this.get(key);
 
-        if (!item) return false
+        if (!item) return false;
 
-        return this.items.indexOf(item) === this.activeIndex.value
+        return this.items.indexOf(item) === this.activeIndex.value;
     }
 
     getActiveItem() {
-        return this.activeIndex.value === undefined
-            ? null
-            : this.items[this.activeIndex.value]
+        return this.activeIndex.value === undefined ? null : this.items[this.activeIndex.value]
     }
 
     /* ----------------------------------------
@@ -177,10 +174,10 @@ export default class ComboboxCollection {
      * ------------------------------------- */
 
     private invalidate() {
-        this.needsReindex = true
-        this.lastQuery = ''
-        this.lastResults = []
-        this.scheduleBatch()
+        this.needsReindex = true;
+        this.lastQuery = '';
+        this.lastResults = [];
+        this.scheduleBatch();
     }
 
     private scheduleBatch() {
@@ -205,26 +202,18 @@ export default class ComboboxCollection {
 
         this.navIndex = [];
 
+        console.log('called');
+
         for (let i = 0; i < this.items.length; i++) {
             if (!this.items[i]?.disabled) {
                 this.navIndex.push(i)
             }
         }
 
-        if (this.items.length >= this.searchThreshold) {
-
-            this.searchIndex = this.items.map(item => ({
-                key: item.key,
-                value: String(item.value)
-                    .toLowerCase()
-                    .normalize('NFD')
-                    .replace(/[\u0300-\u036f]/g, '')
-            }))
-        } else {
-
-            this.searchIndex = []
-
-        }
+        this.searchIndex = this.items.map(item => ({
+            key: item.key,
+            value: String(item.value).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        }))
 
         this.needsReindex = false
     }
@@ -234,6 +223,7 @@ export default class ComboboxCollection {
      * ------------------------------------- */
 
     search(query: string): Item[] {
+
         if (!query) {
             this.lastQuery = ''
             this.lastResults = []
@@ -242,9 +232,7 @@ export default class ComboboxCollection {
 
         const q = query.toLowerCase()
 
-        if (this.lastQuery &&
-            q.startsWith(this.lastQuery) &&
-            this.lastResults) {
+        if (this.lastQuery && q.startsWith(this.lastQuery) && this.lastResults) {
 
             const filtered = this.lastResults.filter(item =>
                 String(item.value).toLowerCase().includes(q)
@@ -258,12 +246,10 @@ export default class ComboboxCollection {
         let results: Item[];
 
         if (this.searchIndex) {
-            const normalized = q
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
+            const normalized = q.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
             results = [];
-
+            console.log('inside search index', this.searchIndex);
             for (const { key, value } of this.searchIndex) {
                 if (value.includes(normalized)) {
 

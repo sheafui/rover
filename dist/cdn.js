@@ -229,19 +229,16 @@
       if (!this.needsReindex)
         return;
       this.navIndex = [];
+      console.log("called");
       for (let i = 0; i < this.items.length; i++) {
         if (!this.items[i]?.disabled) {
           this.navIndex.push(i);
         }
       }
-      if (this.items.length >= this.searchThreshold) {
-        this.searchIndex = this.items.map((item) => ({
-          key: item.key,
-          value: String(item.value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-        }));
-      } else {
-        this.searchIndex = [];
-      }
+      this.searchIndex = this.items.map((item) => ({
+        key: item.key,
+        value: String(item.value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      }));
       this.needsReindex = false;
     }
     search(query) {
@@ -261,6 +258,7 @@
       if (this.searchIndex) {
         const normalized = q.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         results = [];
+        console.log("inside search index", this.searchIndex);
         for (const {key, value} of this.searchIndex) {
           if (value.includes(normalized)) {
             const item = this.itemsMap.get(key);

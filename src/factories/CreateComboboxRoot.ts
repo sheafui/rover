@@ -76,6 +76,7 @@ export default function CreateComboboxRoot(
 
                 let results = collection.search(this.__searchQuery).map((result) => result.key);
 
+
                 if (results.length >= 0) {
                     this.__filteredKeys = results
                 } else {
