@@ -118,10 +118,12 @@ export default class ComboboxCollection {
         this.needsReindex = true;
         this.lastQuery = '';
         this.lastResults = [];
+        
         this.scheduleBatch();
     }
 
     private scheduleBatch() {
+
         if (this.isProcessing) return;
 
         this.isProcessing = true;
@@ -139,6 +141,7 @@ export default class ComboboxCollection {
     }
 
     private rebuildIndexes() {
+        
         if (!this.needsReindex) return;
 
         this.navIndex = [];
