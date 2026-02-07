@@ -1,4 +1,5 @@
 import RoverCollection from 'src/core/RoverCollection';
+import { Item } from 'src/types';
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 // import RoverCollection from '../src/core/RoverCollection';
 
@@ -58,8 +59,8 @@ describe('RoverCollection', () => {
     it('should add disabled items', () => {
       collection.add('key1', 'value1', true);
       
-      const item = collection.get('key1');
-      expect(item?.disabled).toBe(true);
+      const item = collection.get('key1') as Item;
+      expect(item.disabled).toBe(true);
     });
 
     it('should not add duplicate keys', () => {
@@ -74,7 +75,7 @@ describe('RoverCollection', () => {
       collection.add('key1', 'value1');
       
       // Wait for microtask to complete
-      await new Promise(resolve => queueMicrotask(resolve));
+      await Promise.resolve();
       
       expect(collection.pending.state).toBe(false);
     });
@@ -115,7 +116,7 @@ describe('RoverCollection', () => {
       
       collection.forget('key1');
       
-      expect(collection.activeIndex.value).toBe(1); // Should decrement
+      expect(collection.activeIndex.value).toBe(1); // in this case key3 shifts to index 1
     });
 
     it('should not adjust activeIndex if removing item after active one', () => {
@@ -124,7 +125,7 @@ describe('RoverCollection', () => {
       
       collection.forget('key3');
       
-      expect(collection.activeIndex.value).toBe(0); // Should stay same
+      expect(collection.activeIndex.value).toBe(0); // key1 is still at index 0
     });
   });
 
@@ -139,8 +140,6 @@ describe('RoverCollection', () => {
     it('should activate an item by key', async () => {
       collection.activate('key2');
       
-      await new Promise(resolve => queueMicrotask(resolve));
-      
       expect(collection.activeIndex.value).toBe(1);
       expect(collection.getActiveItem()).toEqual({
         key: 'key2',
@@ -151,8 +150,6 @@ describe('RoverCollection', () => {
 
     it('should not activate disabled items', async () => {
       collection.activate('key4');
-      
-      await new Promise(resolve => queueMicrotask(resolve));
       
       expect(collection.activeIndex.value).toBeUndefined();
     });
@@ -200,9 +197,7 @@ describe('RoverCollection', () => {
 
     it('should activate first non-disabled item', async () => {
       collection.activateFirst();
-      
-      await new Promise(resolve => queueMicrotask(resolve));
-      
+    
       expect(collection.activeIndex.value).toBe(0);
       expect(collection.getActiveItem()?.value).toBe('Apple');
     });
@@ -210,7 +205,7 @@ describe('RoverCollection', () => {
     it('should activate last non-disabled item', async () => {
       collection.activateLast();
       
-      await new Promise(resolve => queueMicrotask(resolve));
+      await Promise.resolve();
       
       expect(collection.activeIndex.value).toBe(3);
       expect(collection.getActiveItem()?.value).toBe('Date');
@@ -218,7 +213,7 @@ describe('RoverCollection', () => {
 
     it('should activate next item', async () => {
       collection.activateFirst();
-      await new Promise(resolve => queueMicrotask(resolve));
+      await Promise.resolve();
       
       collection.activateNext();
       
@@ -229,7 +224,7 @@ describe('RoverCollection', () => {
 
     it('should wrap around when activating next from last item', async () => {
       collection.activateLast();
-      await new Promise(resolve => queueMicrotask(resolve));
+      await Promise.resolve();
       
       collection.activateNext();
       
@@ -240,7 +235,7 @@ describe('RoverCollection', () => {
 
     it('should activate previous item', async () => {
       collection.activate('key4');
-      await new Promise(resolve => queueMicrotask(resolve));
+      await Promise.resolve();
       
       collection.activatePrev();
       
@@ -251,7 +246,7 @@ describe('RoverCollection', () => {
 
     it('should wrap around when activating prev from first item', async () => {
       collection.activateFirst();
-      await new Promise(resolve => queueMicrotask(resolve));
+      await Promise.resolve();
       
       collection.activatePrev();
       
@@ -309,24 +304,24 @@ describe('RoverCollection', () => {
     });
 
     it('should filter items by query', () => {
-      const results = collection.search('app');
+      const results :Item[]= collection.search('app') ;
       
       expect(results).toHaveLength(1);
-      expect(results[0].value).toBe('Apple');
+      expect(results[0]?.value).toBe('Apple');
     });
 
     it('should be case insensitive', () => {
       const results = collection.search('BANANA');
       
       expect(results).toHaveLength(1);
-      expect(results[0].value).toBe('Banana');
+      expect(results[0]?.value).toBe('Banana');
     });
 
     it('should handle partial matches', () => {
       const results = collection.search('berry');
       
       expect(results).toHaveLength(1);
-      expect(results[0].value).toBe('Blueberry');
+      expect(results[0]?.value).toBe('Blueberry');
     });
 
     it('should optimize incremental search', () => {
@@ -347,12 +342,12 @@ describe('RoverCollection', () => {
       const results = collection.search('ban');
       
       expect(results).toHaveLength(1);
-      expect(results[0].value).toBe('Banana');
+      expect(results[0]?.value).toBe('Banana');
     });
 
     it('should handle accented characters', async () => {
       collection.add('key6', 'Café');
-      await new Promise(resolve => queueMicrotask(resolve));
+      await Promise.resolve();
       
       const results = collection.search('cafe');
       
@@ -361,7 +356,7 @@ describe('RoverCollection', () => {
 
     it('should normalize unicode characters', async () => {
       collection.add('key7', 'naïve');
-      await new Promise(resolve => queueMicrotask(resolve));
+      await Promise.resolve();
       
       const results = collection.search('naive');
       
@@ -453,7 +448,7 @@ describe('RoverCollection', () => {
     it('should clear pending state after microtask', async () => {
       collection.add('key1', 'value1');
       
-      await new Promise(resolve => queueMicrotask(resolve));
+      await Promise.resolve();
       
       expect(collection.pending.state).toBe(false);
     });
@@ -466,7 +461,7 @@ describe('RoverCollection', () => {
       // Should still be pending
       expect(collection.pending.state).toBe(true);
       
-      await new Promise(resolve => queueMicrotask(resolve));
+      await Promise.resolve();
       
       // Should be done after one microtask
       expect(collection.pending.state).toBe(false);
@@ -503,7 +498,7 @@ describe('RoverCollection', () => {
         collection.add(`key${i}`, `value${i}`);
       }
       
-      await new Promise(resolve => queueMicrotask(resolve));
+      await Promise.resolve();
       
       for (let i = 0; i < 50; i++) {
         collection.forget(`key${i}`);
@@ -538,7 +533,7 @@ describe('RoverCollection', () => {
     it('should handle special unicode characters', async () => {
       collection.add('key1', '😀 Emoji');
       collection.add('key2', '你好 Chinese');
-      await new Promise(resolve => queueMicrotask(resolve));
+      await Promise.resolve();
       
       expect(collection.search('emoji')).toHaveLength(1);
       expect(collection.search('中文')).toHaveLength(0);
@@ -553,7 +548,7 @@ describe('RoverCollection', () => {
         collection.add(`key${i}`, `Value ${i}`);
       }
       
-      await new Promise(resolve => queueMicrotask(resolve));
+      await Promise.resolve();
       
       const endTime = performance.now();
       
@@ -566,7 +561,7 @@ describe('RoverCollection', () => {
         collection.add(`key${i}`, `Value ${i}`);
       }
       
-      await new Promise(resolve => queueMicrotask(resolve));
+      await Promise.resolve();
       
       const startTime = performance.now();
       collection.search('500');

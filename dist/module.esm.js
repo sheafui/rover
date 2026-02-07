@@ -109,9 +109,9 @@ var RoverCollection = class {
   constructor(options = {}) {
     this.items = [];
     this.itemsMap = new Map();
-    this.activeNavPos = -1;
     this.needsReindex = false;
     this.navIndex = [];
+    this.activeNavPos = -1;
     this.lastQuery = "";
     this.isProcessing = false;
     this.pending = Alpine.reactive({state: false});
@@ -250,7 +250,7 @@ var RoverCollection = class {
     this.rebuildIndexes();
     if (!this.navIndex.length)
       return;
-    if (this.navIndex[0]) {
+    if (this.navIndex[0] !== void 0) {
       this.activeIndex.value = this.navIndex[0];
     }
     this.activeNavPos = 0;

@@ -4,14 +4,16 @@ import type { Item, Options, Pending, ActiveIndex, SearchIndex } from "src/types
 export default class RoverCollection {
 
     private items: Array<Item> = [];
-    
+
     private itemsMap = new Map<string, Item>()
 
-    private activeNavPos: number = -1;
-
+    
     private needsReindex: boolean = false;
-
+    
+    // activation trio 
     private navIndex: Array<number> = [];
+    private activeNavPos: number = -1;
+    public activeIndex: ActiveIndex;
 
     private searchIndex: SearchIndex[];
     private lastQuery = '';
@@ -21,7 +23,7 @@ export default class RoverCollection {
 
     public pending: Pending;
 
-    public activeIndex: ActiveIndex;
+
 
     public searchThreshold: number;
 
@@ -109,8 +111,6 @@ export default class RoverCollection {
         return this.activeIndex.value === undefined ? null : this.items[this.activeIndex.value]
     }
 
-
-
     /* ----------------------------------------
      * Indexing
      * ------------------------------------- */
@@ -119,7 +119,7 @@ export default class RoverCollection {
         this.needsReindex = true;
         this.lastQuery = '';
         this.lastResults = [];
-        
+
         this.scheduleBatch();
     }
 
@@ -142,7 +142,7 @@ export default class RoverCollection {
     }
 
     private rebuildIndexes() {
-        
+
         if (!this.needsReindex) return;
 
         this.navIndex = [];
@@ -243,7 +243,7 @@ export default class RoverCollection {
 
         if (!this.navIndex.length) return;
 
-        if (this.navIndex[0]) {
+        if (this.navIndex[0] !== undefined) {
             this.activeIndex.value = this.navIndex[0];
         }
 
