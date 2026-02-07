@@ -1,5 +1,6 @@
 import type { Alpine as AlpineType } from 'alpinejs';
 import { RoverOptionsContext, RoverOptionsData } from 'src/types';
+import { SLOT_NAME as INPUT_SLOT_NAME } from './CreateRoverInput';
 
 export default function CreateRoverOptions(Alpine: AlpineType): RoverOptionsData {
 
@@ -21,12 +22,10 @@ export default function CreateRoverOptions(Alpine: AlpineType): RoverOptionsData
         __handleClickAway(this: RoverOptionsContext, event: MouseEvent) {
             if (this.__static) return;
 
+
             let target = event.target as HTMLElement;
-            
-            if (
-                target.hasAttribute('data-slot') &&
-                target.getAttribute('data-slot') === 'control'
-            ) {
+
+            if (target.dataset.slot && target.dataset.slot === INPUT_SLOT_NAME) {
                 return;
             }
 

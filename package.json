@@ -1,5 +1,5 @@
 {
-  "name": "combobox",
+  "name": "rover",
   "version": "1.0.0",
   "description": "full combobox pattern implementation with alpine for alpine users",
   "main": "dist/module.cjs.js",
@@ -10,6 +10,7 @@
     "watch": "node ./scripts/build.js --watch",
     "lint": "eslint .",
     "tsc": "tsc",
+    "test": "vitest",
     "lint-fix": "eslint . --fix"
   },
   "repository": {
@@ -26,18 +27,22 @@
   },
   "homepage": "https://github.com/sheafui/combobox#readme",
   "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/user-event": "^14.6.1",
     "@types/alpinejs": "^3.13.11",
     "@types/node": "^25.0.3",
+    "@vitest/ui": "^4.0.18",
     "brotli-size": "^4.0.0",
     "esbuild": "^0.8.39",
     "eslint": "^9.39.2",
-    "eslint-config-standard": "^16.0.2",
     "eslint-config-xo": "^0.49.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.3.1",
     "eslint-plugin-standard": "^4.1.0",
+    "jsdom": "^28.0.0",
     "lint-staged": "^10.5.4",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   }
 }

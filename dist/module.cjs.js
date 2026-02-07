@@ -12,8 +12,8 @@ __export(exports, {
 });
 
 // src/factories/CreateRoverInput.ts
+var SLOT_NAME = "rover-input";
 function CreateRoverInput(Alpine2) {
-  const SLOT_NAME = "rover-input";
   return {
     init() {
       let displayValueFn = Alpine2.extractProp(this.$el, "display-value", "");
@@ -73,11 +73,11 @@ function CreateRoverInput(Alpine2) {
 
 // src/factories/CreateRoverOption.ts
 function CreateRoverOption(Alpine2, nextId) {
-  const SLOT_NAME = "rover-option";
+  const SLOT_NAME2 = "rover-option";
   return {
     __uniqueKey: "option-" + nextId,
     init() {
-      this.$el.dataset.slot = SLOT_NAME;
+      this.$el.dataset.slot = SLOT_NAME2;
       let value = Alpine2.extractProp(this.$el, "value", "");
       this.$el.dataset.key = this.__uniqueKey;
       this.$el.dataset.value = value;
@@ -310,7 +310,7 @@ var RoverCollection_default = RoverCollection;
 // src/factories/CreateRoverRoot.ts
 function CreateRoverRoot({el, effect}) {
   const collection = new RoverCollection_default();
-  const SLOT_NAME = "rover-root";
+  const SLOT_NAME2 = "rover-root";
   return {
     __state: null,
     __isOpen: false,
@@ -345,7 +345,7 @@ function CreateRoverRoot({el, effect}) {
       return this.__filteredKeys.includes(key);
     },
     init() {
-      this.$el.dataset.slot = SLOT_NAME;
+      this.$el.dataset.slot = SLOT_NAME2;
       effect(() => {
         this.__isLoading = collection.pending.state;
       });
@@ -537,20 +537,20 @@ function CreateRoverRoot({el, effect}) {
 
 // src/factories/CreateRoverOptions.ts
 function CreateRoverOptions(Alpine2) {
-  const SLOT_NAME = "rover-options";
+  const SLOT_NAME2 = "rover-options";
   return {
     init() {
       this.$data.__static = Alpine2.extractProp(this.$el, "static", false);
       if (Alpine2.bound(this.$el, "keepActivated")) {
         this.__keepActivated = true;
       }
-      return this.$el.dataset.slot = SLOT_NAME;
+      return this.$el.dataset.slot = SLOT_NAME2;
     },
     __handleClickAway(event) {
       if (this.__static)
         return;
       let target = event.target;
-      if (target.hasAttribute("data-slot") && target.getAttribute("data-slot") === "control") {
+      if (target.dataset.slot && target.dataset.slot === SLOT_NAME) {
         return;
       }
       this.__close();
@@ -623,8 +623,8 @@ function rover(Alpine2) {
         return this.$id("rover-options");
       },
       role: "listbox",
-      "x-on:click.away"() {
-        this.__handleClickAway();
+      "x-on:click.away"($event) {
+        this.__handleClickAway($event);
       },
       "x-data"() {
         return CreateRoverOptions(Alpine2);

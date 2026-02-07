@@ -1,10 +1,9 @@
 import { Alpine as AlpineType } from "alpinejs";
 import { RoverInputData, RoverInputContext } from "src/types";
 
+export const SLOT_NAME = 'rover-input';
+
 export default function CreateRoverInput(Alpine: AlpineType): RoverInputData {
-
-    const SLOT_NAME = 'rover-input';
-
 
     return {
         init() {
