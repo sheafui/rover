@@ -80,7 +80,7 @@ export default function CreateRoverRoot(
 
                 let results = collection.search(this.__searchQuery).map((result) => result.key);
 
-
+                console.log(collection.navIndex);
                 if (results.length >= 0) {
                     this.__filteredKeys = results
                 } else {

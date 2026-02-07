@@ -11,7 +11,7 @@ export default class RoverCollection {
     private needsReindex: boolean = false;
     
     // activation trio 
-    private navIndex: Array<number> = [];
+    public navIndex: Array<number> = [];
     private activeNavPos: number = -1;
     public activeIndex: ActiveIndex;
 
