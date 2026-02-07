@@ -1,11 +1,11 @@
 import RoverCollection from "../core/RoverCollection";
 
 import type { default as AlpineType } from "alpinejs";
-import { ComboboxRootData } from "src/types";
+import { RoverRootData } from "src/types";
 
-export default function CreateComboboxRoot(
+export default function CreateRoverRoot(
     { el, effect }: { el: AlpineType.ElementWithXAttributes, effect: AlpineType.DirectiveUtilities['effect'] }
-): ComboboxRootData {
+): RoverRootData {
 
     const collection = new RoverCollection();
 

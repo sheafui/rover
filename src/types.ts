@@ -16,7 +16,7 @@ export type ActiveIndex = { value: undefined | number };
 
 export type SearchIndex = Omit<Item, 'disabled'>;
 
-export interface ComboboxRootData extends XDataContext {
+export interface RoverRootData extends XDataContext {
     __state: string | string[] | null;
     __isOpen: boolean;
     __isMultiple: boolean;
@@ -59,21 +59,19 @@ export interface ComboboxRootData extends XDataContext {
     __nextId: () => number;
 }
 
-export interface ComboboxInputData extends XDataContext {
+export interface RoverInputData extends XDataContext {
     __displayValue?: (value: any) => string;
     __handleEvents: () => void;
 }
 
-export type ComboboxInputContext = ComboboxRootData & ComboboxInputData & Magics<ComboboxInputData>;
+export type RoverInputContext = RoverRootData & RoverInputData & Magics<RoverInputData>;
 
-export interface ComboboxOptionData extends XDataContext {
+export interface RoverOptionData extends XDataContext {
     __uniqueKey: string;
 }
 
-export type ComboboxOptionContext = ComboboxRootData & ComboboxOptionData & Magics<ComboboxOptionData>;
+export type RoverOptionContext = RoverRootData & RoverOptionData & Magics<RoverOptionData>;
 
-export interface ComboboxOptionsData {
-    __virtualizer: any;
-}
+export interface RoverOptionsData extends RoverRootData{}
+export type RoverOptionsContext = RoverRootData & RoverOptionsData & Magics<RoverOptionsData>;
 
-export type ComboboxOptionsContext = ComboboxRootData & ComboboxOptionsData;
