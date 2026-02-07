@@ -1,4 +1,4 @@
-import ComboboxCollection from "../core/ComboboxCollection";
+import RoverCollection from "../core/RoverCollection";
 
 import type { default as AlpineType } from "alpinejs";
 import { ComboboxRootData } from "src/types";
@@ -7,7 +7,7 @@ export default function CreateComboboxRoot(
     { el, effect }: { el: AlpineType.ElementWithXAttributes, effect: AlpineType.DirectiveUtilities['effect'] }
 ): ComboboxRootData {
 
-    const collection = new ComboboxCollection();
+    const collection = new RoverCollection();
 
     type CompareByFn = (a: unknown, b: unknown) => boolean;
 
@@ -75,6 +75,7 @@ export default function CreateComboboxRoot(
             effect(() => {
 
                 let results = collection.search(this.__searchQuery).map((result) => result.key);
+
 
                 if (results.length >= 0) {
                     this.__filteredKeys = results

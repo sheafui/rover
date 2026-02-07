@@ -22,7 +22,7 @@ export default function CreateComboboxInput(Alpine: AlpineType): ComboboxInputDa
 
             this.$el.addEventListener('input', (e: InputEvent) => {
                 e.stopPropagation();
-                
+
                 if (this.__isTyping) {
                     this.__open();
                 }
@@ -70,6 +70,7 @@ export default function CreateComboboxInput(Alpine: AlpineType): ComboboxInputDa
                             this.__close()
                             this.__resetInput()
                         }
+                        
                         break;
                 }
             });

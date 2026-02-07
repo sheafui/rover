@@ -1,10 +1,10 @@
 import { Alpine } from "alpinejs";
 import type { default as AlpineType } from "alpinejs";
-import CreateComboboxInput from "./factories/CreateComboboxInput";
-import CreateComboboxOption from "./factories/CreateComboboxOption";
-import CreateComboboxRoot from "./factories/CreateComboboxRoot";
+import CreateRoverInput from "./factories/CreateRoverInput";
+import CreateRoverOption from "./factories/CreateRoverOption";
+import CreateRoverRoot from "./factories/CreateRoverRoot";
 
-type ComboboxValue =
+type RoverValue =
     | null
     | 'input'
     | 'button'
@@ -15,10 +15,10 @@ type ComboboxValue =
     | 'separator'
     | 'empty';
 
-export default function combobox(Alpine: Alpine): void {
+export default function rover(Alpine: Alpine): void {
 
-    Alpine.directive('combobox', (el: AlpineType.ElementWithXAttributes, { value, modifiers }: AlpineType.DirectiveData, { Alpine, effect }: AlpineType.DirectiveUtilities) => {
-        switch (value as ComboboxValue) {
+    Alpine.directive('rover', (el: AlpineType.ElementWithXAttributes, { value, modifiers }: AlpineType.DirectiveData, { Alpine, effect }: AlpineType.DirectiveUtilities) => {
+        switch (value as RoverValue) {
             case null: handleRoot(Alpine, el, effect);
                 break;
             case 'input': handleInput(Alpine, el);
@@ -38,7 +38,7 @@ export default function combobox(Alpine: Alpine): void {
             case 'empty': handleEmptyState(Alpine, el);
                 break;
             default:
-                console.error('invalid x-combobox value', value, 'use input, button, option, options or leave mepty for root level instead');
+                console.error('invalid x-rover value', value, 'use input, button, option, options or leave mepty for root level instead');
                 break;
         }
     }).before('bind');
@@ -51,7 +51,7 @@ export default function combobox(Alpine: Alpine): void {
 
         Alpine.bind(el, {
             'x-data'() {
-                return CreateComboboxRoot({ el, effect })
+                return CreateRoverRoot({ el, effect })
             }
         })
     }
@@ -63,13 +63,13 @@ export default function combobox(Alpine: Alpine): void {
         Alpine.bind(el, {
             'x-ref': '__input',
             'x-model': '__searchQuery',
-            'x-bind:id'() { return this.$id('combobox-input') },
+            'x-bind:id'() { return this.$id('rover-input') },
 
             'role': 'combobox',
             'tabindex': '0',
             'aria-autocomplete': 'list',
             'x-data'() {
-                return CreateComboboxInput(Alpine)
+                return CreateRoverInput(Alpine)
             }
         })
     }
@@ -78,7 +78,7 @@ export default function combobox(Alpine: Alpine): void {
         Alpine.bind(el, {
 
             'x-ref': '__options',
-            'x-bind:id'() { return this.$id('combobox-options') },
+            'x-bind:id'() { return this.$id('rover-options') },
             'role': 'listbox',
 
             'x-init'() {
@@ -98,15 +98,15 @@ export default function combobox(Alpine: Alpine): void {
     function handleOption(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
 
         Alpine.bind(el, {
-            'x-id'() { return ['combobox-option'] },
-            'x-bind:id'() { return this.$id('combobox-option') },
+            'x-id'() { return ['rover-option'] },
+            'x-bind:id'() { return this.$id('rover-option') },
             'role': 'option',
             'x-show'() {
                 return this.$data.__isVisible(this.$el.dataset.key);
             },
             'x-data'() {
                 // @todo: move to constructor function here for memory gains
-                return CreateComboboxOption(Alpine, this.__nextId())
+                return CreateRoverOption(Alpine, this.__nextId());
             },
         });
     }
@@ -114,8 +114,8 @@ export default function combobox(Alpine: Alpine): void {
     function handleOptionsGroup(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
 
         Alpine.bind(el, {
-            'x-id'() { return ['combobox-options-group'] },
-            'x-bind:id'() { return this.$id('combobox-options-group') },
+            'x-id'() { return ['rover-options-group'] },
+            'x-bind:id'() { return this.$id('rover-options-group') },
             'role': 'option',
             'x-show'() {
                 // we need to hide it if it's doesnt have any child  
@@ -128,7 +128,7 @@ export default function combobox(Alpine: Alpine): void {
 
         Alpine.bind(el, {
             'x-ref': '__button',
-            'x-bind:id'() { return this.$id('combobox-button') },
+            'x-bind:id'() { return this.$id('rover-button') },
 
             'tabindex': '-1',
             'aria-haspopup': 'true',
@@ -152,7 +152,7 @@ export default function combobox(Alpine: Alpine): void {
 
     function handleEmptyState(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
         Alpine.bind(el, {
-            'x-bind:id'() { return this.$id('combobox-button') },
+            'x-bind:id'() { return this.$id('rover-button') },
 
             'tabindex': '-1',
             'aria-haspopup': 'true',
