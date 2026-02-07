@@ -580,6 +580,13 @@
     }).before("bind");
     function handleRoot(Alpine3, el, effect) {
       Alpine3.bind(el, {
+        "x-on:keydown.escape"(e) {
+          if (this.__isOpen) {
+            e.preventDefault();
+            this.__close();
+            queueMicrotask(() => this.$refs.__input.focus({preventScroll: true}));
+          }
+        },
         "x-data"() {
           return CreateRoverRoot({el, effect});
         }
