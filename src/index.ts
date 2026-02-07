@@ -3,6 +3,7 @@ import type { default as AlpineType } from "alpinejs";
 import CreateRoverInput from "./factories/CreateRoverInput";
 import CreateRoverOption from "./factories/CreateRoverOption";
 import CreateRoverRoot from "./factories/CreateRoverRoot";
+import CreateRoverOptions from "./factories/CreateRoverOptions";
 
 type RoverValue =
     | null
@@ -80,17 +81,9 @@ export default function rover(Alpine: Alpine): void {
             'x-ref': '__options',
             'x-bind:id'() { return this.$id('rover-options') },
             'role': 'listbox',
-
-            'x-init'() {
-                this.$data.__static = Alpine.extractProp(this.$el, 'static', false);
-
-                if (Alpine.bound(this.$el, 'keepActivated')) {
-                    this.__keepActivated = true;
-                }
-
-                return this.$el.dataset.slot = 'options';
+            'x-data'() {
+                return CreateRoverOptions(Alpine);
             },
-
             'x-show'() { return this.$data.__static ? true : this.$data.__isOpen; },
         })
     }

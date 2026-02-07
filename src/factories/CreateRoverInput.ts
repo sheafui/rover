@@ -1,7 +1,7 @@
 import { Alpine as AlpineType } from "alpinejs";
-import { ComboboxInputData, ComboboxInputContext } from "src/types";
+import { RoverInputData, RoverInputContext } from "src/types";
 
-export default function CreateComboboxInput(Alpine: AlpineType): ComboboxInputData {
+export default function CreateRoverInput(Alpine: AlpineType): RoverInputData {
 
     return {
         init() {
@@ -12,7 +12,7 @@ export default function CreateComboboxInput(Alpine: AlpineType): ComboboxInputDa
             this.__handleEvents();
         },
 
-        __handleEvents(this: ComboboxInputContext) {
+        __handleEvents(this: RoverInputContext) {
 
             this.$el.addEventListener('focus', () => {
                 // on flat variant we need to activate the first key as

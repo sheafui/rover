@@ -1,5 +1,5 @@
 // src/factories/CreateRoverInput.ts
-function CreateComboboxInput(Alpine2) {
+function CreateRoverInput(Alpine2) {
   return {
     init() {
       let displayValueFn = Alpine2.extractProp(this.$el, "display-value", "");
@@ -57,7 +57,7 @@ function CreateComboboxInput(Alpine2) {
 }
 
 // src/factories/CreateRoverOption.ts
-function CreateComboboxOption(Alpine2, nextId) {
+function CreateRoverOption(Alpine2, nextId) {
   const SLOT_NAME = "option";
   return {
     __uniqueKey: "option-" + nextId,
@@ -289,7 +289,7 @@ var RoverCollection = class {
 var RoverCollection_default = RoverCollection;
 
 // src/factories/CreateRoverRoot.ts
-function CreateComboboxRoot({el, effect}) {
+function CreateRoverRoot({el, effect}) {
   const collection = new RoverCollection_default();
   return {
     __state: null,
@@ -514,6 +514,19 @@ function CreateComboboxRoot({el, effect}) {
   };
 }
 
+// src/factories/CreateRoverOptions.ts
+function CreateRoverOptions(Alpine2) {
+  return {
+    init() {
+      this.this.$data.__static = Alpine2.extractProp(this.$el, "static", false);
+      if (Alpine2.bound(this.$el, "keepActivated")) {
+        this.__keepActivated = true;
+      }
+      return this.$el.dataset.slot = "options";
+    }
+  };
+}
+
 // src/index.ts
 function rover(Alpine2) {
   Alpine2.directive("rover", (el, {value, modifiers}, {Alpine: Alpine3, effect}) => {
@@ -553,7 +566,7 @@ function rover(Alpine2) {
   function handleRoot(Alpine3, el, effect) {
     Alpine3.bind(el, {
       "x-data"() {
-        return CreateComboboxRoot({el, effect});
+        return CreateRoverRoot({el, effect});
       }
     });
   }
@@ -568,7 +581,7 @@ function rover(Alpine2) {
       tabindex: "0",
       "aria-autocomplete": "list",
       "x-data"() {
-        return CreateComboboxInput(Alpine3);
+        return CreateRoverInput(Alpine3);
       }
     });
   }
@@ -579,12 +592,8 @@ function rover(Alpine2) {
         return this.$id("rover-options");
       },
       role: "listbox",
-      "x-init"() {
-        this.$data.__static = Alpine2.extractProp(this.$el, "static", false);
-        if (Alpine2.bound(this.$el, "keepActivated")) {
-          this.__keepActivated = true;
-        }
-        return this.$el.dataset.slot = "options";
+      "x-data"() {
+        return CreateRoverOptions(Alpine2);
       },
       "x-show"() {
         return this.$data.__static ? true : this.$data.__isOpen;
@@ -604,7 +613,7 @@ function rover(Alpine2) {
         return this.$data.__isVisible(this.$el.dataset.key);
       },
       "x-data"() {
-        return CreateComboboxOption(Alpine3, this.__nextId());
+        return CreateRoverOption(Alpine3, this.__nextId());
       }
     });
   }

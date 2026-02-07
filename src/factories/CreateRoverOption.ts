@@ -1,14 +1,14 @@
 import type { Alpine as AlpineType } from 'alpinejs';
-import { ComboboxOptionData, ComboboxOptionContext } from 'src/types';
+import { RoverOptionData, RoverOptionContext } from 'src/types';
 
-export default function CreateComboboxOption(Alpine: AlpineType, nextId: string): ComboboxOptionData {
+export default function CreateRoverOption(Alpine: AlpineType, nextId: string): RoverOptionData {
 
     const SLOT_NAME = 'option';
 
     return {
         __uniqueKey: 'option-' + nextId,
 
-        init(this: ComboboxOptionContext) {
+        init(this: RoverOptionContext) {
 
             this.$el.dataset.slot = SLOT_NAME;
 
