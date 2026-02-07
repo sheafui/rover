@@ -13,11 +13,13 @@ __export(exports, {
 
 // src/factories/CreateRoverInput.ts
 function CreateRoverInput(Alpine2) {
+  const SLOT_NAME = "rover-input";
   return {
     init() {
       let displayValueFn = Alpine2.extractProp(this.$el, "display-value", "");
       if (displayValueFn)
         this.__displayValue = displayValueFn;
+      this.$el.dataset.slot = SLOT_NAME;
       this.__handleEvents();
     },
     __handleEvents() {
@@ -71,7 +73,7 @@ function CreateRoverInput(Alpine2) {
 
 // src/factories/CreateRoverOption.ts
 function CreateRoverOption(Alpine2, nextId) {
-  const SLOT_NAME = "option";
+  const SLOT_NAME = "rover-option";
   return {
     __uniqueKey: "option-" + nextId,
     init() {
@@ -308,6 +310,7 @@ var RoverCollection_default = RoverCollection;
 // src/factories/CreateRoverRoot.ts
 function CreateRoverRoot({el, effect}) {
   const collection = new RoverCollection_default();
+  const SLOT_NAME = "rover-root";
   return {
     __state: null,
     __isOpen: false,
@@ -342,6 +345,7 @@ function CreateRoverRoot({el, effect}) {
       return this.__filteredKeys.includes(key);
     },
     init() {
+      this.$el.dataset.slot = SLOT_NAME;
       effect(() => {
         this.__isLoading = collection.pending.state;
       });
@@ -533,13 +537,23 @@ function CreateRoverRoot({el, effect}) {
 
 // src/factories/CreateRoverOptions.ts
 function CreateRoverOptions(Alpine2) {
+  const SLOT_NAME = "rover-options";
   return {
     init() {
       this.$data.__static = Alpine2.extractProp(this.$el, "static", false);
       if (Alpine2.bound(this.$el, "keepActivated")) {
         this.__keepActivated = true;
       }
-      return this.$el.dataset.slot = "options";
+      return this.$el.dataset.slot = SLOT_NAME;
+    },
+    __handleClickAway(event) {
+      if (this.__static)
+        return;
+      let target = event.target;
+      if (target.hasAttribute("data-slot") && target.getAttribute("data-slot") === "control") {
+        return;
+      }
+      this.__close();
     }
   };
 }
@@ -609,6 +623,9 @@ function rover(Alpine2) {
         return this.$id("rover-options");
       },
       role: "listbox",
+      "x-on:click.away"() {
+        this.__handleClickAway();
+      },
       "x-data"() {
         return CreateRoverOptions(Alpine2);
       },

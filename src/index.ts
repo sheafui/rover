@@ -81,6 +81,9 @@ export default function rover(Alpine: Alpine): void {
             'x-ref': '__options',
             'x-bind:id'() { return this.$id('rover-options') },
             'role': 'listbox',
+            'x-on:click.away'() {
+                this.__handleClickAway()
+            },
             'x-data'() {
                 return CreateRoverOptions(Alpine);
             },

@@ -3,11 +3,16 @@ import { RoverInputData, RoverInputContext } from "src/types";
 
 export default function CreateRoverInput(Alpine: AlpineType): RoverInputData {
 
+    const SLOT_NAME = 'rover-input';
+
+
     return {
         init() {
             let displayValueFn = Alpine.extractProp(this.$el, 'display-value', '');
 
             if (displayValueFn) this.__displayValue = displayValueFn;
+
+            this.$el.dataset.slot = SLOT_NAME;
 
             this.__handleEvents();
         },
@@ -70,7 +75,7 @@ export default function CreateRoverInput(Alpine: AlpineType): RoverInputData {
                             this.__close()
                             this.__resetInput()
                         }
-                        
+
                         break;
                 }
             });

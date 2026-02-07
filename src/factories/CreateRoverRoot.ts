@@ -11,6 +11,8 @@ export default function CreateRoverRoot(
 
     type CompareByFn = (a: unknown, b: unknown) => boolean;
 
+    const SLOT_NAME = 'rover-root';
+
 
     return {
         __state: null,
@@ -63,6 +65,8 @@ export default function CreateRoverRoot(
         },
 
         init() {
+
+            this.$el.dataset.slot = SLOT_NAME;
 
             effect(() => {
                 this.__isLoading = collection.pending.state;

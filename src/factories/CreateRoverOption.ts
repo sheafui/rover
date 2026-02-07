@@ -3,7 +3,7 @@ import { RoverOptionData, RoverOptionContext } from 'src/types';
 
 export default function CreateRoverOption(Alpine: AlpineType, nextId: string): RoverOptionData {
 
-    const SLOT_NAME = 'option';
+    const SLOT_NAME = 'rover-option';
 
     return {
         __uniqueKey: 'option-' + nextId,
