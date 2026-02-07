@@ -1,7 +1,7 @@
 import type { Item, Options, Pending, ActiveIndex, SearchIndex } from "src/types";
 
 
-export default class ComboboxCollection {
+export default class RoverCollection {
 
     private items: Array<Item> = [];
     private itemsMap = new Map<string, Item>()

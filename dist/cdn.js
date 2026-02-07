@@ -1,5 +1,5 @@
 (() => {
-  // src/factories/CreateComboboxInput.ts
+  // src/factories/CreateRoverInput.ts
   function CreateComboboxInput(Alpine2) {
     return {
       init() {
@@ -57,7 +57,7 @@
     };
   }
 
-  // src/factories/CreateComboboxOption.ts
+  // src/factories/CreateRoverOption.ts
   function CreateComboboxOption(Alpine2, nextId) {
     const SLOT_NAME = "option";
     return {
@@ -103,8 +103,8 @@
     };
   }
 
-  // src/core/ComboboxCollection.ts
-  var ComboboxCollection = class {
+  // src/core/RoverCollection.ts
+  var RoverCollection = class {
     constructor(options = {}) {
       this.items = [];
       this.itemsMap = new Map();
@@ -164,47 +164,6 @@
     getActiveItem() {
       return this.activeIndex.value === void 0 ? null : this.items[this.activeIndex.value];
     }
-    activateFirst() {
-      this.rebuildIndexes();
-      if (!this.navIndex.length)
-        return;
-      if (this.navIndex[0]) {
-        this.activeIndex.value = this.navIndex[0];
-      }
-      this.activeNavPos = 0;
-    }
-    activateLast() {
-      this.rebuildIndexes();
-      if (!this.navIndex.length)
-        return;
-      this.activeNavPos = this.navIndex.length - 1;
-      const activeIndex = this.navIndex[this.activeNavPos];
-      if (typeof activeIndex === "number") {
-        this.activeIndex.value = activeIndex;
-      }
-    }
-    activateNext() {
-      this.rebuildIndexes();
-      if (!this.navIndex.length)
-        return;
-      if (this.activeNavPos === -1) {
-        this.activateFirst();
-        return;
-      }
-      this.activeNavPos = (this.activeNavPos + 1) % this.navIndex.length;
-      this.activeIndex.value = this.navIndex[this.activeNavPos];
-    }
-    activatePrev() {
-      this.rebuildIndexes();
-      if (!this.navIndex.length)
-        return;
-      if (this.activeNavPos === -1) {
-        this.activateLast();
-        return;
-      }
-      this.activeNavPos = this.activeNavPos === 0 ? this.navIndex.length - 1 : this.activeNavPos - 1;
-      this.activeIndex.value = this.navIndex[this.activeNavPos];
-    }
     invalidate() {
       this.needsReindex = true;
       this.lastQuery = "";
@@ -257,7 +216,6 @@
       if (this.searchIndex) {
         const normalized = q.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         results = [];
-        console.log("inside search index", this.searchIndex);
         for (const {key, value} of this.searchIndex) {
           if (value.includes(normalized)) {
             const item = this.itemsMap.get(key);
@@ -287,12 +245,53 @@
     get size() {
       return this.items.length;
     }
+    activateFirst() {
+      this.rebuildIndexes();
+      if (!this.navIndex.length)
+        return;
+      if (this.navIndex[0]) {
+        this.activeIndex.value = this.navIndex[0];
+      }
+      this.activeNavPos = 0;
+    }
+    activateLast() {
+      this.rebuildIndexes();
+      if (!this.navIndex.length)
+        return;
+      this.activeNavPos = this.navIndex.length - 1;
+      const activeIndex = this.navIndex[this.activeNavPos];
+      if (typeof activeIndex === "number") {
+        this.activeIndex.value = activeIndex;
+      }
+    }
+    activateNext() {
+      this.rebuildIndexes();
+      if (!this.navIndex.length)
+        return;
+      if (this.activeNavPos === -1) {
+        this.activateFirst();
+        return;
+      }
+      this.activeNavPos = (this.activeNavPos + 1) % this.navIndex.length;
+      this.activeIndex.value = this.navIndex[this.activeNavPos];
+    }
+    activatePrev() {
+      this.rebuildIndexes();
+      if (!this.navIndex.length)
+        return;
+      if (this.activeNavPos === -1) {
+        this.activateLast();
+        return;
+      }
+      this.activeNavPos = this.activeNavPos === 0 ? this.navIndex.length - 1 : this.activeNavPos - 1;
+      this.activeIndex.value = this.navIndex[this.activeNavPos];
+    }
   };
-  var ComboboxCollection_default = ComboboxCollection;
+  var RoverCollection_default = RoverCollection;
 
-  // src/factories/CreateComboboxRoot.ts
+  // src/factories/CreateRoverRoot.ts
   function CreateComboboxRoot({el, effect}) {
-    const collection = new ComboboxCollection_default();
+    const collection = new RoverCollection_default();
     return {
       __state: null,
       __isOpen: false,
@@ -517,8 +516,8 @@
   }
 
   // src/index.ts
-  function combobox(Alpine2) {
-    Alpine2.directive("combobox", (el, {value, modifiers}, {Alpine: Alpine3, effect}) => {
+  function rover(Alpine2) {
+    Alpine2.directive("rover", (el, {value, modifiers}, {Alpine: Alpine3, effect}) => {
       switch (value) {
         case null:
           handleRoot(Alpine3, el, effect);
@@ -548,7 +547,7 @@
           handleEmptyState(Alpine3, el);
           break;
         default:
-          console.error("invalid x-combobox value", value, "use input, button, option, options or leave mepty for root level instead");
+          console.error("invalid x-rover value", value, "use input, button, option, options or leave mepty for root level instead");
           break;
       }
     }).before("bind");
@@ -564,7 +563,7 @@
         "x-ref": "__input",
         "x-model": "__searchQuery",
         "x-bind:id"() {
-          return this.$id("combobox-input");
+          return this.$id("rover-input");
         },
         role: "combobox",
         tabindex: "0",
@@ -578,7 +577,7 @@
       Alpine2.bind(el, {
         "x-ref": "__options",
         "x-bind:id"() {
-          return this.$id("combobox-options");
+          return this.$id("rover-options");
         },
         role: "listbox",
         "x-init"() {
@@ -596,10 +595,10 @@
     function handleOption(Alpine3, el) {
       Alpine3.bind(el, {
         "x-id"() {
-          return ["combobox-option"];
+          return ["rover-option"];
         },
         "x-bind:id"() {
-          return this.$id("combobox-option");
+          return this.$id("rover-option");
         },
         role: "option",
         "x-show"() {
@@ -613,10 +612,10 @@
     function handleOptionsGroup(Alpine3, el) {
       Alpine3.bind(el, {
         "x-id"() {
-          return ["combobox-options-group"];
+          return ["rover-options-group"];
         },
         "x-bind:id"() {
-          return this.$id("combobox-options-group");
+          return this.$id("rover-options-group");
         },
         role: "option",
         "x-show"() {
@@ -628,7 +627,7 @@
       Alpine3.bind(el, {
         "x-ref": "__button",
         "x-bind:id"() {
-          return this.$id("combobox-button");
+          return this.$id("rover-button");
         },
         tabindex: "-1",
         "aria-haspopup": "true",
@@ -649,7 +648,7 @@
     function handleEmptyState(Alpine3, el) {
       Alpine3.bind(el, {
         "x-bind:id"() {
-          return this.$id("combobox-button");
+          return this.$id("rover-button");
         },
         tabindex: "-1",
         "aria-haspopup": "true",
@@ -672,6 +671,6 @@
 
   // builds/cdn.js
   document.addEventListener("alpine:init", () => {
-    window.Alpine.plugin(combobox);
+    window.Alpine.plugin(rover);
   });
 })();

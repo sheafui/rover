@@ -19,14 +19,14 @@
 <body x-data class="flex mt-20 justify-center bg-neutral-950">
 
     <div class="space-y-4">
-        <div x-combobox class="w-[360px]">
+        <div x-rover class="w-[360px]">
             <div class="grid grid-cols-[auto_2rem]">
                 <input 
-                    x-combobox:input
+                    x-rover:input
                     placeholder="Search..."
                     class="flex-1 col-start-1 col-span-full row-start-1 w-full rounded-md bg-transparent py-2 text-neutral-300 placeholder-neutral-300 border border-neutral-500 px-4 focus:outline-none"
                 >
-                <button x-combobox:button type="button"
+                <button x-rover:button type="button"
                     class="col-start-2 row-start-1 flex items-center justify-center size-full">
                     <x-ui.icon name="chevron-down" class="size-4 hover:text-white" />
                 </button>
@@ -35,27 +35,27 @@
             
             
             
-            <ul x-combobox:options
+            <ul x-rover:options
                 class="mt-1 max-h-60  w-full rounded-md border border-neutral-700 bg-white/5 text-white overflow-hidden shadow-lg focus:outline-none"
                 x-cloak
             >
-                <li x-combobox:option value="tenjarine" class="px-4 data-active:bg-white/5  py-2">
+                <li x-rover:option value="tenjarine" class="px-4 data-active:bg-white/5  py-2">
                     tenjarine
                 </li>
 
-                <li x-combobox:option value="apple" class="px-4 data-active:bg-white/5 py-2">
+                <li x-rover:option value="apple" class="px-4 data-active:bg-white/5 py-2">
                     Apple
                 </li>
 
-                <li x-combobox:option value="banana" class="px-4 data-active:bg-white/5 py-2">
+                <li x-rover:option value="banana" class="px-4 data-active:bg-white/5 py-2">
                     Banana
                 </li>
 
-                <li x-combobox:option value="cherry" class="px-4 data-active:bg-white/5 py-2">
+                <li x-rover:option value="cherry" class="px-4 data-active:bg-white/5 py-2">
                     Cherry
                 </li>
 
-                <li class="py-4 text-center" x-combobox:empty>
+                <li class="py-4 text-center" x-rover:empty>
                     No result found
                 </li>
                 </u>
