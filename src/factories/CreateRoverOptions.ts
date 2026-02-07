@@ -5,8 +5,8 @@ export default function CreateRoverOptions(Alpine: AlpineType): RoverOptionsData
 
     return {
         init(this: RoverOptionsContext) {
-            this.
-            this.$data.__static = Alpine.extractProp(this.$el, 'static', false);
+    
+            this.$data.__static = Alpine.extractProp(this.$el, 'static', false) as boolean;
 
             if (Alpine.bound(this.$el, 'keepActivated')) {
                 this.__keepActivated = true;

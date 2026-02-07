@@ -519,7 +519,7 @@
   function CreateRoverOptions(Alpine2) {
     return {
       init() {
-        this.this.$data.__static = Alpine2.extractProp(this.$el, "static", false);
+        this.$data.__static = Alpine2.extractProp(this.$el, "static", false);
         if (Alpine2.bound(this.$el, "keepActivated")) {
           this.__keepActivated = true;
         }

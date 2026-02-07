@@ -72,6 +72,6 @@ export interface RoverOptionData extends XDataContext {
 
 export type RoverOptionContext = RoverRootData & RoverOptionData & Magics<RoverOptionData>;
 
-export interface RoverOptionsData extends RoverRootData{}
+export interface RoverOptionsData extends Partial<RoverRootData>{}
 export type RoverOptionsContext = RoverRootData & RoverOptionsData & Magics<RoverOptionsData>;
 
