@@ -20,7 +20,7 @@
 
     <div class="space-y-4">
         <div x-rover class="w-[360px]">
-            <!-- <div class="grid grid-cols-[auto_2rem]">
+            <div class="grid grid-cols-[auto_2rem]">
                 <input 
                     x-rover:input
                     placeholder="Search..."
@@ -30,23 +30,29 @@
                     class="col-start-2 row-start-1 flex items-center justify-center size-full">
                     <x-ui.icon name="chevron-down" class="size-4 hover:text-white" />
                 </button>
-            </div> -->
+            </div>
 
             
             
             
-            <ul x-rover:options
-                static_
-                class="mt-1 max-h-60  w-full rounded-md border border-neutral-700 bg-white/5 text-white overflow-hidden shadow-lg focus:outline-none"
+            <ul 
+                x-rover:options
+                static
                 x-cloak
+                class="mt-1 max-h-60  w-full rounded-md border border-neutral-700 bg-white/5 text-white overflow-hidden shadow-lg focus:outline-none"
             >
                 <li x-rover:option value="tenjarine" class="px-4 data-active:bg-white/5  py-2">
                     tenjarine
                 </li>
-                <!-- <div class="w-full h-px bg-neutral-700"></div> -->
                 <li x-rover:option value="apple" class="px-4 data-active:bg-white/5 py-2">
                     Apple
                 </li>
+                
+                <!-- the seperator used when the search make it look at the bottom and in that case we need to hide it -->
+                <div 
+                    x-rover:separator 
+                    class="w-full h-px bg-neutral-700"
+                ></div>
 
                 <li x-rover:option value="banana" class="px-4 data-active:bg-white/5 py-2">
                     Banana

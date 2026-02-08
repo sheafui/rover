@@ -352,7 +352,6 @@ function CreateRoverRoot({el, effect}) {
       });
       effect(() => {
         let results = collection.search(this.__searchQuery).map((result) => result.key);
-        console.log(collection.navIndex);
         if (results.length >= 0) {
           this.__filteredKeys = results;
         } else {
@@ -384,7 +383,7 @@ function CreateRoverRoot({el, effect}) {
       this.__isOpen = true;
       let input = this.$refs.__input;
       requestAnimationFrame(() => {
-        input.focus({preventScroll: true});
+        input?.focus({preventScroll: true});
         this.__activateSelectedOrFirst();
       });
     },

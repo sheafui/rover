@@ -545,7 +545,7 @@ describe('RoverCollection', () => {
         it('should handle large collections efficiently', async () => {
             const startTime = performance.now();
 
-            for (let i = 0; i < 1000; i++) {
+            for (let i = 0; i < 10000; i++) {
                 collection.add(`key${i}`, `Value ${i}`);
             }
 
@@ -553,19 +553,19 @@ describe('RoverCollection', () => {
 
             const endTime = performance.now();
 
-            expect(collection.size).toBe(1000);
-            expect(endTime - startTime).toBeLessThan(100); // Should complete in < 1s
+            expect(collection.size).toBe(10000);
+            expect(endTime - startTime).toBeLessThan(100); // Should complete in < 100ms
         });
 
         it('should search large collections efficiently', async () => {
-            for (let i = 0; i < 1000; i++) {
+            for (let i = 0; i < 10000; i++) {
                 collection.add(`key${i}`, `Value ${i}`);
             }
 
             await Promise.resolve();
 
             const startTime = performance.now();
-            collection.search('500');
+            collection.search('00');
             const endTime = performance.now();
 
             expect(endTime - startTime).toBeLessThan(100); // Should complete in < 100ms
