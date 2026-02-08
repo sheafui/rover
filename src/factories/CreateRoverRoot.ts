@@ -2,7 +2,7 @@ import RoverCollection from "../core/RoverCollection";
 
 import type { default as AlpineType } from "alpinejs";
 import { RoverRootData } from "src/types";
-
+import { SLOT_NAME as OPTION_SLOT_NAME } from "./CreateRoverOption";
 export default function CreateRoverRoot(
     { el, effect }: { el: AlpineType.ElementWithXAttributes, effect: AlpineType.DirectiveUtilities['effect'] }
 ): RoverRootData {
@@ -10,7 +10,7 @@ export default function CreateRoverRoot(
     const collection = new RoverCollection();
 
     type CompareByFn = (a: unknown, b: unknown) => boolean;
-
+    
     const SLOT_NAME = 'rover-root';
 
 
@@ -278,7 +278,7 @@ export default function CreateRoverRoot(
 
         __registerEventsDelector() {
 
-            const findClosestOption = (el: Element) => Alpine.findClosest(el, node => node.dataset.slot === 'option');
+            const findClosestOption = (el: Element) => Alpine.findClosest(el, node => node.dataset.slot === OPTION_SLOT_NAME);
 
             const delegate = (handler: (optionEl: HTMLElement) => void) => {
                 return function (e: Event) {
@@ -318,6 +318,7 @@ export default function CreateRoverRoot(
                 this.__optionsEl.addEventListener('mouseover',
                     delegate((optionEl) => {
                         if (!optionEl.dataset.key) return;
+                    //    this activate didn't get autocomplete why ? 
                         this.__activate(optionEl.dataset.key);
                     })
                 );

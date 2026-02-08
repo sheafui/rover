@@ -65,6 +65,11 @@ function CreateRoverInput(Alpine2) {
               this.__resetInput();
             }
             break;
+          default:
+            if (this.__static)
+              return;
+            this.__open();
+            break;
         }
       });
     }
@@ -72,8 +77,8 @@ function CreateRoverInput(Alpine2) {
 }
 
 // src/factories/CreateRoverOption.ts
+var SLOT_NAME2 = "rover-option";
 function CreateRoverOption(Alpine2, nextId) {
-  const SLOT_NAME2 = "rover-option";
   return {
     __uniqueKey: "option-" + nextId,
     init() {
@@ -122,10 +127,11 @@ var RoverCollection = class {
   constructor(options = {}) {
     this.items = [];
     this.itemsMap = new Map();
-    this.needsReindex = false;
+    this.currentQuery = "";
+    this.currentResults = [];
     this.navIndex = [];
     this.activeNavPos = -1;
-    this.lastQuery = "";
+    this.needsReindex = false;
     this.isProcessing = false;
     var _a;
     this.pending = Alpine.reactive({state: false});
@@ -150,39 +156,15 @@ var RoverCollection = class {
     if (this.activeIndex.value === index) {
       this.activeIndex.value = void 0;
       this.activeNavPos = -1;
-    } else if (this.activeIndex.value && this.activeIndex.value > index) {
+    } else if (this.activeIndex.value !== void 0 && this.activeIndex.value > index) {
       this.activeIndex.value--;
     }
     this.invalidate();
   }
-  activate(key) {
-    const item = this.get(key);
-    if (!item || item.disabled)
-      return;
-    this.rebuildIndexes();
-    const index = this.items.indexOf(item);
-    if (this.activeIndex.value === index)
-      return;
-    this.activeIndex.value = index;
-    this.activeNavPos = this.navIndex.indexOf(index);
-  }
-  deactivate() {
-    this.activeIndex.value = void 0;
-    this.activeNavPos = -1;
-  }
-  isActivated(key) {
-    const item = this.get(key);
-    if (!item)
-      return false;
-    return this.items.indexOf(item) === this.activeIndex.value;
-  }
-  getActiveItem() {
-    return this.activeIndex.value === void 0 ? null : this.items[this.activeIndex.value];
-  }
   invalidate() {
     this.needsReindex = true;
-    this.lastQuery = "";
-    this.lastResults = [];
+    this.currentQuery = "";
+    this.currentResults = [];
     this.scheduleBatch();
   }
   scheduleBatch() {
@@ -191,59 +173,62 @@ var RoverCollection = class {
     this.isProcessing = true;
     this.pending.state = true;
     queueMicrotask(() => {
-      this.rebuildIndexes();
+      this.rebuildSearchIndex();
+      this.rebuildNavIndex();
       this.isProcessing = false;
       this.pending.state = false;
     });
   }
-  toggleIsPending() {
-    this.pending.state = !this.pending.state;
-  }
-  rebuildIndexes() {
-    var _a;
+  rebuildSearchIndex() {
     if (!this.needsReindex)
       return;
-    this.navIndex = [];
-    for (let i = 0; i < this.items.length; i++) {
-      if (!((_a = this.items[i]) == null ? void 0 : _a.disabled)) {
-        this.navIndex.push(i);
-      }
-    }
     this.searchIndex = this.items.map((item) => ({
       key: item.key,
       value: String(item.value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     }));
     this.needsReindex = false;
   }
+  rebuildNavIndex() {
+    var _a;
+    this.navIndex = [];
+    const itemsToIndex = this.currentResults.length > 0 ? this.currentResults : this.items;
+    for (let i = 0; i < this.items.length; i++) {
+      if (!((_a = this.items[i]) == null ? void 0 : _a.disabled) && itemsToIndex.includes(this.items[i])) {
+        this.navIndex.push(i);
+      }
+    }
+  }
+  toggleIsPending() {
+    this.pending.state = !this.pending.state;
+  }
   search(query) {
     if (!query) {
-      this.lastQuery = "";
-      this.lastResults = [];
+      this.currentQuery = "";
+      this.currentResults = [];
+      this.rebuildNavIndex();
       return this.items;
     }
     const q = query.toLowerCase();
-    if (this.lastQuery && q.startsWith(this.lastQuery) && this.lastResults) {
-      const filtered = this.lastResults.filter((item) => String(item.value).toLowerCase().includes(q));
-      this.lastQuery = q;
-      this.lastResults = filtered;
+    if (this.currentQuery && q.startsWith(this.currentQuery) && this.currentResults.length > 0) {
+      const filtered = this.currentResults.filter((item) => String(item.value).toLowerCase().includes(q));
+      this.currentQuery = q;
+      this.currentResults = filtered;
+      this.rebuildNavIndex();
       return filtered;
     }
-    let results;
-    if (this.searchIndex) {
-      const normalized = q.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      results = [];
-      for (const {key, value} of this.searchIndex) {
-        if (value.includes(normalized)) {
-          const item = this.itemsMap.get(key);
-          if (item)
-            results.push(item);
-        }
+    this.rebuildSearchIndex();
+    const normalized = q.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const results = [];
+    for (const {key, value} of this.searchIndex) {
+      if (value.includes(normalized)) {
+        const item = this.itemsMap.get(key);
+        if (item)
+          results.push(item);
       }
-    } else {
-      results = this.items.filter((item) => String(item.value).toLowerCase().includes(q));
     }
-    this.lastQuery = q;
-    this.lastResults = results;
+    this.currentQuery = q;
+    this.currentResults = results;
+    this.rebuildNavIndex();
     return results;
   }
   get(key) {
@@ -263,27 +248,56 @@ var RoverCollection = class {
   get size() {
     return this.items.length;
   }
+  activate(key) {
+    const item = this.get(key);
+    if (!item || item.disabled)
+      return;
+    this.rebuildSearchIndex();
+    this.rebuildNavIndex();
+    const index = this.items.indexOf(item);
+    if (this.activeIndex.value === index)
+      return;
+    this.activeIndex.value = index;
+    this.activeNavPos = this.navIndex.indexOf(index);
+  }
+  deactivate() {
+    this.activeIndex.value = void 0;
+    this.activeNavPos = -1;
+  }
+  isActivated(key) {
+    const item = this.get(key);
+    if (!item)
+      return false;
+    return this.items.indexOf(item) === this.activeIndex.value;
+  }
+  getActiveItem() {
+    return this.activeIndex.value === void 0 ? null : this.items[this.activeIndex.value];
+  }
   activateFirst() {
-    this.rebuildIndexes();
+    this.rebuildSearchIndex();
+    this.rebuildNavIndex();
     if (!this.navIndex.length)
       return;
-    if (this.navIndex[0] !== void 0) {
-      this.activeIndex.value = this.navIndex[0];
+    const firstIndex = this.navIndex[0];
+    if (firstIndex !== void 0) {
+      this.activeIndex.value = firstIndex;
+      this.activeNavPos = 0;
     }
-    this.activeNavPos = 0;
   }
   activateLast() {
-    this.rebuildIndexes();
+    this.rebuildSearchIndex();
+    this.rebuildNavIndex();
     if (!this.navIndex.length)
       return;
     this.activeNavPos = this.navIndex.length - 1;
-    const activeIndex = this.navIndex[this.activeNavPos];
-    if (typeof activeIndex === "number") {
-      this.activeIndex.value = activeIndex;
+    const lastIndex = this.navIndex[this.activeNavPos];
+    if (typeof lastIndex === "number") {
+      this.activeIndex.value = lastIndex;
     }
   }
   activateNext() {
-    this.rebuildIndexes();
+    this.rebuildSearchIndex();
+    this.rebuildNavIndex();
     if (!this.navIndex.length)
       return;
     if (this.activeNavPos === -1) {
@@ -294,7 +308,8 @@ var RoverCollection = class {
     this.activeIndex.value = this.navIndex[this.activeNavPos];
   }
   activatePrev() {
-    this.rebuildIndexes();
+    this.rebuildSearchIndex();
+    this.rebuildNavIndex();
     if (!this.navIndex.length)
       return;
     if (this.activeNavPos === -1) {
@@ -310,7 +325,7 @@ var RoverCollection_default = RoverCollection;
 // src/factories/CreateRoverRoot.ts
 function CreateRoverRoot({el, effect}) {
   const collection = new RoverCollection_default();
-  const SLOT_NAME2 = "rover-root";
+  const SLOT_NAME3 = "rover-root";
   return {
     __state: null,
     __isOpen: false,
@@ -345,7 +360,7 @@ function CreateRoverRoot({el, effect}) {
       return this.__filteredKeys.includes(key);
     },
     init() {
-      this.$el.dataset.slot = SLOT_NAME2;
+      this.$el.dataset.slot = SLOT_NAME3;
       effect(() => {
         this.__isLoading = collection.pending.state;
       });
@@ -488,7 +503,7 @@ function CreateRoverRoot({el, effect}) {
       return ++this.__uid;
     },
     __registerEventsDelector() {
-      const findClosestOption = (el2) => Alpine.findClosest(el2, (node) => node.dataset.slot === "option");
+      const findClosestOption = (el2) => Alpine.findClosest(el2, (node) => node.dataset.slot === SLOT_NAME2);
       const delegate = (handler) => {
         return function(e) {
           e.stopPropagation();
@@ -538,14 +553,14 @@ function CreateRoverRoot({el, effect}) {
 
 // src/factories/CreateRoverOptions.ts
 function CreateRoverOptions(Alpine2) {
-  const SLOT_NAME2 = "rover-options";
+  const SLOT_NAME3 = "rover-options";
   return {
     init() {
       this.$data.__static = Alpine2.extractProp(this.$el, "static", false);
       if (Alpine2.bound(this.$el, "keepActivated")) {
         this.__keepActivated = true;
       }
-      return this.$el.dataset.slot = SLOT_NAME2;
+      return this.$el.dataset.slot = SLOT_NAME3;
     },
     __handleClickAway(event) {
       if (this.__static)
@@ -582,7 +597,7 @@ function rover(Alpine2) {
         handleOptionsGroup(Alpine3, el);
         break;
       case "loading":
-        handleIsLoasing(Alpine3, el, modifiers);
+        handleIsLoading(Alpine3, el, modifiers);
         break;
       case "separator":
         handleSeparator(Alpine3, el);
@@ -703,11 +718,11 @@ function rover(Alpine2) {
       tabindex: "-1",
       "aria-haspopup": "true",
       "x-show"() {
-        return Array.isArray(this.__filteredKeys) && this.__filteredKeys.length === 0;
+        return Array.isArray(this.__filteredKeys) && this.__filteredKeys.length === 0 && this.__searchQuery.length > 0;
       }
     });
   }
-  function handleIsLoasing(Alpine3, el, modifiers) {
+  function handleIsLoading(Alpine3, el, modifiers) {
     let data = Alpine3.$data(el);
     if (modifiers.filter((item) => item === "hide")) {
     }

@@ -59,6 +59,8 @@ export interface RoverRootData extends XDataContext {
     __nextId: () => number;
 }
 
+export type RoverRootContext = RoverRootData & Magics<RoverRootData> ;
+
 export interface RoverInputData extends XDataContext {
     __displayValue?: (value: any) => string;
     __handleEvents: () => void;

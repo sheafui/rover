@@ -4,6 +4,7 @@ import CreateRoverInput from "./factories/CreateRoverInput";
 import CreateRoverOption from "./factories/CreateRoverOption";
 import CreateRoverRoot from "./factories/CreateRoverRoot";
 import CreateRoverOptions from "./factories/CreateRoverOptions";
+import { RoverOptionContext, RoverRootContext, RoverRootData } from "./types";
 
 type RoverValue =
     | null
@@ -32,7 +33,7 @@ export default function rover(Alpine: Alpine): void {
                 break;
             case 'options-group': handleOptionsGroup(Alpine, el);
                 break;
-            case 'loading': handleIsLoasing(Alpine, el, modifiers);
+            case 'loading': handleIsLoading(Alpine, el, modifiers);
                 break;
             case 'separator': handleSeparator(Alpine, el);
                 break;
@@ -104,8 +105,17 @@ export default function rover(Alpine: Alpine): void {
             'x-id'() { return ['rover-option'] },
             'x-bind:id'() { return this.$id('rover-option') },
             'role': 'option',
-            'x-show'() {
-                return this.$data.__isVisible(this.$el.dataset.key);
+            // 'x-on:mouseenter'(this: RoverOptionContext) {
+            //     this.__activate(this.$el.dataset.key as string);
+            // },
+            // 'x-on:mousemove'(this: RoverOptionContext) {
+            //     this.__activate(this.$el.dataset.key as string);
+            // },
+            // 'x-on:mouseleave'(this: RoverOptionContext) {
+            //     this.__deactivate();
+            // },
+            'x-show'(this: RoverRootContext) {
+                return this.$data.__isVisible(this.$el.dataset.key as string);
             },
             'x-data'() {
                 // @todo: move to constructor function here for memory gains
@@ -161,12 +171,12 @@ export default function rover(Alpine: Alpine): void {
             'aria-haspopup': 'true',
             // more missing dynamic features 
             'x-show'() {
-                return Array.isArray(this.__filteredKeys) && this.__filteredKeys.length === 0;
+                return Array.isArray(this.__filteredKeys) && this.__filteredKeys.length === 0 && this.__searchQuery.length > 0;
             }
         });
     }
 
-    function handleIsLoasing(Alpine: Alpine, el: AlpineType.ElementWithXAttributes, modifiers: AlpineType.DirectiveData['modifiers']) {
+    function handleIsLoading(Alpine: Alpine, el: AlpineType.ElementWithXAttributes, modifiers: AlpineType.DirectiveData['modifiers']) {
 
         // get the current alpine scope of the el.
         let data = Alpine.$data(el);
