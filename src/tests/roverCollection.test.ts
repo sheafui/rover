@@ -1,8 +1,6 @@
 import RoverCollection from 'src/core/RoverCollection';
 import { Item } from 'src/types';
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-// import RoverCollection from '../src/core/RoverCollection';
-
+import { describe, it, expect, beforeEach } from 'vitest';
 
 describe('RoverCollection', () => {
     let collection: RoverCollection;

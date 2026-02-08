@@ -511,7 +511,7 @@
               this.__close();
               this.__resetInput();
             }
-            this.$nextTick(() => this.$refs.__input.focus({preventScroll: true}));
+            this.$nextTick(() => this.$refs?.__input?.focus({preventScroll: true}));
           }));
           this.__optionsEl.addEventListener("mouseover", delegate((optionEl) => {
             if (!optionEl.dataset.key)
@@ -530,6 +530,40 @@
               return;
             this.__deactivate();
           }));
+          this.$root.addEventListener("keydown", (e) => {
+            switch (e.key) {
+              case "ArrowDown":
+                e.preventDefault();
+                e.stopPropagation();
+                this.__activateNext();
+                break;
+              case "ArrowUp":
+                e.preventDefault();
+                e.stopPropagation();
+                this.__activatePrev();
+                break;
+              case "Enter":
+                e.preventDefault();
+                e.stopPropagation();
+                this.__selectActive();
+                if (!this.__isMultiple) {
+                  this.__close();
+                  this.__resetInput();
+                }
+                break;
+              case "Escape":
+                e.preventDefault();
+                e.stopPropagation();
+                this.__close();
+                this.$nextTick(() => this.$refs?.__input?.focus({preventScroll: true}));
+                break;
+              default:
+                if (this.__static)
+                  return;
+                this.__open();
+                break;
+            }
+          });
         });
       }
     };
