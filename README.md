@@ -1,8 +1,8 @@
-# Alpine Combobox
+# Alpine Rover
 
 > **One directive. Ten+ components and use cases. Zero JavaScript required.**
 
-The most powerful and flexible selection system for Alpine.js and Laravel Blade. Build comboboxes, selects, autocompletes, command palettes, tag inputs, and more with beautiful, declarative HTML.
+The most powerful and flexible selection system for Alpine.js and Laravel Blade. Build comboboxes, selects, autocompletes, command palettes, tag inputs, and much more with beautiful, declarative HTML.
 
 ##  The Why
 

@@ -13,7 +13,6 @@ export default function CreateRoverRoot(
     
     const SLOT_NAME = 'rover-root';
 
-
     return {
         __state: null,
         __isOpen: false,
@@ -127,6 +126,12 @@ export default function CreateRoverRoot(
             this.__state = initialValue;
 
             this.__registerEventsDelector();
+
+
+            // if there is not input tied with this rover, keep always open true
+            // if (!this.$refs.__input) {
+            //     this.__isOpen = true;
+            // }
         },
 
         __open() {
