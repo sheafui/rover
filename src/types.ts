@@ -77,5 +77,6 @@ export type RoverOptionContext = RoverRootData & RoverOptionData & Magics<RoverO
 export interface RoverOptionsData extends Partial<RoverRootData> {
     __handleClickAway: (this: RoverOptionsContext, event: MouseEvent) => void;
 }
+
 export type RoverOptionsContext = RoverRootData & RoverOptionsData & Magics<RoverOptionsData>;
 

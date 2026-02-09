@@ -4,7 +4,6 @@ import { RoverInputData, RoverInputContext } from "src/types";
 export const SLOT_NAME = 'rover-input';
 
 export default function CreateRoverInput(Alpine: AlpineType): RoverInputData {
-
     return {
         init() {
             let displayValueFn = Alpine.extractProp(this.$el, 'display-value', '');
@@ -30,7 +29,6 @@ export default function CreateRoverInput(Alpine: AlpineType): RoverInputData {
                 if (this.__isTyping) {
                     this.__open();
                 }
-
             });
 
             this.$el.addEventListener('blur', () => {
@@ -42,14 +40,11 @@ export default function CreateRoverInput(Alpine: AlpineType): RoverInputData {
                 switch (e.key) {
                     case 'ArrowDown':
                         e.preventDefault(); e.stopPropagation();
-
                         if (!this.__isOpen) {
                             this.__open()
                             break;
                         }
-
                         this.__activateNext();
-
                         break;
 
                     case 'ArrowUp':

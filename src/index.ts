@@ -4,7 +4,7 @@ import CreateRoverInput from "./factories/CreateRoverInput";
 import CreateRoverOption from "./factories/CreateRoverOption";
 import CreateRoverRoot from "./factories/CreateRoverRoot";
 import CreateRoverOptions from "./factories/CreateRoverOptions";
-import { RoverOptionContext, RoverRootContext, RoverRootData } from "./types";
+import { RoverOptionContext, RoverOptionsContext, RoverRootContext, RoverRootData } from "./types";
 
 type RoverValue =
     | null
@@ -89,7 +89,7 @@ export default function rover(Alpine: Alpine): void {
             'x-ref': '__options',
             'x-bind:id'() { return this.$id('rover-options') },
             'role': 'listbox',
-            'x-on:click.away'($event) {
+            'x-on:click.away'(this: RoverOptionsContext, $event) {
                 this.__handleClickAway($event)
             },
             'x-data'() {
@@ -105,15 +105,6 @@ export default function rover(Alpine: Alpine): void {
             'x-id'() { return ['rover-option'] },
             'x-bind:id'() { return this.$id('rover-option') },
             'role': 'option',
-            // 'x-on:mouseenter'(this: RoverOptionContext) {
-            //     this.__activate(this.$el.dataset.key as string);
-            // },
-            // 'x-on:mousemove'(this: RoverOptionContext) {
-            //     this.__activate(this.$el.dataset.key as string);
-            // },
-            // 'x-on:mouseleave'(this: RoverOptionContext) {
-            //     this.__deactivate();
-            // },
             'x-show'(this: RoverRootContext) {
                 return this.$data.__isVisible(this.$el.dataset.key as string);
             },
@@ -142,11 +133,9 @@ export default function rover(Alpine: Alpine): void {
         Alpine.bind(el, {
             'x-ref': '__button',
             'x-bind:id'() { return this.$id('rover-button') },
-
             'tabindex': '-1',
             'aria-haspopup': 'true',
             // more missing dynamic features 
-
             'x-on:click'(e) {
                 if (this.__isDisabled) return
 
@@ -157,7 +146,7 @@ export default function rover(Alpine: Alpine): void {
                     e.preventDefault()
                     this.__open()
                 }
-
+                
                 requestAnimationFrame(() => this.$refs.__input.focus({ preventScroll: true }))
             },
         })
