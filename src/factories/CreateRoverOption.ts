@@ -1,8 +1,9 @@
 import type { Alpine as AlpineType } from 'alpinejs';
 import { RoverOptionData, RoverOptionContext } from 'src/types';
-export const SLOT_NAME = 'rover-option';
-export default function CreateRoverOption(Alpine: AlpineType, nextId: string): RoverOptionData {
 
+export const SLOT_NAME = 'rover-option';
+
+export default function CreateRoverOption(Alpine: AlpineType, nextId: string): RoverOptionData {
     return {
         __uniqueKey: 'option-' + nextId,
 

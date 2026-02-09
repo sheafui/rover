@@ -541,7 +541,7 @@ describe('RoverCollection', () => {
         });
     });
 
-    describe('Memory and Performance', () => {
+    describe('Memory and Performance without virtualizer', () => {
         it('should handle large collections efficiently', async () => {
             const startTime = performance.now();
 
