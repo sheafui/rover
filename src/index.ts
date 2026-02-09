@@ -129,7 +129,6 @@ export default function rover(Alpine: Alpine): void {
     }
 
     function handleButton(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
-
         Alpine.bind(el, {
             'x-ref': '__button',
             'x-bind:id'() { return this.$id('rover-button') },
@@ -146,7 +145,7 @@ export default function rover(Alpine: Alpine): void {
                     e.preventDefault()
                     this.__open()
                 }
-                
+
                 requestAnimationFrame(() => this.$refs.__input.focus({ preventScroll: true }))
             },
         })
@@ -183,8 +182,25 @@ export default function rover(Alpine: Alpine): void {
     function handleSeparator(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
         // when the search is happening if there is any items above it that hidden (filtered out), we need to hide this separator
         // as well as we need to do the same thing if the items the below it hidden 
+        // using only advanced css 
         Alpine.bind(el, {
-            // @todo
+           'x-init'() {
+                this.$watch('__filteredKeys', (filteredKeys: string[]) => {
+                    const elKey = this.$el.dataset.key as string;
+
+                    const nextSiblingKey = this.$el.nextElementSibling?.dataset.key as string;
+                    const prevSiblingKey = this.$el.previousElementSibling?.dataset.key as string;
+
+                    const isNextSiblingHidden = nextSiblingKey ? !filteredKeys.includes(nextSiblingKey) : true;
+                    const isPrevSiblingHidden = prevSiblingKey ? !filteredKeys.includes(prevSiblingKey) : true;
+
+                    if (isNextSiblingHidden || isPrevSiblingHidden) {
+                        this.$el.setAttribute('hidden', 'true');
+                    } else {
+                        this.$el.removeAttribute('hidden');
+                    }
+                });
+            }
         });
     }
 }

@@ -332,7 +332,7 @@ function CreateRoverRoot({el, effect}) {
     __isMultiple: false,
     __isTyping: false,
     __isLoading: false,
-    __uid: 0,
+    __uuid: 0,
     __static: false,
     __keepActivated: true,
     __optionsEl: void 0,
@@ -393,6 +393,11 @@ function CreateRoverRoot({el, effect}) {
       let initialValue = Alpine.extractProp(el, "initial-value", initialValueFallback);
       this.__state = initialValue;
       this.__registerEventsDelector();
+      queueMicrotask(() => {
+        if (!this.$refs.__input) {
+          this.__isOpen = true;
+        }
+      });
     },
     __open() {
       if (this.__isOpen)
@@ -499,7 +504,7 @@ function CreateRoverRoot({el, effect}) {
       return by(a, b);
     },
     __nextId() {
-      return ++this.__uid;
+      return ++this.__uuid;
     },
     __registerEventsDelector() {
       const findClosestOption = (el2) => Alpine.findClosest(el2, (node) => node.dataset.slot === SLOT_NAME2);
@@ -769,7 +774,23 @@ function rover(Alpine2) {
     }
   }
   function handleSeparator(Alpine3, el) {
-    Alpine3.bind(el, {});
+    Alpine3.bind(el, {
+      "x-init"() {
+        this.$watch("__filteredKeys", (filteredKeys) => {
+          var _a, _b;
+          const elKey = this.$el.dataset.key;
+          const nextSiblingKey = (_a = this.$el.nextElementSibling) == null ? void 0 : _a.dataset.key;
+          const prevSiblingKey = (_b = this.$el.previousElementSibling) == null ? void 0 : _b.dataset.key;
+          const isNextSiblingHidden = nextSiblingKey ? !filteredKeys.includes(nextSiblingKey) : true;
+          const isPrevSiblingHidden = prevSiblingKey ? !filteredKeys.includes(prevSiblingKey) : true;
+          if (isNextSiblingHidden || isPrevSiblingHidden) {
+            this.$el.setAttribute("hidden", "true");
+          } else {
+            this.$el.removeAttribute("hidden");
+          }
+        });
+      }
+    });
   }
 }
 

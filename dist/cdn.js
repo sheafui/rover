@@ -316,7 +316,7 @@
       __isMultiple: false,
       __isTyping: false,
       __isLoading: false,
-      __uid: 0,
+      __uuid: 0,
       __static: false,
       __keepActivated: true,
       __optionsEl: void 0,
@@ -377,6 +377,11 @@
         let initialValue = Alpine.extractProp(el, "initial-value", initialValueFallback);
         this.__state = initialValue;
         this.__registerEventsDelector();
+        queueMicrotask(() => {
+          if (!this.$refs.__input) {
+            this.__isOpen = true;
+          }
+        });
       },
       __open() {
         if (this.__isOpen)
@@ -483,7 +488,7 @@
         return by(a, b);
       },
       __nextId() {
-        return ++this.__uid;
+        return ++this.__uuid;
       },
       __registerEventsDelector() {
         const findClosestOption = (el2) => Alpine.findClosest(el2, (node) => node.dataset.slot === SLOT_NAME2);
@@ -747,7 +752,22 @@
       }
     }
     function handleSeparator(Alpine3, el) {
-      Alpine3.bind(el, {});
+      Alpine3.bind(el, {
+        "x-init"() {
+          this.$watch("__filteredKeys", (filteredKeys) => {
+            const elKey = this.$el.dataset.key;
+            const nextSiblingKey = this.$el.nextElementSibling?.dataset.key;
+            const prevSiblingKey = this.$el.previousElementSibling?.dataset.key;
+            const isNextSiblingHidden = nextSiblingKey ? !filteredKeys.includes(nextSiblingKey) : true;
+            const isPrevSiblingHidden = prevSiblingKey ? !filteredKeys.includes(prevSiblingKey) : true;
+            if (isNextSiblingHidden || isPrevSiblingHidden) {
+              this.$el.setAttribute("hidden", "true");
+            } else {
+              this.$el.removeAttribute("hidden");
+            }
+          });
+        }
+      });
     }
   }
 

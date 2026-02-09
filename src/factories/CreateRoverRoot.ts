@@ -1,16 +1,14 @@
 import RoverCollection from "../core/RoverCollection";
 
 import type { default as AlpineType } from "alpinejs";
-import { RoverRootData } from "src/types";
+import { RoverRootContext, RoverRootData } from "src/types";
 import { SLOT_NAME as OPTION_SLOT_NAME } from "./CreateRoverOption";
-export default function CreateRoverRoot(
-    { el, effect }: { el: AlpineType.ElementWithXAttributes, effect: AlpineType.DirectiveUtilities['effect'] }
-): RoverRootData {
+export default function CreateRoverRoot({ el, effect }: { el: AlpineType.ElementWithXAttributes, effect: AlpineType.DirectiveUtilities['effect'] }): RoverRootData {
 
     const collection = new RoverCollection();
 
     type CompareByFn = (a: unknown, b: unknown) => boolean;
-    
+
     const SLOT_NAME = 'rover-root';
 
     return {
@@ -19,7 +17,7 @@ export default function CreateRoverRoot(
         __isMultiple: false,
         __isTyping: false,
         __isLoading: false,
-        __uid: 0,
+        __uuid: 0,
 
         // for component like command pallate where the input is on the popover 
         // we need to ignore the open/close internally
@@ -128,9 +126,11 @@ export default function CreateRoverRoot(
 
 
             // if there is not input tied with this rover, keep always open true
-            // if (!this.$refs.__input) {
-            //     this.__isOpen = true;
-            // }
+            queueMicrotask(() => {
+                if (!this.$refs.__input) {
+                    this.__isOpen = true;
+                }
+            });
         },
 
         __open() {
@@ -277,7 +277,7 @@ export default function CreateRoverRoot(
         },
 
         __nextId() {
-            return ++this.__uid;
+            return ++this.__uuid;
         },
 
         __registerEventsDelector() {
@@ -322,7 +322,7 @@ export default function CreateRoverRoot(
                 this.__optionsEl.addEventListener('mouseover',
                     delegate((optionEl) => {
                         if (!optionEl.dataset.key) return;
-                    //    this activate didn't get autocomplete why ? 
+                        //    this activate didn't get autocomplete why ? 
                         this.__activate(optionEl.dataset.key);
                     })
                 );
@@ -365,7 +365,7 @@ export default function CreateRoverRoot(
                                 this.__resetInput()
                             }
                             break;
-                         case 'Escape':
+                        case 'Escape':
                             e.preventDefault(); e.stopPropagation();
                             this.__close();
                             this.$nextTick(() => this.$refs?.__input?.focus({ preventScroll: true }))

@@ -23,7 +23,7 @@ export interface RoverRootData extends XDataContext {
     __isTyping: boolean;
     __isLoading: boolean;
     __isDisabled: boolean;
-    __uid: number;
+    __uuid: number;
     __static: boolean;
     __keepActivated: boolean;
     __optionsEl: HTMLElement | undefined;
