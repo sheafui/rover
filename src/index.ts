@@ -5,7 +5,7 @@ import CreateRoverOption from "./factories/CreateRoverOption";
 import CreateRoverRoot from "./factories/CreateRoverRoot";
 import CreateRoverOptions from "./factories/CreateRoverOptions";
 import { RoverOptionContext, RoverOptionsContext } from "./types";
-import { CSS_TEXT } from "./factories/CreatorRoverSeparator";
+// import { CSS_TEXT } from "./factories/CreatorRoverSeparator";
 import { CSS_TEXT as GROUP_CSS_TEXT } from "./factories/CreateRoverGroup";
 
 type RoverValue =

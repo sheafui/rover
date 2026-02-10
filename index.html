@@ -16,16 +16,19 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
     <style>
-        [data-slot=rover-separator]:has(+:is([data-slot=rover-option]):is([style*="display: none"])) {
+        [data-slot=rover-separator]:has(+:is([data-slot=rover-option]):is([style*="display: none"])),
+        [data-slot=rover-separator]:has(+:is([data-slot=rover-group]):has([data-slot=rover-option][style*="display: none"])) {
             display: none;
         }
 
         /* Hide separator if no \`hidden\` option before it */
-        :is([data-slot=rover-option])[style*="display: none"]+[data-slot=rover-separator] {
+        :is([data-slot=rover-option])[style*="display: none"]+[data-slot=rover-separator],
+        :is([data-slot=rover-group]):has([data-slot=rover-option][style*="display: none"])+[data-slot=rover-separator] {
             display: none;
         }
 
-        :is([data-slot=rover-group]):has([data-slot=rover-option][style*="display: none"]):not(:has([data-slot=rover-option]:not([style*="display: none"]))) {
+        /* Hide group if all options within it are hidden */
+        :is([data-slot=rover-group]):has([data-slot=rover-option][style*="display: none"]) {
             display: none;
         }
     </style>
@@ -60,9 +63,9 @@
                 </li>
 
                 <!-- the seperator used when the search make it look at the bottom and in that case we need to hide it -->
-                <!-- <li x-rover:separator class="w-full h-px bg-neutral-700"></li> -->
-
-
+                
+                <li x-rover:separator class="w-full h-px bg-neutral-700"></li>
+                
                 <li x-rover:option value="banana" class="px-4 data-active:bg-white/5 py-2">
                     Banana
                 </li>
@@ -71,10 +74,10 @@
                     Cherry
                 </li>
 
-                <!-- <li x-rover:separator class="w-full h-px bg-neutral-700"></li> -->
+                <li x-rover:separator class="w-full h-px bg-neutral-700"></li>
 
                 <li x-rover:group>
-                    <div>special fruits</div>
+                    <div class="text-sm ml-2 underline">special fruits</div>
                     <ul>
                         <li x-rover:option value="orange" class="px-4 data-active:bg-white/5 py-2">
                             Orange
