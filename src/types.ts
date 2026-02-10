@@ -32,7 +32,7 @@ export interface RoverRootData extends XDataContext {
     __selectedKeys: string | string[] | null | undefined;
     __filteredKeys: string[] | null;
     __searchQuery: string;
-
+    
     // Methods
     __add: (k: string, v: string, d: boolean) => void;
     __forget: (k: string) => void;
@@ -54,9 +54,12 @@ export interface RoverRootData extends XDataContext {
     __startTyping: () => void;
     __stopTyping: () => void;
     __resetInput: () => void;
+    __searchUsingQuery: (query: string) => void;
     __getCurrentValue: () => string;
     __compare: (a: unknown, b: unknown) => boolean;
     __nextId: () => number;
+    __getKeyByIndex: (index: number) => string | null;
+    __getActiveItem: () => Item | null;
 }
 
 export type RoverRootContext = RoverRootData & Magics<RoverRootData> ;

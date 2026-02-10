@@ -330,17 +330,17 @@ function CreateRoverRoot({
     __searchQuery: "",
     __add: (k, v, d) => collection.add(k, v, d),
     __forget: (k) => collection.forget(k),
-    __activate: (k) => {
-      collection.activate(k);
-      console.log("active element:", this.__activatedKey);
-    },
-    __isActive: (k) => collection.isActivated(k),
+    __activate: (k) => collection.activate(k),
     __deactivate: () => collection.deactivate(),
+    __isActive: (k) => collection.isActivated(k),
     __getValueByKey: (k) => collection.getValueByKey(k),
+    __getActiveItem: () => collection.getActiveItem(),
     __activateNext: () => collection.activateNext(),
     __activatePrev: () => collection.activatePrev(),
     __activateFirst: () => collection.activateFirst(),
     __activateLast: () => collection.activateLast(),
+    __searchUsingQuery: (query) => collection.search(query),
+    __getKeyByIndex: (index) => collection.getKeyByIndex(index),
     __isVisible(key) {
       if (this.__searchQuery === "")
         return true;
@@ -354,18 +354,18 @@ function CreateRoverRoot({
         this.__isLoading = collection.pending.state;
       });
       effect(() => {
-        console.log("activated key changed:", collection.getActiveItem());
-        this.__activatedKey = collection.getKeyByIndex(collection.activeIndex.value);
+        this.__activatedKey = this.__getKeyByIndex(collection.activeIndex.value);
       });
       effect(() => {
-        let results = collection.search(this.__searchQuery).map((result) => result.key);
+        let results = this.__searchUsingQuery(this.__searchQuery).map((result) => result.key);
+        console.log("results:", results);
         if (results.length >= 0) {
           this.__filteredKeys = results;
         } else {
           this.__filteredKeys = null;
         }
         if (this.__activatedKey && this.__filteredKeys && !this.__filteredKeys.includes(this.__activatedKey)) {
-          collection.deactivate();
+          this.__deactivate();
         }
         if (this.__isOpen && !collection.getActiveItem() && this.__filteredKeys && this.__filteredKeys.length) {
           this.__activate(this.__filteredKeys[0]);

@@ -1,7 +1,7 @@
 import RoverCollection from "../core/RoverCollection";
 
 import type { default as AlpineType } from "alpinejs";
-import { RoverRootData } from "src/types";
+import { Item, RoverRootData } from "src/types";
 import { SLOT_NAME as OPTION_SLOT_NAME } from "./CreateRoverOption";
 
 export default function CreateRoverRoot(
@@ -47,23 +47,22 @@ export default function CreateRoverRoot(
 
         __add: (k: string, v: string, d: boolean) => collection.add(k, v, d),
         __forget: (k: string) => collection.forget(k),
-        __activate: (k: string) => {
-            collection.activate(k)
-            console.log('active element:', this.__activatedKey);
-        },
-        __isActive: (k: string) => collection.isActivated(k),
+        __activate: (k: string) => collection.activate(k),
         __deactivate: () => collection.deactivate(),
+        __isActive: (k: string) => collection.isActivated(k),
         __getValueByKey: (k: string) => collection.getValueByKey(k),
+        __getActiveItem: () => collection.getActiveItem(),
 
         // navigation:
         __activateNext: () => collection.activateNext(),
         __activatePrev: () => collection.activatePrev(),
         __activateFirst: () => collection.activateFirst(),
         __activateLast: () => collection.activateLast(),
+        __searchUsingQuery: (query: string) => collection.search(query),
+        __getKeyByIndex: (index: number) => collection.getKeyByIndex(index),
 
         // visibilty
         __isVisible(key: string) {
-
             // if the search isn't active always show all options
             if (this.__searchQuery === '') return true;
 
@@ -81,13 +80,14 @@ export default function CreateRoverRoot(
             });
 
             effect(() => {
-                console.log('activated key changed:', collection.getActiveItem());
-                this.__activatedKey = collection.getKeyByIndex(collection.activeIndex.value);
+                this.__activatedKey = this.__getKeyByIndex(collection.activeIndex.value);
             })
 
             effect(() => {
 
-                let results = collection.search(this.__searchQuery).map((result) => result.key);
+                let results = this.__searchUsingQuery(this.__searchQuery).map((result: Item) => result.key);
+
+                console.log('results:', results);
 
                 if (results.length >= 0) {
                     this.__filteredKeys = results
@@ -95,20 +95,11 @@ export default function CreateRoverRoot(
                     this.__filteredKeys = null;
                 }
 
-                if (
-                    this.__activatedKey &&
-                    this.__filteredKeys &&
-                    !this.__filteredKeys.includes(this.__activatedKey)
-                ) {
-                    collection.deactivate();
+                if (this.__activatedKey && this.__filteredKeys && !this.__filteredKeys.includes(this.__activatedKey)) {
+                    this.__deactivate();
                 }
 
-                if (
-                    this.__isOpen &&
-                    !collection.getActiveItem() &&
-                    this.__filteredKeys &&
-                    this.__filteredKeys.length
-                ) {
+                if (this.__isOpen && !collection.getActiveItem() && this.__filteredKeys && this.__filteredKeys.length) {
                     this.__activate(this.__filteredKeys[0]);
                 }
             });
