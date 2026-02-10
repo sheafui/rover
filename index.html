@@ -14,28 +14,29 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <style>
+        /* Hide separator if no `hidden` option after it */
+        :is([data-slot="rover-option"], [data-slot="rover-options-group"])[style*="display: none"]~[data-slot="rover-separator"] {
+            display: none;
+        }
+
+        /* Hide separator if no `hidden` option before it */
+        :is([data-slot="rover-option"], [data-slot="rover-options-group"])[style*="display: none"]+[data-slot="rover-separator"] {
+            display: none;
+        }
+    </style>
 </head>
 
 <body x-data class="flex mt-20 justify-center bg-neutral-950">
 
     <div class="space-y-4">
-        <div 
-            x-rover 
-            class="w-[360px]"
-        >
-            <div 
-                class="grid grid-cols-[auto_2rem] overflow-hidden"
-            >
-                <input 
-                    x-rover:input 
-                    placeholder="Search..."
-                    class="flex-1 col-start-1 col-span-full overflow-hidden row-start-1 w-full rounded-md bg-transparent py-2 text-neutral-300 placeholder-neutral-300 border border-neutral-500 px-4 focus:outline-none" 
-                />
-                <button 
-                    x-rover:button 
-                    type="button"
-                    class="col-start-2 row-start-1 bg-white/10 text-white flex items-center self-center justify-center size-full"
-                >
+        <div x-rover class="w-[360px]">
+            <div class="grid grid-cols-[auto_2rem] overflow-hidden">
+                <input x-rover:input placeholder="Search..."
+                    class="flex-1 col-start-1 col-span-full overflow-hidden row-start-1 w-full rounded-md bg-transparent py-2 text-neutral-300 placeholder-neutral-300 border border-neutral-500 px-4 focus:outline-none" />
+                <button x-rover:button type="button"
+                    class="col-start-2 row-start-1 bg-white/10 text-white flex items-center self-center justify-center size-full">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="size-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
@@ -43,11 +44,8 @@
                 </button>
             </div>
 
-            <ul 
-                x-rover:options 
-                x-cloak
-                class="mt-1 max-h-60  w-full rounded-md border border-neutral-700 bg-white/5 text-white overflow-hidden shadow-lg focus:outline-none"
-            >
+            <ul x-rover:options x-cloak
+                class="mt-1 max-h-60  w-full rounded-md border border-neutral-700 bg-white/5 text-white overflow-hidden shadow-lg focus:outline-none">
                 <li x-rover:option value="tenjarine" class="px-4 data-active:bg-white/5  py-2">
                     tenjarine
                 </li>
@@ -56,7 +54,7 @@
                 </li>
 
                 <!-- the seperator used when the search make it look at the bottom and in that case we need to hide it -->
-                <div x-rover:separator class="w-full h-px bg-neutral-700"></div>
+                <li x-rover:separator class="w-full h-px bg-neutral-700"></li>
 
                 <li x-rover:option value="banana" class="px-4 data-active:bg-white/5 py-2">
                     Banana
@@ -69,7 +67,7 @@
                 <li class="py-4 text-center" x-rover:empty>
                     No result found
                 </li>
-            </u>
+                </u>
         </div>
     </div>
 </body>

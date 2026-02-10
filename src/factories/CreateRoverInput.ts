@@ -77,7 +77,6 @@ export default function CreateRoverInput(Alpine: AlpineType): RoverInputData {
                         this.__open();
 
                         break;
-
                 }
             });
         },

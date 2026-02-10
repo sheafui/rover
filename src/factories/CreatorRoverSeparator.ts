@@ -1,4 +1,10 @@
 export const CSS_TEXT = `
+    &{
+        display: block;
+        height: 4px;
+        background-color: red !important    ;
+        margin: 4px 0;
+    }
     & ~ [data-slot="rover-option"] {
         display: none;
     }

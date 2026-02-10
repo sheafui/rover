@@ -622,46 +622,6 @@ function CreateRoverOptions(Alpine2) {
   };
 }
 
-// src/factories/CreatorRoverSeparator.ts
-var CSS_TEXT = `
-    & ~ [data-slot="rover-option"] {
-        display: none;
-    }
-    & ~ [data-slot="rover-option"][data-disabled="true"] {
-        display: block;
-    }
-    & ~ [data-slot="rover-options-group"] {
-        display: none;
-    }
-    & ~ [data-slot="rover-options-group"][data-disabled="true"] {
-        display: block;
-    }
-    & ~ [data-slot="rover-separator"] {
-        display: none;
-    }
-    & ~ [data-slot="rover-separator"][data-disabled="true"] {
-        display: block;
-    }
-    &[data-disabled="true"] ~ [data-slot="rover-option"] {
-        display: none;
-    }
-    &[data-disabled="true"] ~ [data-slot="rover-option"][data-disabled="true"] {
-        display: block;
-    }
-    &[data-disabled="true"] ~ [data-slot="rover-options-group"] {
-        display: none;
-    }
-    &[data-disabled="true"] ~ [data-slot="rover-options-group"][data-disabled="true"] {
-        display: block;
-    }
-    &[data-disabled="true"] ~ [data-slot="rover-separator"] {
-        display: none;
-    }
-    &[data-disabled="true"] ~ [data-slot="rover-separator"][data-disabled="true"] {
-        display: block;
-    }              
-`;
-
 // src/index.ts
 function rover(Alpine2) {
   Alpine2.directive("rover", (el, {value, modifiers}, {Alpine: Alpine3, effect}) => {
@@ -820,7 +780,7 @@ function rover(Alpine2) {
   function handleSeparator(Alpine3, el) {
     Alpine3.bind(el, {
       "x-init"() {
-        this.$el.style.cssText = CSS_TEXT;
+        this.$el.dataset.slot = "rover-separator";
       }
     });
   }

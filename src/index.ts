@@ -217,12 +217,34 @@ export default function rover(Alpine: Alpine): void {
     * -------------------------------------        
     */
     function handleSeparator(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
-        // when the search is happening if there is any items above it that hidden (filtered out), we need to hide this separator
-        // as well as we need to do the same thing if the items the below it hidden 
-        // using only advanced css 
         Alpine.bind(el, {
             'x-init'() {
-                this.$el.style.cssText = CSS_TEXT;
+                this.$el.dataset.slot = 'rover-separator';
+
+                // if (!document.querySelector('#rover-separator-styles')) {
+                    
+                //     const style = document.createElement('style');
+                    
+                //     style.id = 'rover-separator-styles';
+                    
+                //     style.textContent = `
+                    
+                //     [data-slot="rover-separator"] {
+                //         background-color: red;
+                //     }
+                    
+                //     /* Hide separator if it has no visible siblings after it */
+                //     [data-slot="rover-separator"]:has(~ [data-slot="rover-option"]:not([style*="display: none"])) {
+                //         display: block;
+                //     }
+                    
+                //     /* Hide if all following options are hidden */
+                //     [data-slot="rover-separator"]:not(:has(~ [data-slot="rover-option"]:not([style*="display: none"]))) {
+                //         display: none;
+                //     }
+                // `;
+                // document.head.appendChild(style);
+                // }
             }
         });
     }
