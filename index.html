@@ -34,7 +34,7 @@
             </div>
 
             <ul x-rover:options x-cloak
-                class="mt-1 max-h-60  w-full rounded-md border border-neutral-700 bg-white/5 text-white overflow-hidden shadow-lg focus:outline-none">
+                class="mt-1 max-h-60  w-full rounded-md border border-neutral-700 bg-white/5 text-white overflow-auto shadow-lg focus:outline-none">
                 <li x-rover:option value="tenjarine" class="px-4 data-active:bg-white/5  py-2">
                     tenjarine
                 </li>
@@ -44,6 +44,7 @@
 
                 <!-- the seperator used when the search make it look at the bottom and in that case we need to hide it -->
                 <li x-rover:separator class="w-full h-px bg-neutral-700"></li>
+
 
                 <li x-rover:option value="banana" class="px-4 data-active:bg-white/5 py-2">
                     Banana
@@ -56,7 +57,23 @@
                 <li class="py-4 text-center" x-rover:empty>
                     No result found
                 </li>
-                </u>
+                <li x-rover:group>
+                    <div>special fruits</div>
+                    <ul>
+                        <li x-rover:option value="banana" class="px-4 data-active:bg-white/5 py-2">
+                            Banana
+                        </li>
+
+                        <li x-rover:option value="cherry" class="px-4 data-active:bg-white/5 py-2">
+                            Cherry
+                        </li>
+                    </ul>
+                </li>
+                <li class="py-4 text-center" x-rover:empty>
+                    No result found
+                </li>
+            </ul>
+
         </div>
     </div>
 </body>

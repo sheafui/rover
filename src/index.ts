@@ -32,7 +32,7 @@ export default function rover(Alpine: Alpine): void {
                 break;
             case 'option': handleOption(Alpine, el);
                 break;
-            case 'options-group': handleOptionsGroup(Alpine, el);
+            case 'options': handleOptionsGroup(Alpine, el);
                 break;
             case 'loading': handleIsLoading(Alpine, el, modifiers);
                 break;
@@ -41,7 +41,7 @@ export default function rover(Alpine: Alpine): void {
             case 'empty': handleEmptyState(Alpine, el);
                 break;
             default:
-                console.error('invalid x-rover value', value, 'use input, button, option, options or leave mepty for root level instead');
+                console.error('invalid x-rover value', value, 'use input, button, option, options, group or leave mepty for root level instead');
                 break;
         }
     }).before('bind');
