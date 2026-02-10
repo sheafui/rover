@@ -15,11 +15,11 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
-<style>
+    <style>
         /* ============================================
          * GROUP HIDING RULES
          * ============================================ */
-        
+
         /* Hide group if ALL options within it are hidden */
         [data-slot=rover-group]:has([data-slot=rover-option]):not(:has([data-slot=rover-option]:not([style*="display: none"]))) {
             display: none;
@@ -28,44 +28,68 @@
         /* ============================================
          * SEPARATOR HIDING RULES
          * ============================================ */
-        
+
         /* Rule 1: Hide ALL separators when empty state is showing */
-        [data-slot=rover-empty]:not([style*="display: none"]) ~ [data-slot=rover-separator] {
+        /* [data-slot=rover-empty]:not([style*="display: none"])~[data-slot=rover-separator] {
+            display: none;
+        } */
+
+        /* Rule 2: Hide separator immediately followed by another separator */
+        [data-slot=rover-separator]+[data-slot=rover-separator] {
             display: none;
         }
 
-        /* Rule 2: Hide first separator in the list */
-        [data-slot=rover-separator]:first-of-type {
+        /* ============================================
+         * SEPARATOR + OPTION RULES
+         * ============================================ */
+
+        /* Rule 3: Hide separator if PREVIOUS sibling is a HIDDEN option */
+        [data-slot=rover-option][style*="display: none"]+[data-slot=rover-separator] {
             display: none;
         }
 
-        /* Rule 3: Hide last separator in the list */
-        [data-slot=rover-separator]:last-of-type {
-            display: none;
-        }
-
-        /* Rule 4: Hide separator if immediately followed by another separator */
-        [data-slot=rover-separator] + [data-slot=rover-separator] {
-            display: none;
-        }
-
-        /* Rule 5: Hide separator if next sibling is a HIDDEN option */
+        /* Rule 4: Hide separator if NEXT sibling is a HIDDEN option */
         [data-slot=rover-separator]:has(+ [data-slot=rover-option][style*="display: none"]) {
             display: none;
         }
 
-        /* Rule 6: Hide separator if next sibling is a HIDDEN group (all options inside hidden) */
-        [data-slot=rover-separator]:has(+ [data-slot=rover-group]:has([data-slot=rover-option]):not(:has([data-slot=rover-option]:not([style*="display: none"])))) {
+        /* ============================================
+         * SEPARATOR + GROUP RULES (THE KEY FIX)
+         * ============================================ */
+
+        /* Rule 5: Hide separator if PREVIOUS sibling is a group with ALL hidden options */
+        [data-slot=rover-group]:has([data-slot=rover-option][style*="display: none"]):not(:has([data-slot=rover-option]:not([style*="display: none"])))+[data-slot=rover-separator] {
             display: none;
         }
 
-        /* Rule 7: Hide separator if previous sibling is a HIDDEN option */
-        [data-slot=rover-option][style*="display: none"] + [data-slot=rover-separator] {
+        /* Rule 6: Hide separator if NEXT sibling is a group with ALL hidden options */
+        [data-slot=rover-separator]:has(+ [data-slot=rover-group]:has([data-slot=rover-option][style*="display: none"]):not(:has([data-slot=rover-option]:not([style*="display: none"])))) {
             display: none;
         }
 
-        /* Rule 8: Hide separator if previous sibling is a HIDDEN group */
-        [data-slot=rover-group]:has([data-slot=rover-option]):not(:has([data-slot=rover-option]:not([style*="display: none"]))) + [data-slot=rover-separator] {
+        /* ============================================
+         * EDGE CASE: SEPARATOR WITH NO VISIBLE CONTENT AFTER
+         * ============================================ */
+
+        /* Rule 7: Hide separator if there's NO visible option OR visible group after it
+         * This handles the "cherry" case and "apple" case
+         */
+        [data-slot=rover-separator]:not(:has(~ [data-slot=rover-option]:not([style*="display: none"]),
+                ~ [data-slot=rover-group]:has([data-slot=rover-option]:not([style*="display: none"])))) {
+            display: none;
+        }
+
+        /* ============================================
+         * EDGE CASE: SEPARATOR WITH NO VISIBLE CONTENT BEFORE
+         * ============================================ */
+
+        /* Rule 8: First child separator (nothing before it) */
+        [data-slot=rover-options]> :first-child[data-slot=rover-separator] {
+            display: none;
+        }
+
+        /* Rule 9: Separator after empty state when empty is first and visible */
+        [data-slot=rover-empty]:first-child:not([style*="display: none"])+[data-slot=rover-separator] {
             display: none;
         }
     </style>
@@ -100,9 +124,9 @@
                 </li>
 
                 <!-- the seperator used when the search make it look at the bottom and in that case we need to hide it -->
-                
+
                 <li x-rover:separator class="w-full h-px bg-neutral-700"></li>
-                
+
                 <li x-rover:option value="banana" class="px-4 data-active:bg-white/5 py-2">
                     Banana
                 </li>
