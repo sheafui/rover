@@ -31,6 +31,7 @@ export interface RoverRootData extends XDataContext {
     __activatedKey: string | undefined;
     __selectedKeys: string | string[] | null | undefined;
     __filteredKeys: string[] | null;
+    __filteredKeysSet: Set<string>;
     __searchQuery: string;
     
     // Methods

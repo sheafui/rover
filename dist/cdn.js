@@ -326,9 +326,10 @@
       __compareBy: void 0,
       __activatedKey: void 0,
       __selectedKeys: void 0,
-      __filteredKeys: null,
       __isDisabled: false,
       __searchQuery: "",
+      __filteredKeys: null,
+      __filteredKeysSet: new Set(),
       __add: (k, v, d) => collection.add(k, v, d),
       __forget: (k) => collection.forget(k),
       __activate: (k) => collection.activate(k),
@@ -345,9 +346,9 @@
       __isVisible(key) {
         if (this.__searchQuery === "")
           return true;
-        if (!this.__filteredKeys)
+        if (this.__filteredKeysSet.size === 0)
           return true;
-        return this.__filteredKeys.includes(key);
+        return this.__filteredKeysSet.has(key);
       },
       init() {
         this.$el.dataset.slot = SLOT_NAME3;
@@ -359,11 +360,12 @@
         });
         effect(() => {
           let results = this.__searchUsingQuery(this.__searchQuery).map((result) => result.key);
-          console.log("results:", results);
           if (results.length >= 0) {
             this.__filteredKeys = results;
+            this.__filteredKeysSet = new Set(results);
           } else {
             this.__filteredKeys = null;
+            this.__filteredKeysSet = new Set();
           }
           if (this.__activatedKey && this.__filteredKeys && !this.__filteredKeys.includes(this.__activatedKey)) {
             this.__deactivate();
@@ -671,6 +673,9 @@
             this.__close();
             queueMicrotask(() => this.$refs.__input.focus({preventScroll: true}));
           }
+        },
+        "x-bind:key"() {
+          return this.__reRenderKey;
         },
         "x-data"() {
           return CreateRoverRoot({el, effect});

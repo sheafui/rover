@@ -65,6 +65,9 @@ export default function rover(Alpine: Alpine): void {
                     queueMicrotask(() => this.$refs.__input.focus({ preventScroll: true }));
                 }
             },
+            'x-bind:key'() {
+                return this.__reRenderKey;
+            },
             'x-data'() {
                 return CreateRoverRoot({ el, effect })
             }

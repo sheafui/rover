@@ -39,11 +39,12 @@ export default function CreateRoverRoot(
         __compareBy: undefined,
         __activatedKey: undefined,
         __selectedKeys: undefined,
-        __filteredKeys: null,
         __isDisabled: false,
-
+        
         // search 
         __searchQuery: '',
+        __filteredKeys: null,
+        __filteredKeysSet: new Set<string>(),
 
         __add: (k: string, v: string, d: boolean) => collection.add(k, v, d),
         __forget: (k: string) => collection.forget(k),
@@ -66,9 +67,9 @@ export default function CreateRoverRoot(
             // if the search isn't active always show all options
             if (this.__searchQuery === '') return true;
 
-            if (!this.__filteredKeys) return true;
+            if (this.__filteredKeysSet.size === 0) return true;
 
-            return this.__filteredKeys.includes(key);
+            return this.__filteredKeysSet.has(key);
         },
 
         init() {
@@ -81,18 +82,17 @@ export default function CreateRoverRoot(
 
             effect(() => {
                 this.__activatedKey = this.__getKeyByIndex(collection.activeIndex.value);
-            })
+            });
 
             effect(() => {
-
                 let results = this.__searchUsingQuery(this.__searchQuery).map((result: Item) => result.key);
-
-                console.log('results:', results);
 
                 if (results.length >= 0) {
                     this.__filteredKeys = results
+                    this.__filteredKeysSet = new Set(results);
                 } else {
                     this.__filteredKeys = null;
+                    this.__filteredKeysSet = new Set();
                 }
 
                 if (this.__activatedKey && this.__filteredKeys && !this.__filteredKeys.includes(this.__activatedKey)) {
