@@ -331,7 +331,10 @@
       __searchQuery: "",
       __add: (k, v, d) => collection.add(k, v, d),
       __forget: (k) => collection.forget(k),
-      __activate: (k) => collection.activate(k),
+      __activate: (k) => {
+        collection.activate(k);
+        console.log("active element:", this.__activatedKey);
+      },
       __isActive: (k) => collection.isActivated(k),
       __deactivate: () => collection.deactivate(),
       __getValueByKey: (k) => collection.getValueByKey(k),
@@ -347,12 +350,12 @@
         return this.__filteredKeys.includes(key);
       },
       init() {
-        console.log("activated key:", this.__activatedKey);
         this.$el.dataset.slot = SLOT_NAME3;
         effect(() => {
           this.__isLoading = collection.pending.state;
         });
         effect(() => {
+          console.log("activated key changed:", collection.getActiveItem());
           this.__activatedKey = collection.getKeyByIndex(collection.activeIndex.value);
         });
         effect(() => {
@@ -366,7 +369,7 @@
             collection.deactivate();
           }
           if (this.__isOpen && !collection.getActiveItem() && this.__filteredKeys && this.__filteredKeys.length) {
-            collection.activate(this.__filteredKeys[0]);
+            this.__activate(this.__filteredKeys[0]);
           }
         });
         if (this.__isMultiple) {

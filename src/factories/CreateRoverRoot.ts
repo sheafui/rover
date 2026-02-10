@@ -47,7 +47,10 @@ export default function CreateRoverRoot(
 
         __add: (k: string, v: string, d: boolean) => collection.add(k, v, d),
         __forget: (k: string) => collection.forget(k),
-        __activate: (k: string) => collection.activate(k),
+        __activate: (k: string) => {
+            collection.activate(k)
+            console.log('active element:', this.__activatedKey);
+        },
         __isActive: (k: string) => collection.isActivated(k),
         __deactivate: () => collection.deactivate(),
         __getValueByKey: (k: string) => collection.getValueByKey(k),
@@ -71,8 +74,6 @@ export default function CreateRoverRoot(
 
         init() {
 
-            console.log('activated key:', this.__activatedKey);
-
             this.$el.dataset.slot = SLOT_NAME;
 
             effect(() => {
@@ -80,6 +81,7 @@ export default function CreateRoverRoot(
             });
 
             effect(() => {
+                console.log('activated key changed:', collection.getActiveItem());
                 this.__activatedKey = collection.getKeyByIndex(collection.activeIndex.value);
             })
 
@@ -107,7 +109,7 @@ export default function CreateRoverRoot(
                     this.__filteredKeys &&
                     this.__filteredKeys.length
                 ) {
-                    collection.activate(this.__filteredKeys[0]);
+                    this.__activate(this.__filteredKeys[0]);
                 }
             });
 
