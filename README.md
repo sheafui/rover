@@ -10,6 +10,8 @@ At SheafUI, we found ourselves rebuilding the same interaction pattern across 10
 
 So we're not going to continue ...
 
+in summary this plugin adds the $combobox pattern$ for any component may need that in a clean, declarative way.
+
 
 ##  Features
 
@@ -24,6 +26,53 @@ So we're not going to continue ...
 -  **Multiple Modes** - Single select, multi-select, tags, autocomplete, command palette, and more
 
 ---
+
+## Usage Example
+
+```html
+<div x-data x-rover>
+    <!-- Control -->
+    <input x-rover:input placeholder="Search..." />
+
+    <button x-rover:button type="button">
+        Toggle
+    </button>
+
+    <!-- Options -->
+    <ul x-rover:options>
+
+        <!-- Group -->
+        <li x-rover:group>
+            <ul>
+                <li x-rover:option value="tangerine">
+                    Tangerine
+                </li>
+
+                <li x-rover:option value="apple">
+                    Apple
+                </li>
+
+                <div x-rover:separator></div>
+
+                <li x-rover:option value="banana">
+                    Banana
+                </li>
+            </ul>
+        </li>
+
+        <!-- Ungrouped options -->
+        <li x-rover:option value="cherry">
+            Cherry
+        </li>
+
+        <!-- Empty state -->
+        <li x-rover:empty>
+            No results found
+        </li>
+    </ul>
+</div>
+
+```
 
 ## 🚧 Development Status
 

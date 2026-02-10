@@ -28,7 +28,7 @@ export interface RoverRootData extends XDataContext {
     __keepActivated: boolean;
     __optionsEl: HTMLElement | undefined;
     __compareBy: string | ((a: unknown, b: unknown) => boolean) | undefined;
-    __activedKey: string | undefined;
+    __activatedKey: string | undefined;
     __selectedKeys: string | string[] | null | undefined;
     __filteredKeys: string[] | null;
     __searchQuery: string;

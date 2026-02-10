@@ -1,7 +1,7 @@
 import RoverCollection from "../core/RoverCollection";
 
 import type { default as AlpineType } from "alpinejs";
-import { RoverRootContext, RoverRootData } from "src/types";
+import { RoverRootData } from "src/types";
 import { SLOT_NAME as OPTION_SLOT_NAME } from "./CreateRoverOption";
 export default function CreateRoverRoot({ el, effect }: { el: AlpineType.ElementWithXAttributes, effect: AlpineType.DirectiveUtilities['effect'] }): RoverRootData {
 
@@ -29,7 +29,7 @@ export default function CreateRoverRoot({ el, effect }: { el: AlpineType.Element
         __keepActivated: true,
         __optionsEl: undefined,
         __compareBy: undefined,
-        __activedKey: undefined,
+        __activatedKey: undefined,
         __selectedKeys: undefined,
         __filteredKeys: null,
         __isDisabled: false,
@@ -70,7 +70,7 @@ export default function CreateRoverRoot({ el, effect }: { el: AlpineType.Element
             });
 
             effect(() => {
-                this.__activedKey = collection.getKeyByIndex(collection.activeIndex.value);
+                this.__activatedKey = collection.getKeyByIndex(collection.activeIndex.value);
             })
 
             effect(() => {
@@ -84,9 +84,9 @@ export default function CreateRoverRoot({ el, effect }: { el: AlpineType.Element
                 }
 
                 if (
-                    this.__activedKey &&
+                    this.__activatedKey &&
                     this.__filteredKeys &&
-                    !this.__filteredKeys.includes(this.__activedKey)
+                    !this.__filteredKeys.includes(this.__activatedKey)
                 ) {
                     collection.deactivate();
                 }
@@ -219,9 +219,9 @@ export default function CreateRoverRoot({ el, effect }: { el: AlpineType.Element
         },
 
         __selectActive() {
-            if (!this.__activedKey) return;
+            if (!this.__activatedKey) return;
 
-            this.__handleSelection(this.__activedKey);
+            this.__handleSelection(this.__activatedKey);
         },
         __startTyping() {
             this.__isTyping = true
