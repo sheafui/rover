@@ -6,6 +6,7 @@ import CreateRoverRoot from "./factories/CreateRoverRoot";
 import CreateRoverOptions from "./factories/CreateRoverOptions";
 import { RoverOptionsContext, RoverRootContext } from "./types";
 import { CSS_TEXT } from "./factories/CreatorRoverSeparator";
+import { CSS_TEXT as GROUP_CSS_TEXT } from "./factories/CreateRoverGroup";
 
 type RoverValue =
     | null
@@ -13,7 +14,7 @@ type RoverValue =
     | 'button'
     | 'options'
     | 'option'
-    | 'options-group'
+    | 'group'
     | 'loading'
     | 'separator'
     | 'empty';
@@ -32,7 +33,7 @@ export default function rover(Alpine: Alpine): void {
                 break;
             case 'option': handleOption(Alpine, el);
                 break;
-            case 'options': handleOptionsGroup(Alpine, el);
+            case 'group': handleOptionsGroup(Alpine, el);
                 break;
             case 'loading': handleIsLoading(Alpine, el, modifiers);
                 break;
@@ -142,9 +143,19 @@ export default function rover(Alpine: Alpine): void {
             'x-id'() { return ['rover-options-group'] },
             'x-bind:id'() { return this.$id('rover-options-group') },
             'role': 'option',
-            'x-show'() {
-                // we need to hide it if it's doesnt have any child  
-                return true;
+            'x-init'() {
+                this.$el.dataset.slot = 'rover-group';
+
+                if (!document.querySelector('#rover-group-styles')) {
+
+                    const style = document.createElement('style');
+
+                    style.id = 'rover-group-styles';
+
+                    style.textContent = GROUP_CSS_TEXT;
+
+                    document.head.appendChild(style);
+                }
             },
         });
     }

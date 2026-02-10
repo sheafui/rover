@@ -611,6 +611,18 @@ var CSS_TEXT = `
     }
 `;
 
+// src/factories/CreateRoverGroup.ts
+var CSS_TEXT2 = `
+    /* Hide separator if no \`hidden\` option after it */
+    [data-slot=rover-separator]:has( +:is([data-slot=rover-option], [data-slot=rover-options-group])[style*="display: none"]) {
+        display: none;
+    }
+    /* Hide separator if no \`hidden\` option before it */
+    :is([data-slot=rover-option], [data-slot=rover-options-group])[style*="display: none"]+[data-slot=rover-separator] {
+        display: none;
+    }
+`;
+
 // src/index.ts
 function rover(Alpine2) {
   Alpine2.directive("rover", (el, {value, modifiers}, {Alpine: Alpine3, effect}) => {
@@ -630,7 +642,7 @@ function rover(Alpine2) {
       case "option":
         handleOption(Alpine3, el);
         break;
-      case "options":
+      case "group":
         handleOptionsGroup(Alpine3, el);
         break;
       case "loading":
@@ -720,8 +732,14 @@ function rover(Alpine2) {
         return this.$id("rover-options-group");
       },
       role: "option",
-      "x-show"() {
-        return true;
+      "x-init"() {
+        this.$el.dataset.slot = "rover-group";
+        if (!document.querySelector("#rover-group-styles")) {
+          const style = document.createElement("style");
+          style.id = "rover-group-styles";
+          style.textContent = CSS_TEXT2;
+          document.head.appendChild(style);
+        }
       }
     });
   }

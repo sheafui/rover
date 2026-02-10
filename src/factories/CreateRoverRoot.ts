@@ -72,7 +72,7 @@ export default function CreateRoverRoot(
         init() {
 
             console.log('activated key:', this.__activatedKey);
-            
+
             this.$el.dataset.slot = SLOT_NAME;
 
             effect(() => {
@@ -161,6 +161,7 @@ export default function CreateRoverRoot(
 
             // If something is already active from keyboard, don't override
             let activeItem = collection.getActiveItem();
+
             if (activeItem) return;
 
             // Try to activate the first selected item
@@ -171,6 +172,7 @@ export default function CreateRoverRoot(
 
                 if (keyToActivate) {
                     this.__activate(keyToActivate);
+
 
                     //@todo: Scroll into the view'ss container port... 
                     return;
