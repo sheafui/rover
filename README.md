@@ -41,6 +41,9 @@ in summary this plugin adds the $combobox pattern$ for any component may need th
     <!-- Options -->
     <ul x-rover:options>
 
+        <!-- loading...  -->
+        <li x-rover:loading>loading...<li>
+        
         <!-- Group -->
         <li x-rover:group>
             <ul>
