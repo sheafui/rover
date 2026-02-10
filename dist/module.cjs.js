@@ -622,6 +622,18 @@ function CreateRoverOptions(Alpine2) {
   };
 }
 
+// src/factories/CreatorRoverSeparator.ts
+var CSS_TEXT = `
+    /* Hide separator if no \`hidden\` option after it */
+    [data-slot=rover-separator]:has( +:is([data-slot=rover-option], [data-slot=rover-options-group])[style*="display: none"]) {
+        display: none;
+    }
+    /* Hide separator if no \`hidden\` option before it */
+    :is([data-slot=rover-option], [data-slot=rover-options-group])[style*="display: none"]+[data-slot=rover-separator] {
+        display: none;
+    }
+`;
+
 // src/index.ts
 function rover(Alpine2) {
   Alpine2.directive("rover", (el, {value, modifiers}, {Alpine: Alpine3, effect}) => {
@@ -781,6 +793,12 @@ function rover(Alpine2) {
     Alpine3.bind(el, {
       "x-init"() {
         this.$el.dataset.slot = "rover-separator";
+        if (!document.querySelector("#rover-separator-styles")) {
+          const style = document.createElement("style");
+          style.id = "rover-separator-styles";
+          style.textContent = CSS_TEXT;
+          document.head.appendChild(style);
+        }
       }
     });
   }

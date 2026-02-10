@@ -221,30 +221,16 @@ export default function rover(Alpine: Alpine): void {
             'x-init'() {
                 this.$el.dataset.slot = 'rover-separator';
 
-                // if (!document.querySelector('#rover-separator-styles')) {
-                    
-                //     const style = document.createElement('style');
-                    
-                //     style.id = 'rover-separator-styles';
-                    
-                //     style.textContent = `
-                    
-                //     [data-slot="rover-separator"] {
-                //         background-color: red;
-                //     }
-                    
-                //     /* Hide separator if it has no visible siblings after it */
-                //     [data-slot="rover-separator"]:has(~ [data-slot="rover-option"]:not([style*="display: none"])) {
-                //         display: block;
-                //     }
-                    
-                //     /* Hide if all following options are hidden */
-                //     [data-slot="rover-separator"]:not(:has(~ [data-slot="rover-option"]:not([style*="display: none"]))) {
-                //         display: none;
-                //     }
-                // `;
-                // document.head.appendChild(style);
-                // }
+                if (!document.querySelector('#rover-separator-styles')) {
+
+                    const style = document.createElement('style');
+
+                    style.id = 'rover-separator-styles';
+
+                    style.textContent = CSS_TEXT;
+
+                    document.head.appendChild(style);
+                }
             }
         });
     }
