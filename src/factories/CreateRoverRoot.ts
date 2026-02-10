@@ -67,9 +67,9 @@ export default function CreateRoverRoot(
             // if the search isn't active always show all options
             if (this.__searchQuery === '') return true;
 
-            if (this.__filteredKeysSet.size === 0) return true;
+            if (this.__filteredKeys === null || this.__filteredKeys.length === 0) return true;
 
-            return this.__filteredKeysSet.has(key);
+            return this.__filteredKeys.includes(key);
         },
 
         init() {
@@ -89,10 +89,8 @@ export default function CreateRoverRoot(
 
                 if (results.length >= 0) {
                     this.__filteredKeys = results
-                    this.__filteredKeysSet = new Set(results);
                 } else {
                     this.__filteredKeys = null;
-                    this.__filteredKeysSet = new Set();
                 }
 
                 if (this.__activatedKey && this.__filteredKeys && !this.__filteredKeys.includes(this.__activatedKey)) {
@@ -123,7 +121,7 @@ export default function CreateRoverRoot(
             // @ts-expect-error - Alpine.extractProp types are too restrictive, awaiting fix
             let initialValue = Alpine.extractProp(el, 'initial-value', initialValueFallback);
 
-            this.__state = initialValue;
+            this.__state = 'hiba';
 
             this.__registerEventsDelector();
 

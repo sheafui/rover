@@ -362,9 +362,9 @@ function CreateRoverRoot({
     __isVisible(key) {
       if (this.__searchQuery === "")
         return true;
-      if (this.__filteredKeysSet.size === 0)
+      if (this.__filteredKeys === null || this.__filteredKeys.length === 0)
         return true;
-      return this.__filteredKeysSet.has(key);
+      return this.__filteredKeys.includes(key);
     },
     init() {
       this.$el.dataset.slot = SLOT_NAME3;
@@ -378,10 +378,8 @@ function CreateRoverRoot({
         let results = this.__searchUsingQuery(this.__searchQuery).map((result) => result.key);
         if (results.length >= 0) {
           this.__filteredKeys = results;
-          this.__filteredKeysSet = new Set(results);
         } else {
           this.__filteredKeys = null;
-          this.__filteredKeysSet = new Set();
         }
         if (this.__activatedKey && this.__filteredKeys && !this.__filteredKeys.includes(this.__activatedKey)) {
           this.__deactivate();
@@ -400,7 +398,7 @@ function CreateRoverRoot({
       this.__compareBy = Alpine.extractProp(el, "by", "");
       const initialValueFallback = this.__isMultiple ? [] : "";
       let initialValue = Alpine.extractProp(el, "initial-value", initialValueFallback);
-      this.__state = initialValue;
+      this.__state = "hiba";
       this.__registerEventsDelector();
       queueMicrotask(() => {
         if (!this.$refs.__input) {
