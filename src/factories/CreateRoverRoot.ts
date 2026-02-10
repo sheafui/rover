@@ -40,7 +40,7 @@ export default function CreateRoverRoot(
         __activatedKey: undefined,
         __selectedKeys: undefined,
         __isDisabled: false,
-        
+
         // search 
         __searchQuery: '',
         __filteredKeys: null,
@@ -61,16 +61,6 @@ export default function CreateRoverRoot(
         __activateLast: () => collection.activateLast(),
         __searchUsingQuery: (query: string) => collection.search(query),
         __getKeyByIndex: (index: number) => collection.getKeyByIndex(index),
-
-        // visibilty
-        __isVisible(key: string) {
-            // if the search isn't active always show all options
-            if (this.__searchQuery === '') return true;
-
-            if (this.__filteredKeys === null || this.__filteredKeys.length === 0) return true;
-
-            return this.__filteredKeys.includes(key);
-        },
 
         init() {
 

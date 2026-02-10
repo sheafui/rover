@@ -68,6 +68,7 @@ var SLOT_NAME2 = "rover-option";
 function CreateRoverOption(Alpine2, nextId) {
   return {
     __uniqueKey: "option-" + nextId,
+    __isVisible: true,
     init() {
       this.$el.dataset.slot = SLOT_NAME2;
       let value = Alpine2.extractProp(this.$el, "value", "");
@@ -81,6 +82,9 @@ function CreateRoverOption(Alpine2, nextId) {
         } else {
           this.$el.removeAttribute("data-active");
         }
+      });
+      Alpine2.effect(() => {
+        this.__isVisible = this.__filteredKeys === null || this.__filteredKeys.includes(this.__uniqueKey);
       });
       this.$watch("__selectedKeys", (selectedKeys) => {
         let thisElHasBeenSelected = false;
@@ -114,6 +118,7 @@ var RoverCollection = class {
   constructor(options = {}) {
     this.items = [];
     this.itemsMap = new Map();
+    this.searchIndex = [];
     this.currentQuery = "";
     this.currentResults = [];
     this.navIndex = [];
@@ -223,7 +228,9 @@ var RoverCollection = class {
     return this.get(key)?.value;
   }
   getKeyByIndex(index) {
-    return index == null ? null : this.items[index]?.key ?? null;
+    if (index == null || index === void 0)
+      return null;
+    return this.items[index]?.key ?? null;
   }
   all() {
     return this.items;
@@ -254,7 +261,9 @@ var RoverCollection = class {
     return this.items.indexOf(item) === this.activeIndex.value;
   }
   getActiveItem() {
-    return this.activeIndex.value === void 0 ? null : this.items[this.activeIndex.value];
+    if (this.activeIndex.value === void 0)
+      return null;
+    return this.items[this.activeIndex.value] ?? null;
   }
   activateFirst() {
     this.rebuildSearchIndex();
@@ -288,7 +297,10 @@ var RoverCollection = class {
       return;
     }
     this.activeNavPos = (this.activeNavPos + 1) % this.navIndex.length;
-    this.activeIndex.value = this.navIndex[this.activeNavPos];
+    const nextIndex = this.navIndex[this.activeNavPos];
+    if (nextIndex !== void 0) {
+      this.activeIndex.value = nextIndex;
+    }
   }
   activatePrev() {
     this.rebuildSearchIndex();
@@ -300,7 +312,10 @@ var RoverCollection = class {
       return;
     }
     this.activeNavPos = this.activeNavPos === 0 ? this.navIndex.length - 1 : this.activeNavPos - 1;
-    this.activeIndex.value = this.navIndex[this.activeNavPos];
+    const prevIndex = this.navIndex[this.activeNavPos];
+    if (prevIndex !== void 0) {
+      this.activeIndex.value = prevIndex;
+    }
   }
 };
 var RoverCollection_default = RoverCollection;
@@ -342,13 +357,6 @@ function CreateRoverRoot({
     __activateLast: () => collection.activateLast(),
     __searchUsingQuery: (query) => collection.search(query),
     __getKeyByIndex: (index) => collection.getKeyByIndex(index),
-    __isVisible(key) {
-      if (this.__searchQuery === "")
-        return true;
-      if (this.__filteredKeys === null || this.__filteredKeys.length === 0)
-        return true;
-      return this.__filteredKeys.includes(key);
-    },
     init() {
       this.$el.dataset.slot = SLOT_NAME3;
       effect(() => {
@@ -722,7 +730,7 @@ function rover(Alpine2) {
       },
       role: "option",
       "x-show"() {
-        return this.$data.__isVisible(this.$el.dataset.key);
+        return this.$data.__isVisible;
       },
       "x-data"() {
         return CreateRoverOption(Alpine3, this.__nextId());

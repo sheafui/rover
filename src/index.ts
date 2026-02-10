@@ -4,7 +4,7 @@ import CreateRoverInput from "./factories/CreateRoverInput";
 import CreateRoverOption from "./factories/CreateRoverOption";
 import CreateRoverRoot from "./factories/CreateRoverRoot";
 import CreateRoverOptions from "./factories/CreateRoverOptions";
-import { RoverOptionsContext, RoverRootContext } from "./types";
+import { RoverOptionContext, RoverOptionsContext } from "./types";
 import { CSS_TEXT } from "./factories/CreatorRoverSeparator";
 import { CSS_TEXT as GROUP_CSS_TEXT } from "./factories/CreateRoverGroup";
 
@@ -126,8 +126,9 @@ export default function rover(Alpine: Alpine): void {
             'x-id'() { return ['rover-option'] },
             'x-bind:id'() { return this.$id('rover-option') },
             'role': 'option',
-            'x-show'(this: RoverRootContext) {
-                return this.$data.__isVisible(this.$el.dataset.key as string);
+            'x-show'(this: RoverOptionContext) {
+                // return this.$data.__isVisible(this.$el.dataset.key as string);
+                return this.$data.__isVisible;
             },
             'x-data'() {
                 // @todo: move to constructor function here for memory gains

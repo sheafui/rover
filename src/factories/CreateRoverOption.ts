@@ -6,6 +6,7 @@ export const SLOT_NAME = 'rover-option';
 export default function CreateRoverOption(Alpine: AlpineType, nextId: string): RoverOptionData {
     return {
         __uniqueKey: 'option-' + nextId,
+        __isVisible: true,
 
         init(this: RoverOptionContext) {
 
@@ -27,6 +28,10 @@ export default function CreateRoverOption(Alpine: AlpineType, nextId: string): R
                 } else {
                     this.$el.removeAttribute('data-active');
                 }
+            });
+
+            Alpine.effect(() => {
+                this.__isVisible = this.__filteredKeys === null || this.__filteredKeys.includes(this.__uniqueKey);
             });
 
             this.$watch('__selectedKeys', (selectedKeys: string | string[]) => {

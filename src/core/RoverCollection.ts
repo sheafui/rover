@@ -7,7 +7,7 @@ export default class RoverCollection {
     private itemsMap = new Map<string, Item>();
 
     // Search state
-    private searchIndex: SearchIndex[];
+    private searchIndex: SearchIndex[] = [];
     private currentQuery = '';
     private currentResults: Array<Item> = [];
 
@@ -177,7 +177,8 @@ export default class RoverCollection {
     }
 
     public getKeyByIndex(index: number | null | undefined): string | null {
-        return index == null ? null : this.items[index]?.key ?? null;
+        if (index == null || index === undefined) return null;
+        return this.items[index]?.key ?? null;
     }
 
     public all(): Item[] {
@@ -219,7 +220,8 @@ export default class RoverCollection {
     }
 
     public getActiveItem(): Item | null {
-        return this.activeIndex.value === undefined ? null : this.items[this.activeIndex.value] as Item;
+        if (this.activeIndex.value === undefined) return null;
+        return this.items[this.activeIndex.value] ?? null;
     }
 
     /* ----------------------------------------
@@ -265,7 +267,10 @@ export default class RoverCollection {
         }
 
         this.activeNavPos = (this.activeNavPos + 1) % this.navIndex.length;
-        this.activeIndex.value = this.navIndex[this.activeNavPos];
+        const nextIndex = this.navIndex[this.activeNavPos];
+        if (nextIndex !== undefined) {
+            this.activeIndex.value = nextIndex;
+        }
     }
 
     public activatePrev(): void {
@@ -283,6 +288,9 @@ export default class RoverCollection {
             ? this.navIndex.length - 1
             : this.activeNavPos - 1;
 
-        this.activeIndex.value = this.navIndex[this.activeNavPos];
+        const prevIndex = this.navIndex[this.activeNavPos];
+        if (prevIndex !== undefined) {
+            this.activeIndex.value = prevIndex;
+        }
     }
 }

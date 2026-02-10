@@ -28,7 +28,7 @@ export interface RoverRootData extends XDataContext {
     __keepActivated: boolean;
     __optionsEl: HTMLElement | undefined;
     __compareBy: string | ((a: unknown, b: unknown) => boolean) | undefined;
-    __activatedKey: string | undefined;
+    __activatedKey: string | null | undefined;
     __selectedKeys: string | string[] | null | undefined;
     __filteredKeys: string[] | null;
     __filteredKeysSet: Set<string>;
@@ -41,13 +41,16 @@ export interface RoverRootData extends XDataContext {
     __isActive: (k: string) => boolean;
     __deactivate: () => void;
     __getValueByKey: (k: string) => string | undefined;
+    __getActiveItem: () => Item | null;
     __activateNext: () => void;
     __activatePrev: () => void;
     __activateFirst: () => void;
     __activateLast: () => void;
-    __isVisible: (key: string) => boolean;
+    __searchUsingQuery: (query: string) => Item[];
+    __getKeyByIndex: (index: number | null | undefined) => string | null;
+    // __isVisible: (key: string) => boolean;
     __open: () => void;
-    __activateSelectedOrFirst: (activateSelected: boolean) => void;
+    __activateSelectedOrFirst: (activateSelected?: boolean) => void;
     __registerEventsDelector: () => void;
     __close: () => void;
     __handleSelection: (key: string) => void;
@@ -55,15 +58,12 @@ export interface RoverRootData extends XDataContext {
     __startTyping: () => void;
     __stopTyping: () => void;
     __resetInput: () => void;
-    __searchUsingQuery: (query: string) => void;
     __getCurrentValue: () => string;
     __compare: (a: unknown, b: unknown) => boolean;
     __nextId: () => number;
-    __getKeyByIndex: (index: number) => string | null;
-    __getActiveItem: () => Item | null;
 }
 
-export type RoverRootContext = RoverRootData & Magics<RoverRootData> ;
+export type RoverRootContext = RoverRootData & Magics<RoverRootData>;
 
 export interface RoverInputData extends XDataContext {
     __displayValue?: (value: any) => string;
@@ -74,6 +74,7 @@ export type RoverInputContext = RoverRootData & RoverInputData & Magics<RoverInp
 
 export interface RoverOptionData extends XDataContext {
     __uniqueKey: string;
+    __isVisible: boolean;
 }
 
 export type RoverOptionContext = RoverRootData & RoverOptionData & Magics<RoverOptionData>;
@@ -83,4 +84,3 @@ export interface RoverOptionsData extends Partial<RoverRootData> {
 }
 
 export type RoverOptionsContext = RoverRootData & RoverOptionsData & Magics<RoverOptionsData>;
-
