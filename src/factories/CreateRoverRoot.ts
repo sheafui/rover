@@ -111,8 +111,6 @@ export default function CreateRoverRoot(
             // @ts-expect-error - Alpine.extractProp types are too restrictive, awaiting fix
             let initialValue = Alpine.extractProp(el, 'initial-value', initialValueFallback);
 
-            this.__state = 'hiba';
-
             this.__registerEventsDelector();
 
 
@@ -164,10 +162,8 @@ export default function CreateRoverRoot(
         },
 
         __close() {
-
             this.__isOpen = false;
-
-            this.__deactivate()
+            this.__deactivate();
         },
 
         __handleSelection(key: string) {

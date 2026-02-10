@@ -92,6 +92,7 @@ function CreateRoverOption(Alpine2, nextId) {
       this.$watch("__activatedKey", (activeKey) => {
         if (activeKey === this.__uniqueKey) {
           this.$el.setAttribute("data-active", "true");
+          this.$el.scrollIntoView({behavior: "smooth", block: "nearest"});
         } else {
           this.$el.removeAttribute("data-active");
         }
@@ -407,7 +408,6 @@ function CreateRoverRoot({
       this.__compareBy = Alpine.extractProp(el, "by", "");
       const initialValueFallback = this.__isMultiple ? [] : "";
       let initialValue = Alpine.extractProp(el, "initial-value", initialValueFallback);
-      this.__state = "hiba";
       this.__registerEventsDelector();
       queueMicrotask(() => {
         if (!this.$refs.__input) {
@@ -634,20 +634,8 @@ function CreateRoverOptions(Alpine2) {
   };
 }
 
-// src/factories/CreatorRoverSeparator.ts
-var CSS_TEXT = `
-    /* Hide separator if no \`hidden\` option after it */
-    [data-slot=rover-separator]:has( +:is([data-slot=rover-option], [data-slot=rover-options-group])[style*="display: none"]) {
-        display: none;
-    }
-    /* Hide separator if no \`hidden\` option before it */
-    :is([data-slot=rover-option], [data-slot=rover-options-group])[style*="display: none"]+[data-slot=rover-separator] {
-        display: none;
-    }
-`;
-
 // src/factories/CreateRoverGroup.ts
-var CSS_TEXT2 = `
+var CSS_TEXT = `
     /* Hide separator if no \`hidden\` option after it */
     [data-slot=rover-separator]:has( +:is([data-slot=rover-option], [data-slot=rover-options-group])[style*="display: none"]) {
         display: none;
@@ -693,7 +681,7 @@ function rover(Alpine2) {
         console.error("invalid x-rover value", value, "use input, button, option, options, group or leave mepty for root level instead");
         break;
     }
-  }).before("bind");
+  });
   function handleRoot(Alpine3, el, effect) {
     Alpine3.bind(el, {
       "x-on:keydown.escape"(e) {
@@ -775,7 +763,7 @@ function rover(Alpine2) {
         if (!document.querySelector("#rover-group-styles")) {
           const style = document.createElement("style");
           style.id = "rover-group-styles";
-          style.textContent = CSS_TEXT2;
+          style.textContent = CSS_TEXT;
           document.head.appendChild(style);
         }
       }
@@ -829,8 +817,6 @@ function rover(Alpine2) {
         if (!document.querySelector("#rover-separator-styles")) {
           const style = document.createElement("style");
           style.id = "rover-separator-styles";
-          style.textContent = CSS_TEXT;
-          document.head.appendChild(style);
         }
       }
     });

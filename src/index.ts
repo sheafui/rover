@@ -45,7 +45,7 @@ export default function rover(Alpine: Alpine): void {
                 console.error('invalid x-rover value', value, 'use input, button, option, options, group or leave mepty for root level instead');
                 break;
         }
-    }).before('bind');
+    });
 
     /*--------------------------------------
     * Root level directive handler
@@ -242,9 +242,9 @@ export default function rover(Alpine: Alpine): void {
 
                     style.id = 'rover-separator-styles';
 
-                    style.textContent = CSS_TEXT;
+                    // style.textContent = CSS_TEXT;
 
-                    document.head.appendChild(style);
+                    // document.head.appendChild(style);
                 }
             }
         });

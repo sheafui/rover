@@ -25,6 +25,7 @@ export default function CreateRoverOption(Alpine: AlpineType, nextId: string): R
             this.$watch('__activatedKey', (activeKey: string) => {
                 if (activeKey === this.__uniqueKey) {
                     this.$el.setAttribute('data-active', 'true');
+                    this.$el.scrollIntoView({ behavior: "smooth", block: 'nearest' });
                 } else {
                     this.$el.removeAttribute('data-active');
                 }
