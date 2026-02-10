@@ -10,7 +10,7 @@ At SheafUI, we found ourselves rebuilding the same interaction pattern across 10
 
 So we're not going to continue ...
 
-in summary this plugin adds the $combobox pattern$ for any component may need that in a clean, declarative way.
+In summary this plugin adds the $combobox$ $pattern$ for any component may need that in a clean, declarative way.
 
 
 ##  Features

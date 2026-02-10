@@ -21,7 +21,7 @@ export default function CreateRoverOption(Alpine: AlpineType, nextId: string): R
 
             this.__add(this.__uniqueKey, value, disabled);
 
-            this.$watch('__activedKey', (activeKey: string) => {
+            this.$watch('__activatedKey', (activeKey: string) => {
                 if (activeKey === this.__uniqueKey) {
                     this.$el.setAttribute('data-active', 'true');
                 } else {

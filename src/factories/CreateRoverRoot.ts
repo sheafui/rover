@@ -3,7 +3,15 @@ import RoverCollection from "../core/RoverCollection";
 import type { default as AlpineType } from "alpinejs";
 import { RoverRootData } from "src/types";
 import { SLOT_NAME as OPTION_SLOT_NAME } from "./CreateRoverOption";
-export default function CreateRoverRoot({ el, effect }: { el: AlpineType.ElementWithXAttributes, effect: AlpineType.DirectiveUtilities['effect'] }): RoverRootData {
+
+export default function CreateRoverRoot(
+    { el,
+        effect
+    }: {
+        el: AlpineType.ElementWithXAttributes,
+        effect: AlpineType.DirectiveUtilities['effect']
+    }
+): RoverRootData {
 
     const collection = new RoverCollection();
 
@@ -63,6 +71,8 @@ export default function CreateRoverRoot({ el, effect }: { el: AlpineType.Element
 
         init() {
 
+            console.log('activated key:', this.__activatedKey);
+            
             this.$el.dataset.slot = SLOT_NAME;
 
             effect(() => {

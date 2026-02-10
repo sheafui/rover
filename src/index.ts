@@ -4,7 +4,8 @@ import CreateRoverInput from "./factories/CreateRoverInput";
 import CreateRoverOption from "./factories/CreateRoverOption";
 import CreateRoverRoot from "./factories/CreateRoverRoot";
 import CreateRoverOptions from "./factories/CreateRoverOptions";
-import { RoverOptionContext, RoverOptionsContext, RoverRootContext, RoverRootData } from "./types";
+import { RoverOptionsContext, RoverRootContext } from "./types";
+import { CSS_TEXT } from "./factories/CreatorRoverSeparator";
 
 type RoverValue =
     | null
@@ -45,6 +46,10 @@ export default function rover(Alpine: Alpine): void {
         }
     }).before('bind');
 
+    /*--------------------------------------
+    * Root level directive handler
+    * -------------------------------------        
+    */
     function handleRoot(
         Alpine: Alpine,
         el: AlpineType.ElementWithXAttributes,
@@ -65,6 +70,10 @@ export default function rover(Alpine: Alpine): void {
         })
     }
 
+    /*--------------------------------------
+     * input part directive handler
+     * -------------------------------------        
+     */
     function handleInput(
         Alpine: Alpine,
         el: AlpineType.ElementWithXAttributes
@@ -83,6 +92,10 @@ export default function rover(Alpine: Alpine): void {
         })
     }
 
+    /*--------------------------------------
+     * options part directive handler
+     * -------------------------------------        
+     */
     function handleOptions(el: AlpineType.ElementWithXAttributes) {
         Alpine.bind(el, {
 
@@ -99,6 +112,10 @@ export default function rover(Alpine: Alpine): void {
         })
     }
 
+    /*--------------------------------------
+     * option part directive handler
+     * -------------------------------------        
+     */
     function handleOption(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
 
         Alpine.bind(el, {
@@ -115,6 +132,10 @@ export default function rover(Alpine: Alpine): void {
         });
     }
 
+    /*--------------------------------------
+     * options group directive handler
+     * -------------------------------------        
+     */
     function handleOptionsGroup(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
 
         Alpine.bind(el, {
@@ -128,6 +149,10 @@ export default function rover(Alpine: Alpine): void {
         });
     }
 
+    /*--------------------------------------
+     * button part directive handler
+     * -------------------------------------        
+     */
     function handleButton(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
         Alpine.bind(el, {
             'x-ref': '__button',
@@ -151,6 +176,10 @@ export default function rover(Alpine: Alpine): void {
         })
     }
 
+    /*--------------------------------------
+     * empty state directive handler
+     * -------------------------------------        
+     */
     function handleEmptyState(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
         Alpine.bind(el, {
             'x-bind:id'() { return this.$id('rover-button') },
@@ -164,6 +193,10 @@ export default function rover(Alpine: Alpine): void {
         });
     }
 
+    /*--------------------------------------
+     * loading state directive handler
+     * -------------------------------------        
+     */
     function handleIsLoading(Alpine: Alpine, el: AlpineType.ElementWithXAttributes, modifiers: AlpineType.DirectiveData['modifiers']) {
 
         // get the current alpine scope of the el.
@@ -179,27 +212,17 @@ export default function rover(Alpine: Alpine): void {
 
     }
 
+    /*-------------------------------------
+    * separator directive handler
+    * -------------------------------------        
+    */
     function handleSeparator(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
         // when the search is happening if there is any items above it that hidden (filtered out), we need to hide this separator
         // as well as we need to do the same thing if the items the below it hidden 
         // using only advanced css 
         Alpine.bind(el, {
-           'x-init'() {
-                this.$watch('__filteredKeys', (filteredKeys: string[]) => {
-                    const elKey = this.$el.dataset.key as string;
-
-                    const nextSiblingKey = this.$el.nextElementSibling?.dataset.key as string;
-                    const prevSiblingKey = this.$el.previousElementSibling?.dataset.key as string;
-
-                    const isNextSiblingHidden = nextSiblingKey ? !filteredKeys.includes(nextSiblingKey) : true;
-                    const isPrevSiblingHidden = prevSiblingKey ? !filteredKeys.includes(prevSiblingKey) : true;
-
-                    if (isNextSiblingHidden || isPrevSiblingHidden) {
-                        this.$el.setAttribute('hidden', 'true');
-                    } else {
-                        this.$el.removeAttribute('hidden');
-                    }
-                });
+            'x-init'() {
+                this.$el.style.cssText = CSS_TEXT;
             }
         });
     }

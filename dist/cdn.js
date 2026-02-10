@@ -76,7 +76,7 @@
         this.$el.dataset.value = value;
         let disabled = Alpine2.extractProp(this.$el, "disabled", false, false);
         this.__add(this.__uniqueKey, value, disabled);
-        this.$watch("__activedKey", (activeKey) => {
+        this.$watch("__activatedKey", (activeKey) => {
           if (activeKey === this.__uniqueKey) {
             this.$el.setAttribute("data-active", "true");
           } else {
@@ -307,7 +307,10 @@
   var RoverCollection_default = RoverCollection;
 
   // src/factories/CreateRoverRoot.ts
-  function CreateRoverRoot({el, effect}) {
+  function CreateRoverRoot({
+    el,
+    effect
+  }) {
     const collection = new RoverCollection_default();
     const SLOT_NAME3 = "rover-root";
     return {
@@ -321,7 +324,7 @@
       __keepActivated: true,
       __optionsEl: void 0,
       __compareBy: void 0,
-      __activedKey: void 0,
+      __activatedKey: void 0,
       __selectedKeys: void 0,
       __filteredKeys: null,
       __isDisabled: false,
@@ -344,12 +347,13 @@
         return this.__filteredKeys.includes(key);
       },
       init() {
+        console.log("activated key:", this.__activatedKey);
         this.$el.dataset.slot = SLOT_NAME3;
         effect(() => {
           this.__isLoading = collection.pending.state;
         });
         effect(() => {
-          this.__activedKey = collection.getKeyByIndex(collection.activeIndex.value);
+          this.__activatedKey = collection.getKeyByIndex(collection.activeIndex.value);
         });
         effect(() => {
           let results = collection.search(this.__searchQuery).map((result) => result.key);
@@ -358,7 +362,7 @@
           } else {
             this.__filteredKeys = null;
           }
-          if (this.__activedKey && this.__filteredKeys && !this.__filteredKeys.includes(this.__activedKey)) {
+          if (this.__activatedKey && this.__filteredKeys && !this.__filteredKeys.includes(this.__activatedKey)) {
             collection.deactivate();
           }
           if (this.__isOpen && !collection.getActiveItem() && this.__filteredKeys && this.__filteredKeys.length) {
@@ -444,9 +448,9 @@
         }
       },
       __selectActive() {
-        if (!this.__activedKey)
+        if (!this.__activatedKey)
           return;
-        this.__handleSelection(this.__activedKey);
+        this.__handleSelection(this.__activatedKey);
       },
       __startTyping() {
         this.__isTyping = true;
@@ -595,6 +599,46 @@
       }
     };
   }
+
+  // src/factories/CreatorRoverSeparator.ts
+  var CSS_TEXT = `
+    & ~ [data-slot="rover-option"] {
+        display: none;
+    }
+    & ~ [data-slot="rover-option"][data-disabled="true"] {
+        display: block;
+    }
+    & ~ [data-slot="rover-options-group"] {
+        display: none;
+    }
+    & ~ [data-slot="rover-options-group"][data-disabled="true"] {
+        display: block;
+    }
+    & ~ [data-slot="rover-separator"] {
+        display: none;
+    }
+    & ~ [data-slot="rover-separator"][data-disabled="true"] {
+        display: block;
+    }
+    &[data-disabled="true"] ~ [data-slot="rover-option"] {
+        display: none;
+    }
+    &[data-disabled="true"] ~ [data-slot="rover-option"][data-disabled="true"] {
+        display: block;
+    }
+    &[data-disabled="true"] ~ [data-slot="rover-options-group"] {
+        display: none;
+    }
+    &[data-disabled="true"] ~ [data-slot="rover-options-group"][data-disabled="true"] {
+        display: block;
+    }
+    &[data-disabled="true"] ~ [data-slot="rover-separator"] {
+        display: none;
+    }
+    &[data-disabled="true"] ~ [data-slot="rover-separator"][data-disabled="true"] {
+        display: block;
+    }              
+`;
 
   // src/index.ts
   function rover(Alpine2) {
@@ -754,18 +798,7 @@
     function handleSeparator(Alpine3, el) {
       Alpine3.bind(el, {
         "x-init"() {
-          this.$watch("__filteredKeys", (filteredKeys) => {
-            const elKey = this.$el.dataset.key;
-            const nextSiblingKey = this.$el.nextElementSibling?.dataset.key;
-            const prevSiblingKey = this.$el.previousElementSibling?.dataset.key;
-            const isNextSiblingHidden = nextSiblingKey ? !filteredKeys.includes(nextSiblingKey) : true;
-            const isPrevSiblingHidden = prevSiblingKey ? !filteredKeys.includes(prevSiblingKey) : true;
-            if (isNextSiblingHidden || isPrevSiblingHidden) {
-              this.$el.setAttribute("hidden", "true");
-            } else {
-              this.$el.removeAttribute("hidden");
-            }
-          });
+          this.$el.style.cssText = CSS_TEXT;
         }
       });
     }
