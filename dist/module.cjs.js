@@ -356,7 +356,9 @@ function CreateRoverRoot({
     __isMultiple: false,
     __isTyping: false,
     __isLoading: false,
-    __uuid: 0,
+    __o_id: -1,
+    __g_id: -1,
+    __s_id: -1,
     __static: false,
     __keepActivated: true,
     __optionsEl: void 0,
@@ -526,8 +528,14 @@ function CreateRoverRoot({
       }
       return by(a, b);
     },
-    __nextId() {
-      return ++this.__uuid;
+    __nextOptionId() {
+      return ++this.__o_id;
+    },
+    __nextGroupId() {
+      return ++this.__g_id;
+    },
+    __nextSeparatorId() {
+      return ++this.__s_id;
     },
     __registerEventsDelector() {
       const findClosestOption = (el2) => Alpine.findClosest(el2, (node) => node.dataset.slot === SLOT_NAME2);
@@ -739,7 +747,7 @@ function rover(Alpine2) {
         return this.$data.__isVisible;
       },
       "x-data"() {
-        return CreateRoverOption(Alpine3, this.__nextId());
+        return CreateRoverOption(Alpine3, this.__nextOptionId());
       }
     });
   }

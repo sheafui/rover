@@ -18,7 +18,7 @@ export default function CreateRoverRoot(
     type CompareByFn = (a: unknown, b: unknown) => boolean;
 
     const SLOT_NAME = 'rover-root';
-    
+
     const defaultUIItem: UIItem = { type: 'o', key: undefined };
 
     return {
@@ -27,7 +27,12 @@ export default function CreateRoverRoot(
         __isMultiple: false,
         __isTyping: false,
         __isLoading: false,
-        __uuid: 0,
+        // unique id generator for options and groups and separators
+        // we use this for navigation and selection as well use remove separator
+        // or group wrapper around options for consistency 
+        __o_id: -1,
+        __g_id: -1,
+        __s_id: -1,
 
         // for component like command pallate where the input is on the popover 
         // we need to ignore the open/close internally
@@ -275,10 +280,15 @@ export default function CreateRoverRoot(
             return by(a, b);
         },
 
-        __nextId() {
-            return ++this.__uuid;
+        __nextOptionId() {
+            return ++this.__o_id;
         },
-
+        __nextGroupId() {
+            return ++this.__g_id;
+        },
+        __nextSeparatorId() {
+            return ++this.__s_id;
+        },
         __registerEventsDelector() {
 
             const findClosestOption = (el: Element) => Alpine.findClosest(el, node => node.dataset.slot === OPTION_SLOT_NAME);

@@ -127,9 +127,9 @@ export default function rover(Alpine: Alpine): void {
             'x-show'(this: RoverOptionContext) {
                 return this.$data.__isVisible;
             },
-            'x-data'() {
+            'x-data'(this: RoverOptionContext) {
                 // @todo: move to constructor function here for memory gains
-                return CreateRoverOption(Alpine, this.__nextId());
+                return CreateRoverOption(Alpine, this.__nextOptionId());
             },
         });
     }

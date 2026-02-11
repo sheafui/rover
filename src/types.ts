@@ -23,7 +23,9 @@ export interface RoverRootData extends XDataContext {
     __isTyping: boolean;
     __isLoading: boolean;
     __isDisabled: boolean;
-    __uuid: number;
+    __o_id: number;
+    __g_id: number;
+    __s_id: number;
     __static: boolean;
     __keepActivated: boolean;
     __items: UIItem[];
@@ -61,7 +63,9 @@ export interface RoverRootData extends XDataContext {
     __resetInput: () => void;
     __getCurrentValue: () => string;
     __compare: (a: unknown, b: unknown) => boolean;
-    __nextId: () => number;
+    __nextOptionId: () => number;
+    __nextGroupId: () => number;
+    __nextSeparatorId: () => number;
 }
 
 export type RoverRootContext = RoverRootData & Magics<RoverRootData>;
