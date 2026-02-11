@@ -3,7 +3,7 @@ import { RoverOptionData, RoverOptionContext } from 'src/types';
 
 export const SLOT_NAME = 'rover-option';
 
-export default function CreateRoverOption(Alpine: AlpineType, id: number): RoverOptionData {
+export default function CreateRoverOption(Alpine: AlpineType, id: number, dirValue: string | null): RoverOptionData {
     return {
         __uniqueKey: 'option-' + id,
         __isVisible: true,
@@ -14,10 +14,14 @@ export default function CreateRoverOption(Alpine: AlpineType, id: number): Rover
             this.$el.dataset.key = this.__uniqueKey;
 
             // Extract props
-            let value = Alpine.extractProp(this.$el, 'value', '') as string;
+            let value;
 
-            console.log('Option init:', this.__uniqueKey, 'with value:', value);
-            
+            if (dirValue !== null) {
+                value = dirValue;
+            } else {
+                value = Alpine.extractProp(this.$el, 'value', '') as string;
+            }
+
             let disabled = Alpine.extractProp(this.$el, 'disabled', false, false) as boolean;
 
             this.$el.dataset.value = value;

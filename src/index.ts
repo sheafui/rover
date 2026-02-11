@@ -1,4 +1,4 @@
-import { Alpine } from "alpinejs";
+import { Alpine, evaluateLater } from "alpinejs";
 import type { default as AlpineType } from "alpinejs";
 import CreateRoverInput from "./factories/CreateRoverInput";
 import CreateRoverOption from "./factories/CreateRoverOption";
@@ -19,7 +19,12 @@ type RoverValue =
 
 export default function rover(Alpine: Alpine): void {
 
-    Alpine.directive('rover', (el: AlpineType.ElementWithXAttributes, { value, modifiers }: AlpineType.DirectiveData, { Alpine, effect }: AlpineType.DirectiveUtilities) => {
+    Alpine.directive('rover', (
+        el: AlpineType.ElementWithXAttributes,
+        { value, modifiers, expression }: AlpineType.DirectiveData,
+        { Alpine, effect, evaluate }: AlpineType.DirectiveUtilities) => {
+
+
         switch (value as RoverValue) {
             case null: handleRoot(Alpine, el, effect);
                 break;
@@ -29,7 +34,7 @@ export default function rover(Alpine: Alpine): void {
                 break;
             case 'options': handleOptions(el);
                 break;
-            case 'option': handleOption(Alpine, el);
+            case 'option': handleOption(Alpine, el, expression, evaluate);
                 break;
             case 'group': handleOptionsGroup(Alpine, el);
                 break;
@@ -98,7 +103,12 @@ export default function rover(Alpine: Alpine): void {
         })
     }
 
-    function handleOption(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
+    function handleOption(
+        Alpine: Alpine,
+        el: AlpineType.ElementWithXAttributes,
+        expression: AlpineType.DirectiveData['expression'],
+        evaluate: AlpineType.DirectiveUtilities['evaluate']
+    ) {
         Alpine.bind(el, {
             'x-id'() { return ['rover-option'] },
             'x-bind:id'() { return this.$id('rover-option') },
@@ -107,7 +117,13 @@ export default function rover(Alpine: Alpine): void {
                 return this.$data.__isVisible;
             },
             'x-data'(this: RoverOptionContext) {
-                return CreateRoverOption(Alpine, this.__nextOptionId());
+                let value = null;
+
+                if (expression !== '') {
+                    value = evaluate(expression)
+                }
+                
+                return CreateRoverOption(Alpine, this.__nextOptionId(), String(value));
             },
         });
     }
@@ -188,7 +204,7 @@ export default function rover(Alpine: Alpine): void {
                 const id = String(this.__nextSeparatorId());
 
                 this.$el.dataset.key = id;
-                
+
                 this.__pushSeparatorToItems(id);
 
                 this.$el.setAttribute('role', 'separator');

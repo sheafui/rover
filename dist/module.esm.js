@@ -65,15 +65,19 @@ function CreateRoverInput(Alpine2) {
 
 // src/factories/CreateRoverOption.ts
 var SLOT_NAME2 = "rover-option";
-function CreateRoverOption(Alpine2, id) {
+function CreateRoverOption(Alpine2, id, dirValue) {
   return {
     __uniqueKey: "option-" + id,
     __isVisible: true,
     init() {
       this.$el.dataset.slot = SLOT_NAME2;
       this.$el.dataset.key = this.__uniqueKey;
-      let value = Alpine2.extractProp(this.$el, "value", "");
-      console.log("Option init:", this.__uniqueKey, "with value:", value);
+      let value;
+      if (dirValue !== null) {
+        value = dirValue;
+      } else {
+        value = Alpine2.extractProp(this.$el, "value", "");
+      }
       let disabled = Alpine2.extractProp(this.$el, "disabled", false, false);
       this.$el.dataset.value = value;
       this.__add(this.__uniqueKey, value, disabled);
@@ -668,7 +672,7 @@ function CreateRoverOptions(Alpine2) {
 
 // src/index.ts
 function rover(Alpine2) {
-  Alpine2.directive("rover", (el, {value, modifiers}, {Alpine: Alpine3, effect}) => {
+  Alpine2.directive("rover", (el, {value, modifiers, expression}, {Alpine: Alpine3, effect, evaluate}) => {
     switch (value) {
       case null:
         handleRoot(Alpine3, el, effect);
@@ -683,7 +687,7 @@ function rover(Alpine2) {
         handleOptions(el);
         break;
       case "option":
-        handleOption(Alpine3, el);
+        handleOption(Alpine3, el, expression, evaluate);
         break;
       case "group":
         handleOptionsGroup(Alpine3, el);
@@ -751,7 +755,7 @@ function rover(Alpine2) {
       }
     });
   }
-  function handleOption(Alpine3, el) {
+  function handleOption(Alpine3, el, expression, evaluate) {
     Alpine3.bind(el, {
       "x-id"() {
         return ["rover-option"];
@@ -764,7 +768,11 @@ function rover(Alpine2) {
         return this.$data.__isVisible;
       },
       "x-data"() {
-        return CreateRoverOption(Alpine3, this.__nextOptionId());
+        let value = null;
+        if (expression !== "") {
+          value = evaluate(expression);
+        }
+        return CreateRoverOption(Alpine3, this.__nextOptionId(), String(value));
       }
     });
   }

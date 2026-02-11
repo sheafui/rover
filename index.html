@@ -29,7 +29,12 @@
     </style>
 </head>
 
-<body x-data class="flex mt-20 justify-center bg-neutral-950">
+<body 
+    x-data="{
+        item: 'hiba'
+    }" 
+    class="flex mt-20 justify-center bg-neutral-950"
+>
 
     <div class="space-y-4">
         <div x-rover class="w-[360px]">
@@ -53,7 +58,7 @@
                 <li class="py-4 text-center" x-rover:empty>
                     No result found
                 </li>
-                <li x-rover:option value="tenjarine" class="px-4 data-active:bg-white/5  py-2">
+                <li  value="tenjarine"  class="px-4 data-active:bg-white/5  py-2">
                     tenjarine
                 </li>
                 <li x-rover:option value="apple" class="px-4 data-active:bg-white/5 py-2">
