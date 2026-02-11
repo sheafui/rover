@@ -106,7 +106,7 @@
         this.$watch("__isVisible", (visibility) => {
           this.$el.hidden = !visibility;
         });
-        queueMicrotask(() => {
+        this.$nextTick(() => {
           if (disabled) {
             this.$el.setAttribute("tabindex", "-1");
           }
@@ -397,7 +397,7 @@
         const initialValueFallback = this.__isMultiple ? [] : "";
         let initialValue = Alpine.extractProp(el, "initial-value", initialValueFallback);
         this.__registerEventsDelector();
-        queueMicrotask(() => {
+        this.$nextTick(() => {
           if (!this.$refs.__input) {
             this.__isOpen = true;
           }
@@ -732,7 +732,7 @@
           this.$el.dataset.slot = "rover-group";
           this.$el.setAttribute("aria-labelledby", `${groupId}-label`);
           this.$watch("__searchQuery", () => {
-            queueMicrotask(() => {
+            this.$nextTick(() => {
               const hasVisibleOptions = this.$el.querySelectorAll("[data-slot=rover-option]:not([hidden])").length > 0;
               this.$el.hidden = !hasVisibleOptions;
             });

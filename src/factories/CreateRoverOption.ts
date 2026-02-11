@@ -63,7 +63,7 @@ export default function CreateRoverOption(Alpine: AlpineType, nextId: string): R
             });
 
 
-            queueMicrotask((): void => {
+            this.$nextTick((): void => {
                 if (disabled) {
                     this.$el.setAttribute('tabindex', '-1');
                 }

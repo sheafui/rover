@@ -158,7 +158,7 @@ export default function rover(Alpine: Alpine): void {
                 this.$el.setAttribute('aria-labelledby', `${groupId}-label`)
 
                 this.$watch('__searchQuery', () => {
-                    queueMicrotask(() => {
+                    this.$nextTick(() => {
                         const hasVisibleOptions = this.$el.querySelectorAll(
                             '[data-slot=rover-option]:not([hidden])'
                         ).length > 0

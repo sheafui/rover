@@ -121,7 +121,7 @@ export default function CreateRoverRoot(
 
 
             // if there is not input tied with this rover, keep always open true
-            queueMicrotask(() => {
+            this.$nextTick(() => {
                 if (!this.$refs.__input) {
                     this.__isOpen = true;
                 }
