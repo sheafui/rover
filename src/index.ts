@@ -62,7 +62,6 @@ export default function rover(Alpine: Alpine): void {
                 if (this.__isOpen) {
                     e.preventDefault();
                     this.__close();
-                    queueMicrotask(() => this.$refs.__input.focus({ preventScroll: true }));
                 }
             },
             'x-bind:key'() {
@@ -76,7 +75,6 @@ export default function rover(Alpine: Alpine): void {
 
     /*--------------------------------------
      * input part directive handler
-     * -------------------------------------        
      */
     function handleInput(
         Alpine: Alpine,
@@ -150,18 +148,19 @@ export default function rover(Alpine: Alpine): void {
             'x-init'() {
                 this.$el.dataset.slot = 'rover-group';
 
-                this.$watch('__filteredKeys', () => {
-                    let thereIsAnyVisibleOption = this.$el.querySelectorAll('[data-slot=rover-option]:not([style*=display: none])').length > 0;
+                // this.$watch('__filteredKeys', () => {
+                //     let thereIsAnyVisibleOption = this.$el.querySelectorAll('[data-slot=rover-option]:not([style*="display: none"])').length > 0;
 
-                    console.log('thereIsAnyVisibleOption', thereIsAnyVisibleOption);
+                //     console.log(this.$el.querySelectorAll('[data-slot=rover-option]:not([style*="display: none"])'));
 
-                    if (!thereIsAnyVisibleOption) {
-                        this.$el.style.display = 'none';
-                    } else {
-                        this.$el.style.display = '';
-                    }
-                });
-                
+                //     console.log('thereIsAnyVisibleOption', thereIsAnyVisibleOption);
+
+                //     if (!thereIsAnyVisibleOption) {
+                //         this.$el.style.display = 'none';
+                //     } else {
+                //         this.$el.style.display = '';
+                //     }
+                // });
             },
         });
     }

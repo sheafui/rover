@@ -14,8 +14,6 @@ export default function CreateRoverOptions(Alpine: AlpineType): RoverOptionsData
             if (Alpine.bound(this.$el, 'keepActivated')) {
                 this.__keepActivated = true;
             }
-
-
             return this.$el.dataset.slot = SLOT_NAME;
         },
 

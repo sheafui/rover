@@ -66,19 +66,25 @@ export default function CreateRoverRoot(
 
             this.$el.dataset.slot = SLOT_NAME;
 
+            // LOADING STUFF
             effect(() => {
                 this.__isLoading = collection.pending.state;
             });
 
+            // SYNC ACTIVATED KEY
             effect(() => {
                 this.__activatedKey = this.__getKeyByIndex(collection.activeIndex.value);
             });
 
+            // SEARCH REACTIVITY
             effect(() => {
-                let results = this.__searchUsingQuery(this.__searchQuery).map((result: Item) => result.key);
+                if (String(this.__searchQuery).length > 0) {
 
-                if (results.length >= 0) {
-                    this.__filteredKeys = results
+                    let results = this.__searchUsingQuery(this.__searchQuery).map((result: Item) => result.key);
+
+                    if (results.length >= 0) {
+                        this.__filteredKeys = results;
+                    }
                 } else {
                     this.__filteredKeys = null;
                 }

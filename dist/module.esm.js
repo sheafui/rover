@@ -85,7 +85,7 @@ function CreateRoverOption(Alpine2, nextId) {
         }
       });
       Alpine2.effect(() => {
-        this.__isVisible = this.__filteredKeys === null || this.__filteredKeys.includes(this.__uniqueKey);
+        this.__isVisible = this.__filteredKeys !== null ? this.__filteredKeys.includes(this.__uniqueKey) : true;
       });
       this.$watch("__selectedKeys", (selectedKeys) => {
         let thisElHasBeenSelected = false;
@@ -367,9 +367,11 @@ function CreateRoverRoot({
         this.__activatedKey = this.__getKeyByIndex(collection.activeIndex.value);
       });
       effect(() => {
-        let results = this.__searchUsingQuery(this.__searchQuery).map((result) => result.key);
-        if (results.length >= 0) {
-          this.__filteredKeys = results;
+        if (String(this.__searchQuery).length > 0) {
+          let results = this.__searchUsingQuery(this.__searchQuery).map((result) => result.key);
+          if (results.length >= 0) {
+            this.__filteredKeys = results;
+          }
         } else {
           this.__filteredKeys = null;
         }
@@ -652,7 +654,6 @@ function rover(Alpine2) {
         if (this.__isOpen) {
           e.preventDefault();
           this.__close();
-          queueMicrotask(() => this.$refs.__input.focus({preventScroll: true}));
         }
       },
       "x-bind:key"() {
@@ -724,15 +725,6 @@ function rover(Alpine2) {
       role: "option",
       "x-init"() {
         this.$el.dataset.slot = "rover-group";
-        this.$watch("__filteredKeys", () => {
-          let thereIsAnyVisibleOption = this.$el.querySelectorAll("[data-slot=rover-option]:not([style*=display: none])").length > 0;
-          console.log("thereIsAnyVisibleOption", thereIsAnyVisibleOption);
-          if (!thereIsAnyVisibleOption) {
-            this.$el.style.display = "none";
-          } else {
-            this.$el.style.display = "";
-          }
-        });
       }
     });
   }

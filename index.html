@@ -16,14 +16,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
     <style>
-        /* Rule 2: Hide separator immediately followed by another separator */
-        [data-slot=rover-separator]+[data-slot=rover-separator] {
-            display: none;
-        }
-
-        /* ============================================
-         * SEPARATOR + OPTION RULES
-         * ============================================ */
 
         /* Rule 3: Hide separator if PREVIOUS sibling is a `hidden` option */
         :is([data-slot=rover-option],[data-slot=rover-group])[style*="display: none"]+[data-slot=rover-separator] {
@@ -53,7 +45,10 @@
                 </button>
             </div>
 
-            <ul x-rover:options x-cloak
+            <ul 
+                x-rover:options 
+                static 
+                x-cloak
                 class="mt-1 max-h-60  w-full rounded-md border border-neutral-700 bg-white/5 text-white overflow-auto shadow-lg focus:outline-none">
                 <li class="py-4 text-center" x-rover:empty>
                     No result found
