@@ -1,7 +1,7 @@
 import RoverCollection from "../core/RoverCollection";
 
 import type { default as AlpineType } from "alpinejs";
-import { Item, RoverRootData, UIItem } from "src/types";
+import { Item, RoverRootData } from "src/types";
 import { SLOT_NAME as OPTION_SLOT_NAME } from "./CreateRoverOption";
 
 export default function CreateRoverRoot(
@@ -25,33 +25,17 @@ export default function CreateRoverRoot(
         __isMultiple: false,
         __isTyping: false,
         __isLoading: false,
-        // unique id generator for options and groups and separators
-        // we use this for navigation and selection as well use remove separator
-        // or group wrapper around options for consistency 
         __o_id: -1,
         __g_id: -1,
         __s_id: -1,
-
-        // for component like command pallate where the input is on the popover 
-        // we need to ignore the open/close internally
-        // that why this flag exists
         __static: false,
-
-        // this is responsible when the user leave the options area, if this true it
-        //  keeps the old activated element activated and not otherwise 
         __keepActivated: true,
         __optionsEl: undefined,
         __compareBy: undefined,
         __activatedKey: undefined,
         __selectedKeys: undefined,
         __isDisabled: false,
-
-        // this is the flat structure of all the options and groups  and separators in the list
-        // to make it easier to navigate and search without needing to do recursion every time
-        // THIS IS NOT THE SOURCE OF TRUTH, THE SOURCE OF TRUTH IS IN THE COLLECTION CLASS.
         __items: [],
-
-        // search 
         __searchQuery: '',
         __filteredKeys: null,
         __filteredKeysSet: new Set<string>(),
@@ -63,8 +47,6 @@ export default function CreateRoverRoot(
         __isActive: (k: string) => collection.isActivated(k),
         __getValueByKey: (k: string) => collection.getValueByKey(k),
         __getActiveItem: () => collection.getActiveItem(),
-
-        // navigation:
         __activateNext: () => collection.activateNext(),
         __activatePrev: () => collection.activatePrev(),
         __activateFirst: () => collection.activateFirst(),
@@ -73,7 +55,6 @@ export default function CreateRoverRoot(
         __getKeyByIndex: (index: number) => collection.getKeyByIndex(index),
 
         init() {
-
             this.$el.dataset.slot = SLOT_NAME;
 
             // LOADING STUFF
@@ -89,7 +70,6 @@ export default function CreateRoverRoot(
             // SEARCH REACTIVITY
             effect(() => {
                 if (String(this.__searchQuery).length > 0) {
-
                     let results = this.__searchUsingQuery(this.__searchQuery).map((result: Item) => result.key);
 
                     if (results.length >= 0) {
@@ -99,7 +79,6 @@ export default function CreateRoverRoot(
                     this.__filteredKeys = null;
                 }
 
-                // if no visible active item, deactivate the active key on the collection.
                 if (this.__activatedKey && this.__filteredKeys && !this.__filteredKeys.includes(this.__activatedKey)) {
                     this.__deactivate();
                 }
@@ -109,8 +88,72 @@ export default function CreateRoverRoot(
                 }
             });
 
+            effect(() => {
+                const activeKey = this.__activatedKey;
+                const visibleKeys = this.__filteredKeys ? new Set(this.__filteredKeys) : null;
+                const selectedKeys = new Set(
+                    Array.isArray(this.__selectedKeys)
+                        ? this.__selectedKeys
+                        : this.__selectedKeys ? [this.__selectedKeys] : []
+                );
 
+                // Batch all DOM updates in a single animation frame
+                requestAnimationFrame(() => {
+                    const options = this.$el.querySelectorAll('[data-slot=rover-option]');
 
+                    options.forEach((opt: Element) => {
+                        const htmlOpt = opt as HTMLElement;
+                        const key = htmlOpt.dataset.key;
+
+                        if (!key) return;
+
+                        if (visibleKeys !== null) {
+                            htmlOpt.hidden = !visibleKeys.has(key);
+                        } else {
+                            htmlOpt.hidden = false;
+                        }
+
+                        if (key === activeKey) {
+                            htmlOpt.setAttribute('data-active', 'true');
+
+                            // Scroll into view if needed
+                            htmlOpt.scrollIntoView({
+                                behavior: "smooth",
+                                block: 'nearest'
+                            });
+                        } else {
+                            htmlOpt.removeAttribute('data-active');
+                        }
+
+                        if (selectedKeys.has(key)) {
+                            htmlOpt.setAttribute('aria-selected', 'true');
+                            htmlOpt.setAttribute('data-selected', 'true');
+                        } else {
+                            htmlOpt.setAttribute('aria-selected', 'false');
+                            htmlOpt.removeAttribute('data-selected');
+                        }
+                    });
+
+                    // handle groups visibility based on visible options
+                    const groups = this.$el.querySelectorAll('[data-slot=rover-group]');
+
+                    groups.forEach((group: Element) => {
+                        const htmlGroup = group as HTMLElement;
+                        const options = htmlGroup.querySelectorAll('[data-slot=rover-option]');
+                        // Check if group has any visible options
+                        const hasVisibleOption = Array.from(options).some((opt: Element) => {
+                            const htmlOpt = opt as HTMLElement;
+                            return visibleKeys
+                                ? visibleKeys.has(htmlOpt.dataset.key || '')
+                                : true;
+                        });
+
+                        htmlGroup.hidden = !hasVisibleOption;
+                    });
+                });
+            });
+
+            // Initialize multiple/single mode
             if (this.__isMultiple) {
                 this.__selectedKeys = [];
             } else {
@@ -118,9 +161,7 @@ export default function CreateRoverRoot(
             }
 
             this.__isMultiple = Alpine.extractProp(el, 'multiple', false) as boolean;
-
             this.__isDisabled = Alpine.extractProp(el, 'disabled', false) as boolean;
-
             this.__compareBy = Alpine.extractProp(el, 'by', '') as string;
 
             const initialValueFallback: Array<string> | string = this.__isMultiple ? [] : '';
@@ -129,7 +170,6 @@ export default function CreateRoverRoot(
             let initialValue = Alpine.extractProp(el, 'initial-value', initialValueFallback);
 
             this.__registerEventsDelector();
-
 
             // if there is not input tied with this rover, keep always open true
             this.$nextTick(() => {
@@ -158,13 +198,14 @@ export default function CreateRoverRoot(
                 key,
             });
         },
-        
+
         __pushGroupToItems(key: string) {
             this.__items.push({
                 type: 'g',
                 key,
             });
         },
+
         __pushOptionToItems(key: string) {
             this.__items.push({
                 type: 'o',
@@ -175,12 +216,10 @@ export default function CreateRoverRoot(
         __activateSelectedOrFirst(activateSelected = true) {
             if (!this.__isOpen) return;
 
-            // If something is already active from keyboard, don't override
             let activeItem = this.__getActiveItem();
 
             if (activeItem) return;
 
-            // Try to activate the first selected item
             if (activateSelected && this.__selectedKeys) {
                 const keyToActivate = this.__isMultiple
                     ? this.__selectedKeys[0]
@@ -243,34 +282,29 @@ export default function CreateRoverRoot(
 
         __selectActive() {
             if (!this.__activatedKey) return;
-
             this.__handleSelection(this.__activatedKey);
         },
+
         __startTyping() {
             this.__isTyping = true
         },
+
         __stopTyping() {
             this.__isTyping = false
         },
+
         __resetInput() {
             let input = this.$refs.__input;
-
             if (!input) return;
 
             let value = this.__getCurrentValue();
-
             input.value = value;
         },
+
         __getCurrentValue() {
-
             if (!this.$refs.__input) return '';
-
             if (!this.__state) return '';
-
-            // if (this.__displayValue) return this.__displayValue(this.__state);
-
             if (typeof this.__state === 'string') return this.__state;
-
             return ''
         },
 
@@ -279,12 +313,9 @@ export default function CreateRoverRoot(
 
             if (!this.__compareBy) {
                 by = (a: unknown, b: unknown) => Alpine.raw(a) === Alpine.raw(b);
-            }
-
-            else if (typeof this.__compareBy === 'string') {
+            } else if (typeof this.__compareBy === 'string') {
                 const property = this.__compareBy;
                 by = (a: unknown, b: unknown) => {
-
                     if ((!a || typeof a !== 'object') || (!b || typeof b !== 'object')) {
                         return Alpine.raw(a) === Alpine.raw(b);
                     }
@@ -302,14 +333,16 @@ export default function CreateRoverRoot(
         __nextOptionId() {
             return ++this.__o_id;
         },
+
         __nextGroupId() {
             return ++this.__g_id;
         },
+
         __nextSeparatorId() {
             return ++this.__s_id;
         },
-        __registerEventsDelector() {
 
+        __registerEventsDelector() {
             const findClosestOption = (el: Element) => Alpine.findClosest(el, node => node.dataset.slot === OPTION_SLOT_NAME);
 
             const delegate = (handler: (optionEl: HTMLElement) => void) => {
@@ -327,14 +360,13 @@ export default function CreateRoverRoot(
             };
 
             this.$nextTick(() => {
-
                 this.__optionsEl = this.$refs.__options;
 
                 if (!this.__optionsEl) return;
 
                 this.__optionsEl.addEventListener('click',
                     delegate((optionEl) => {
-                        if (!optionEl.dataset.key) return;  // Add safety check
+                        if (!optionEl.dataset.key) return;
 
                         this.__handleSelection(optionEl.dataset.key);
 
@@ -350,7 +382,6 @@ export default function CreateRoverRoot(
                 this.__optionsEl.addEventListener('mouseover',
                     delegate((optionEl) => {
                         if (!optionEl.dataset.key) return;
-                        //    this activate didn't get autocomplete why ? 
                         this.__activate(optionEl.dataset.key);
                     })
                 );
@@ -370,10 +401,7 @@ export default function CreateRoverRoot(
                     })
                 );
 
-                // listen on the root level
-
                 this.$root.addEventListener('keydown', (e: KeyboardEvent) => {
-
                     switch (e.key) {
                         case 'ArrowDown':
                             e.preventDefault(); e.stopPropagation();
@@ -393,18 +421,17 @@ export default function CreateRoverRoot(
                                 this.__resetInput()
                             }
                             break;
+
                         case 'Escape':
                             e.preventDefault(); e.stopPropagation();
                             this.__close();
                             this.$nextTick(() => this.$refs?.__input?.focus({ preventScroll: true }))
                             break;
+
                         default:
                             if (this.__static) return;
-
                             this.__open();
-
                             break;
-
                     }
                 });
             });

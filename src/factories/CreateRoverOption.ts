@@ -3,68 +3,39 @@ import { RoverOptionData, RoverOptionContext } from 'src/types';
 
 export const SLOT_NAME = 'rover-option';
 
+/**
+ * OPTIMIZED VERSION - NO INDIVIDUAL WATCHERS
+ * 
+ * All reactive logic moved to CreateRoverRoot for better performance
+ * This version just sets up the option and adds it to the collection
+ */
 export default function CreateRoverOption(Alpine: AlpineType, id: number): RoverOptionData {
     return {
         __uniqueKey: 'option-' + id,
         __isVisible: true,
 
         init(this: RoverOptionContext) {
-
+            // Setup element
             this.$el.dataset.slot = SLOT_NAME;
-
-            let value = Alpine.extractProp(this.$el, 'value', '') as string;
-
             this.$el.dataset.key = this.__uniqueKey;
+
+            // Extract props
+            let value = Alpine.extractProp(this.$el, 'value', '') as string;
+            let disabled = Alpine.extractProp(this.$el, 'disabled', false, false) as boolean;
 
             this.$el.dataset.value = value;
 
-            let disabled = Alpine.extractProp(this.$el, 'disabled', false, false) as boolean;
-
+            // Add to collection
             this.__add(this.__uniqueKey, value, disabled);
-
             this.__pushOptionToItems(String(id));
 
-            // this is clean approach but I am not sure if this is the most acheivable of
-            //  clean/efficient tradeoff but I will investigate further
-            this.$watch('__activatedKey', (activeKey: string) => {
-                if (activeKey === this.__uniqueKey) {
-                    this.$el.setAttribute('data-active', 'true');
+            // ❌ REMOVED: All watchers moved to CreateRoverRoot
+            // ❌ No more: this.$watch('__activatedKey', ...)
+            // ❌ No more: this.$watch('__searchQuery', ...)
+            // ❌ No more: this.$watch('__selectedKeys', ...)
+            // ❌ No more: this.$watch('__isVisible', ...)
 
-                    this.$el.scrollIntoView({ behavior: "smooth", block: 'nearest' });
-                } else {
-                    this.$el.removeAttribute('data-active');
-                }
-            });
-
-            this.$watch('__searchQuery', () => {
-                this.__isVisible = this.__filteredKeys !== null
-                    ? this.__filteredKeys.includes(this.__uniqueKey)
-                    : true;
-            });
-
-            this.$watch('__selectedKeys', (selectedKeys: string | string[]) => {
-                let selected = false;
-
-                if (!this.__isMultiple) {
-                    selected = selectedKeys === this.__uniqueKey;
-                } else {
-                    selected = Array.isArray(selectedKeys) && selectedKeys.includes(this.__uniqueKey);
-                }
-
-                if (selected) {
-                    this.$el.setAttribute('aria-selected', 'true');
-                    this.$el.setAttribute('data-selected', 'true');
-                } else {
-                    this.$el.setAttribute('aria-selected', 'false');
-                    this.$el.removeAttribute('data-selected');
-                }
-            });
-
-            this.$watch('__isVisible', (visibility) => {
-                this.$el.hidden = !visibility;
-            });
-
-
+            // Set disabled attribute if needed
             this.$nextTick((): void => {
                 if (disabled) {
                     this.$el.setAttribute('tabindex', '-1');
@@ -74,6 +45,7 @@ export default function CreateRoverOption(Alpine: AlpineType, id: number): Rover
 
         destroy() {
             this.__forget(this.__uniqueKey);
+            // No watchers to clean up!
         }
     }
 }

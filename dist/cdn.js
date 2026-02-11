@@ -72,41 +72,12 @@
       __isVisible: true,
       init() {
         this.$el.dataset.slot = SLOT_NAME2;
-        let value = Alpine2.extractProp(this.$el, "value", "");
         this.$el.dataset.key = this.__uniqueKey;
-        this.$el.dataset.value = value;
+        let value = Alpine2.extractProp(this.$el, "value", "");
         let disabled = Alpine2.extractProp(this.$el, "disabled", false, false);
+        this.$el.dataset.value = value;
         this.__add(this.__uniqueKey, value, disabled);
         this.__pushOptionToItems(String(id));
-        this.$watch("__activatedKey", (activeKey) => {
-          if (activeKey === this.__uniqueKey) {
-            this.$el.setAttribute("data-active", "true");
-            this.$el.scrollIntoView({behavior: "smooth", block: "nearest"});
-          } else {
-            this.$el.removeAttribute("data-active");
-          }
-        });
-        this.$watch("__searchQuery", () => {
-          this.__isVisible = this.__filteredKeys !== null ? this.__filteredKeys.includes(this.__uniqueKey) : true;
-        });
-        this.$watch("__selectedKeys", (selectedKeys) => {
-          let selected = false;
-          if (!this.__isMultiple) {
-            selected = selectedKeys === this.__uniqueKey;
-          } else {
-            selected = Array.isArray(selectedKeys) && selectedKeys.includes(this.__uniqueKey);
-          }
-          if (selected) {
-            this.$el.setAttribute("aria-selected", "true");
-            this.$el.setAttribute("data-selected", "true");
-          } else {
-            this.$el.setAttribute("aria-selected", "false");
-            this.$el.removeAttribute("data-selected");
-          }
-        });
-        this.$watch("__isVisible", (visibility) => {
-          this.$el.hidden = !visibility;
-        });
         this.$nextTick(() => {
           if (disabled) {
             this.$el.setAttribute("tabindex", "-1");
@@ -389,6 +360,51 @@
           if (this.__isOpen && !this.__getActiveItem() && this.__filteredKeys && this.__filteredKeys.length) {
             this.__activate(this.__filteredKeys[0]);
           }
+        });
+        effect(() => {
+          const activeKey = this.__activatedKey;
+          const visibleKeys = this.__filteredKeys ? new Set(this.__filteredKeys) : null;
+          const selectedKeys = new Set(Array.isArray(this.__selectedKeys) ? this.__selectedKeys : this.__selectedKeys ? [this.__selectedKeys] : []);
+          requestAnimationFrame(() => {
+            const options = this.$el.querySelectorAll("[data-slot=rover-option]");
+            options.forEach((opt) => {
+              const htmlOpt = opt;
+              const key = htmlOpt.dataset.key;
+              if (!key)
+                return;
+              if (visibleKeys !== null) {
+                htmlOpt.hidden = !visibleKeys.has(key);
+              } else {
+                htmlOpt.hidden = false;
+              }
+              if (key === activeKey) {
+                htmlOpt.setAttribute("data-active", "true");
+                htmlOpt.scrollIntoView({
+                  behavior: "smooth",
+                  block: "nearest"
+                });
+              } else {
+                htmlOpt.removeAttribute("data-active");
+              }
+              if (selectedKeys.has(key)) {
+                htmlOpt.setAttribute("aria-selected", "true");
+                htmlOpt.setAttribute("data-selected", "true");
+              } else {
+                htmlOpt.setAttribute("aria-selected", "false");
+                htmlOpt.removeAttribute("data-selected");
+              }
+            });
+            const groups = this.$el.querySelectorAll("[data-slot=rover-group]");
+            groups.forEach((group) => {
+              const htmlGroup = group;
+              const options2 = htmlGroup.querySelectorAll("[data-slot=rover-option]");
+              const hasVisibleOption = Array.from(options2).some((opt) => {
+                const htmlOpt = opt;
+                return visibleKeys ? visibleKeys.has(htmlOpt.dataset.key || "") : true;
+              });
+              htmlGroup.hidden = !hasVisibleOption;
+            });
+          });
         });
         if (this.__isMultiple) {
           this.__selectedKeys = [];
@@ -762,12 +778,6 @@
           const id = String(this.__nextGroupId());
           this.$el.dataset.key = id;
           this.__pushGroupToItems(id);
-          this.$watch("__searchQuery", () => {
-            this.$nextTick(() => {
-              const hasVisibleOptions = this.$el.querySelectorAll("[data-slot=rover-option]:not([hidden])").length > 0;
-              this.$el.hidden = !hasVisibleOptions;
-            });
-          });
         }
       });
     }
