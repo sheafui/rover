@@ -150,16 +150,18 @@ export default function rover(Alpine: Alpine): void {
             'x-init'() {
                 this.$el.dataset.slot = 'rover-group';
 
-                if (!document.querySelector('#rover-group-styles')) {
+                this.$watch('__filteredKeys', () => {
+                    let thereIsAnyVisibleOption = this.$el.querySelectorAll('[data-slot=rover-option]:not([style*=display: none])').length > 0;
 
-                    const style = document.createElement('style');
+                    console.log('thereIsAnyVisibleOption', thereIsAnyVisibleOption);
 
-                    style.id = 'rover-group-styles';
-
-                    style.textContent = GROUP_CSS_TEXT;
-
-                    document.head.appendChild(style);
-                }
+                    if (!thereIsAnyVisibleOption) {
+                        this.$el.style.display = 'none';
+                    } else {
+                        this.$el.style.display = '';
+                    }
+                });
+                
             },
         });
     }

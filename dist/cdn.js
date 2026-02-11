@@ -611,18 +611,6 @@
     };
   }
 
-  // src/factories/CreateRoverGroup.ts
-  var CSS_TEXT = `
-    /* Hide separator if no \`hidden\` option after it */
-    [data-slot=rover-separator]:has( +:is([data-slot=rover-option], [data-slot=rover-options-group])[style*="display: none"]) {
-        display: none;
-    }
-    /* Hide separator if no \`hidden\` option before it */
-    :is([data-slot=rover-option], [data-slot=rover-options-group])[style*="display: none"]+[data-slot=rover-separator] {
-        display: none;
-    }
-`;
-
   // src/index.ts
   function rover(Alpine2) {
     Alpine2.directive("rover", (el, {value, modifiers}, {Alpine: Alpine3, effect}) => {
@@ -737,12 +725,15 @@
         role: "option",
         "x-init"() {
           this.$el.dataset.slot = "rover-group";
-          if (!document.querySelector("#rover-group-styles")) {
-            const style = document.createElement("style");
-            style.id = "rover-group-styles";
-            style.textContent = CSS_TEXT;
-            document.head.appendChild(style);
-          }
+          this.$watch("__filteredKeys", () => {
+            let thereIsAnyVisibleOption = this.$el.querySelectorAll("[data-slot=rover-option]:not([style*=display: none])").length > 0;
+            console.log("thereIsAnyVisibleOption", thereIsAnyVisibleOption);
+            if (!thereIsAnyVisibleOption) {
+              this.$el.style.display = "none";
+            } else {
+              this.$el.style.display = "";
+            }
+          });
         }
       });
     }
