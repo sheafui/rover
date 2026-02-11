@@ -741,6 +741,12 @@
           const groupId = this.$id("rover-group");
           this.$el.dataset.slot = "rover-group";
           this.$el.setAttribute("aria-labelledby", `${groupId}-label`);
+          const id = String(this.__nextGroupId());
+          this.$el.dataset.key = id;
+          this.__items.push({
+            type: "g",
+            key: id
+          });
           this.$watch("__searchQuery", () => {
             this.$nextTick(() => {
               const hasVisibleOptions = this.$el.querySelectorAll("[data-slot=rover-option]:not([hidden])").length > 0;
@@ -795,10 +801,12 @@
       Alpine3.bind(el, {
         "x-init"() {
           this.$el.dataset.slot = "rover-separator";
-          if (!document.querySelector("#rover-separator-styles")) {
-            const style = document.createElement("style");
-            style.id = "rover-separator-styles";
-          }
+          const id = String(this.__nextSeparatorId());
+          this.$el.dataset.key = id;
+          this.__items.push({
+            type: "s",
+            key: id
+          });
         }
       });
     }

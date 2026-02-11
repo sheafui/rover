@@ -4,7 +4,7 @@ import CreateRoverInput from "./factories/CreateRoverInput";
 import CreateRoverOption from "./factories/CreateRoverOption";
 import CreateRoverRoot from "./factories/CreateRoverRoot";
 import CreateRoverOptions from "./factories/CreateRoverOptions";
-import { RoverOptionContext, RoverOptionsContext } from "./types";
+import { RoverOptionContext, RoverOptionsContext, RoverRootContext } from "./types";
 // import { CSS_TEXT } from "./factories/CreatorRoverSeparator";
 import { CSS_TEXT as GROUP_CSS_TEXT } from "./factories/CreateRoverGroup";
 
@@ -151,11 +151,20 @@ export default function rover(Alpine: Alpine): void {
 
             'role': 'group',
 
-            'x-init'() {
+            'x-init'(this: RoverRootContext) {
                 const groupId = this.$id('rover-group')
 
                 this.$el.dataset.slot = 'rover-group'
                 this.$el.setAttribute('aria-labelledby', `${groupId}-label`)
+
+                const id = String(this.__nextGroupId());
+
+                this.$el.dataset.key = id;
+
+                this.__items.push({
+                    type: 'g',
+                    key: id,
+                });
 
                 this.$watch('__searchQuery', () => {
                     this.$nextTick(() => {
@@ -240,19 +249,17 @@ export default function rover(Alpine: Alpine): void {
     */
     function handleSeparator(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
         Alpine.bind(el, {
-            'x-init'() {
+            'x-init'(this: RoverRootContext) {
                 this.$el.dataset.slot = 'rover-separator';
 
-                if (!document.querySelector('#rover-separator-styles')) {
+                const id = String(this.__nextSeparatorId());
 
-                    const style = document.createElement('style');
+                this.$el.dataset.key = id;
 
-                    style.id = 'rover-separator-styles';
-
-                    // style.textContent = CSS_TEXT;
-
-                    // document.head.appendChild(style);
-                }
+                this.__items.push({
+                    type: 's',
+                    key: id,
+                });
             }
         });
     }
