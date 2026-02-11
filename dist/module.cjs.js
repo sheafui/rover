@@ -399,7 +399,7 @@ function CreateRoverRoot({
         if (this.__activatedKey && this.__filteredKeys && !this.__filteredKeys.includes(this.__activatedKey)) {
           this.__deactivate();
         }
-        if (this.__isOpen && !collection.getActiveItem() && this.__filteredKeys && this.__filteredKeys.length) {
+        if (this.__isOpen && !this.__getActiveItem() && this.__filteredKeys && this.__filteredKeys.length) {
           this.__activate(this.__filteredKeys[0]);
         }
       });
@@ -433,7 +433,7 @@ function CreateRoverRoot({
     __activateSelectedOrFirst(activateSelected = true) {
       if (!this.__isOpen)
         return;
-      let activeItem = collection.getActiveItem();
+      let activeItem = this.__getActiveItem();
       if (activeItem)
         return;
       if (activateSelected && this.__selectedKeys) {
@@ -443,7 +443,7 @@ function CreateRoverRoot({
           return;
         }
       }
-      collection.activateFirst();
+      this.__activateFirst();
     },
     __close() {
       this.__isOpen = false;

@@ -93,7 +93,7 @@ export default function CreateRoverRoot(
                     this.__deactivate();
                 }
 
-                if (this.__isOpen && !collection.getActiveItem() && this.__filteredKeys && this.__filteredKeys.length) {
+                if (this.__isOpen && !this.__getActiveItem() && this.__filteredKeys && this.__filteredKeys.length) {
                     this.__activate(this.__filteredKeys[0]);
                 }
             });
@@ -145,7 +145,7 @@ export default function CreateRoverRoot(
             if (!this.__isOpen) return;
 
             // If something is already active from keyboard, don't override
-            let activeItem = collection.getActiveItem();
+            let activeItem = this.__getActiveItem();
 
             if (activeItem) return;
 
@@ -157,14 +157,11 @@ export default function CreateRoverRoot(
 
                 if (keyToActivate) {
                     this.__activate(keyToActivate);
-
-
-                    //@todo: Scroll into the view'ss container port... 
                     return;
                 }
             }
 
-            collection.activateFirst();
+            this.__activateFirst();
         },
 
         __close() {
@@ -239,7 +236,7 @@ export default function CreateRoverRoot(
 
             if (!this.__state) return '';
 
-            // if (this.__displayValue) return this.__displayValue(this.__state)
+            // if (this.__displayValue) return this.__displayValue(this.__state);
 
             if (typeof this.__state === 'string') return this.__state;
 
