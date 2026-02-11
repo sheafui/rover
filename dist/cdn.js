@@ -379,12 +379,14 @@
               }
               if (key === activeKey) {
                 htmlOpt.setAttribute("data-active", "true");
+                htmlOpt.setAttribute("aria-current", "true");
                 htmlOpt.scrollIntoView({
                   behavior: "smooth",
                   block: "nearest"
                 });
               } else {
                 htmlOpt.removeAttribute("data-active");
+                htmlOpt.removeAttribute("aria-current");
               }
               if (selectedKeys.has(key)) {
                 htmlOpt.setAttribute("aria-selected", "true");

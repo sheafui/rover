@@ -88,6 +88,7 @@ export default function CreateRoverRoot(
                 }
             });
 
+            // HANDLING INDIVIDUAL OPTION VISIBILITY, SELECTION, ACTIVE STATE 
             effect(() => {
                 const activeKey = this.__activatedKey;
                 const visibleKeys = this.__filteredKeys ? new Set(this.__filteredKeys) : null;
@@ -115,14 +116,17 @@ export default function CreateRoverRoot(
 
                         if (key === activeKey) {
                             htmlOpt.setAttribute('data-active', 'true');
+                            htmlOpt.setAttribute('aria-current', 'true');
 
                             // Scroll into view if needed
                             htmlOpt.scrollIntoView({
                                 behavior: "smooth",
                                 block: 'nearest'
                             });
+
                         } else {
                             htmlOpt.removeAttribute('data-active');
+                            htmlOpt.removeAttribute('aria-current');
                         }
 
                         if (selectedKeys.has(key)) {
