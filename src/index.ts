@@ -247,6 +247,7 @@ export default function rover(Alpine: Alpine): void {
     function handleSeparator(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
         Alpine.bind(el, {
             'x-init'(this: RoverRootContext) {
+                
                 this.$el.dataset.slot = 'rover-separator';
 
                 const id = String(this.__nextSeparatorId());
@@ -256,6 +257,7 @@ export default function rover(Alpine: Alpine): void {
                 this.__pushSeparatorToItems(id);
 
                 this.$el.setAttribute('role', 'separator');
+
                 this.$el.setAttribute('aria-orientation', 'horizontal');
             }
         });

@@ -24,7 +24,7 @@ export default function CreateRoverOption(Alpine: AlpineType, id: number): Rover
 
             this.__pushOptionToItems(String(id));
 
-            // thisis clean approach but I am not sure if this is the most acheivable of
+            // this is clean approach but I am not sure if this is the most acheivable of
             //  clean/efficient tradeoff but I will investigate further
             this.$watch('__activatedKey', (activeKey: string) => {
                 if (activeKey === this.__uniqueKey) {
