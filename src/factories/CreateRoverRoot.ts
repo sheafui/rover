@@ -1,7 +1,7 @@
 import RoverCollection from "../core/RoverCollection";
 
 import type { default as AlpineType } from "alpinejs";
-import { Item, RoverRootData } from "src/types";
+import { Item, RoverRootData, UIItem } from "src/types";
 import { SLOT_NAME as OPTION_SLOT_NAME } from "./CreateRoverOption";
 
 export default function CreateRoverRoot(
@@ -18,6 +18,8 @@ export default function CreateRoverRoot(
     type CompareByFn = (a: unknown, b: unknown) => boolean;
 
     const SLOT_NAME = 'rover-root';
+    
+    const defaultUIItem: UIItem = { type: 'o', key: undefined };
 
     return {
         __state: null,
@@ -40,6 +42,11 @@ export default function CreateRoverRoot(
         __activatedKey: undefined,
         __selectedKeys: undefined,
         __isDisabled: false,
+
+        // this is the flat structure of all the options and groups  and separators in the list
+        // to make it easier to navigate and search without needing to do recursion every time
+        // THIS IS NOT THE SOURCE OF TRUTH, THE SOURCE OF TRUTH IS IN THE COLLECTION CLASS.
+        __items: [],
 
         // search 
         __searchQuery: '',

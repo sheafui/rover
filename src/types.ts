@@ -26,6 +26,7 @@ export interface RoverRootData extends XDataContext {
     __uuid: number;
     __static: boolean;
     __keepActivated: boolean;
+    __items: UIItem[];
     __optionsEl: HTMLElement | undefined;
     __compareBy: string | ((a: unknown, b: unknown) => boolean) | undefined;
     __activatedKey: string | null | undefined;
@@ -33,7 +34,7 @@ export interface RoverRootData extends XDataContext {
     __filteredKeys: string[] | null;
     __filteredKeysSet: Set<string>;
     __searchQuery: string;
-    
+
     // Methods
     __add: (k: string, v: string, d: boolean) => void;
     __forget: (k: string) => void;
@@ -84,3 +85,12 @@ export interface RoverOptionsData extends Partial<RoverRootData> {
 }
 
 export type RoverOptionsContext = RoverRootData & RoverOptionsData & Magics<RoverOptionsData>;
+
+export type UIItem = {
+    type:
+    'o' | // option
+    'g' | // group
+    's'; // separator
+
+    key?: string;
+}

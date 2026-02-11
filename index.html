@@ -18,7 +18,7 @@
     <style>
 
         /* Rule 3: Hide separator if PREVIOUS sibling is a `hidden` option */
-        :is([data-slot=rover-option],[data-slot=rover-group]):is([hidden])+[data-slot=rover-separator] {
+        :is([data-slot=rover-option],[data-slot=rover-group])[hidden]+[data-slot=rover-separator] {
             display: none;
         }
 

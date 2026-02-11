@@ -332,6 +332,7 @@
   }) {
     const collection = new RoverCollection_default();
     const SLOT_NAME3 = "rover-root";
+    const defaultUIItem = {type: "o", key: void 0};
     return {
       __state: null,
       __isOpen: false,
@@ -346,6 +347,7 @@
       __activatedKey: void 0,
       __selectedKeys: void 0,
       __isDisabled: false,
+      __items: [],
       __searchQuery: "",
       __filteredKeys: null,
       __filteredKeysSet: new Set(),
