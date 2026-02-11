@@ -22,6 +22,8 @@ export default function CreateRoverOption(Alpine: AlpineType, nextId: string): R
 
             this.__add(this.__uniqueKey, value, disabled);
 
+            // thisis clean approach but I am not sure if this is the most acheivable of
+            //  clean/efficient tradeoff but I will investigate further
             this.$watch('__activatedKey', (activeKey: string) => {
                 if (activeKey === this.__uniqueKey) {
                     this.$el.setAttribute('data-active', 'true');
@@ -32,28 +34,22 @@ export default function CreateRoverOption(Alpine: AlpineType, nextId: string): R
                 }
             });
 
-            Alpine.effect(() => {
-                this.__isVisible = this.__filteredKeys !== null ? this.__filteredKeys.includes(this.__uniqueKey) : true;
+            this.$watch('__searchQuery', () => {
+                this.__isVisible = this.__filteredKeys !== null
+                    ? this.__filteredKeys.includes(this.__uniqueKey)
+                    : true;
             });
 
-
-            this.$watch('__searchQuery', (query: string) => {
-                if (query.length) {
-                    this.__isVisible = this.__filteredKeys !== null ? this.__filteredKeys.includes(this.__uniqueKey) : true;
-                }
-            })
-
             this.$watch('__selectedKeys', (selectedKeys: string | string[]) => {
-
-                let thisElHasBeenSelected = false;
+                let selected = false;
 
                 if (!this.__isMultiple) {
-                    thisElHasBeenSelected = selectedKeys === this.__uniqueKey;
+                    selected = selectedKeys === this.__uniqueKey;
                 } else {
-                    thisElHasBeenSelected = Array.isArray(selectedKeys) && selectedKeys.includes(this.__uniqueKey);
+                    selected = Array.isArray(selectedKeys) && selectedKeys.includes(this.__uniqueKey);
                 }
 
-                if (thisElHasBeenSelected) {
+                if (selected) {
                     this.$el.setAttribute('aria-selected', 'true');
                     this.$el.setAttribute('data-selected', 'true');
                 } else {
@@ -63,7 +59,7 @@ export default function CreateRoverOption(Alpine: AlpineType, nextId: string): R
             });
 
             this.$watch('__isVisible', (visibility) => {
-                this.$el.hidden = visibility;
+                this.$el.hidden = !visibility;
             });
 
 

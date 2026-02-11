@@ -85,22 +85,17 @@
             this.$el.removeAttribute("data-active");
           }
         });
-        Alpine2.effect(() => {
+        this.$watch("__searchQuery", () => {
           this.__isVisible = this.__filteredKeys !== null ? this.__filteredKeys.includes(this.__uniqueKey) : true;
         });
-        this.$watch("__searchQuery", (query) => {
-          if (query.length) {
-            this.__isVisible = this.__filteredKeys !== null ? this.__filteredKeys.includes(this.__uniqueKey) : true;
-          }
-        });
         this.$watch("__selectedKeys", (selectedKeys) => {
-          let thisElHasBeenSelected = false;
+          let selected = false;
           if (!this.__isMultiple) {
-            thisElHasBeenSelected = selectedKeys === this.__uniqueKey;
+            selected = selectedKeys === this.__uniqueKey;
           } else {
-            thisElHasBeenSelected = Array.isArray(selectedKeys) && selectedKeys.includes(this.__uniqueKey);
+            selected = Array.isArray(selectedKeys) && selectedKeys.includes(this.__uniqueKey);
           }
-          if (thisElHasBeenSelected) {
+          if (selected) {
             this.$el.setAttribute("aria-selected", "true");
             this.$el.setAttribute("data-selected", "true");
           } else {
@@ -109,7 +104,7 @@
           }
         });
         this.$watch("__isVisible", (visibility) => {
-          this.$el.hidden = visibility;
+          this.$el.hidden = !visibility;
         });
         queueMicrotask(() => {
           if (disabled) {
