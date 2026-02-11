@@ -19,8 +19,6 @@ export default function CreateRoverRoot(
 
     const SLOT_NAME = 'rover-root';
 
-    const defaultUIItem: UIItem = { type: 'o', key: undefined };
-
     return {
         __state: null,
         __isOpen: false,
@@ -151,6 +149,26 @@ export default function CreateRoverRoot(
                 input?.focus({ preventScroll: true });
                 this.__activateSelectedOrFirst();
             })
+        },
+
+        __pushSeparatorToItems(key: string) {
+            this.__items.push({
+                type: 's',
+                key,
+            });
+        },
+        
+        __pushGroupToItems(key: string) {
+            this.__items.push({
+                type: 'g',
+                key,
+            });
+        },
+        __pushOptionToItems(key: string) {
+            this.__items.push({
+                type: 'o',
+                key,
+            });
         },
 
         __activateSelectedOrFirst(activateSelected = true) {

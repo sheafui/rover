@@ -3,9 +3,9 @@ import { RoverOptionData, RoverOptionContext } from 'src/types';
 
 export const SLOT_NAME = 'rover-option';
 
-export default function CreateRoverOption(Alpine: AlpineType, nextId: number): RoverOptionData {
+export default function CreateRoverOption(Alpine: AlpineType, id: number): RoverOptionData {
     return {
-        __uniqueKey: 'option-' + nextId,
+        __uniqueKey: 'option-' + id,
         __isVisible: true,
 
         init(this: RoverOptionContext) {
@@ -21,6 +21,8 @@ export default function CreateRoverOption(Alpine: AlpineType, nextId: number): R
             let disabled = Alpine.extractProp(this.$el, 'disabled', false, false) as boolean;
 
             this.__add(this.__uniqueKey, value, disabled);
+
+            this.__pushOptionToItems(String(id));
 
             // thisis clean approach but I am not sure if this is the most acheivable of
             //  clean/efficient tradeoff but I will investigate further

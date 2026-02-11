@@ -66,9 +66,9 @@
 
   // src/factories/CreateRoverOption.ts
   var SLOT_NAME2 = "rover-option";
-  function CreateRoverOption(Alpine2, nextId) {
+  function CreateRoverOption(Alpine2, id) {
     return {
-      __uniqueKey: "option-" + nextId,
+      __uniqueKey: "option-" + id,
       __isVisible: true,
       init() {
         this.$el.dataset.slot = SLOT_NAME2;
@@ -77,6 +77,7 @@
         this.$el.dataset.value = value;
         let disabled = Alpine2.extractProp(this.$el, "disabled", false, false);
         this.__add(this.__uniqueKey, value, disabled);
+        this.__pushOptionToItems(String(id));
         this.$watch("__activatedKey", (activeKey) => {
           if (activeKey === this.__uniqueKey) {
             this.$el.setAttribute("data-active", "true");
@@ -332,7 +333,6 @@
   }) {
     const collection = new RoverCollection_default();
     const SLOT_NAME3 = "rover-root";
-    const defaultUIItem = {type: "o", key: void 0};
     return {
       __state: null,
       __isOpen: false,
@@ -415,6 +415,24 @@
         requestAnimationFrame(() => {
           input?.focus({preventScroll: true});
           this.__activateSelectedOrFirst();
+        });
+      },
+      __pushSeparatorToItems(key) {
+        this.__items.push({
+          type: "s",
+          key
+        });
+      },
+      __pushGroupToItems(key) {
+        this.__items.push({
+          type: "g",
+          key
+        });
+      },
+      __pushOptionToItems(key) {
+        this.__items.push({
+          type: "o",
+          key
         });
       },
       __activateSelectedOrFirst(activateSelected = true) {
@@ -743,10 +761,7 @@
           this.$el.setAttribute("aria-labelledby", `${groupId}-label`);
           const id = String(this.__nextGroupId());
           this.$el.dataset.key = id;
-          this.__items.push({
-            type: "g",
-            key: id
-          });
+          this.__pushGroupToItems(id);
           this.$watch("__searchQuery", () => {
             this.$nextTick(() => {
               const hasVisibleOptions = this.$el.querySelectorAll("[data-slot=rover-option]:not([hidden])").length > 0;
@@ -803,10 +818,9 @@
           this.$el.dataset.slot = "rover-separator";
           const id = String(this.__nextSeparatorId());
           this.$el.dataset.key = id;
-          this.__items.push({
-            type: "s",
-            key: id
-          });
+          this.__pushSeparatorToItems(id);
+          this.$el.setAttribute("role", "separator");
+          this.$el.setAttribute("aria-orientation", "horizontal");
         }
       });
     }

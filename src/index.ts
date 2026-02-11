@@ -161,10 +161,7 @@ export default function rover(Alpine: Alpine): void {
 
                 this.$el.dataset.key = id;
 
-                this.__items.push({
-                    type: 'g',
-                    key: id,
-                });
+                this.__pushGroupToItems(id);
 
                 this.$watch('__searchQuery', () => {
                     this.$nextTick(() => {
@@ -256,10 +253,10 @@ export default function rover(Alpine: Alpine): void {
 
                 this.$el.dataset.key = id;
 
-                this.__items.push({
-                    type: 's',
-                    key: id,
-                });
+                this.__pushSeparatorToItems(id);
+
+                this.$el.setAttribute('role', 'separator');
+                this.$el.setAttribute('aria-orientation', 'horizontal');
             }
         });
     }
