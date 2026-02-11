@@ -138,38 +138,38 @@ export default function rover(Alpine: Alpine): void {
      * options group directive handler
      * -------------------------------------        
      */
-    function handleOptionsGroup(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
-
+    function handleOptionsGroup(
+        Alpine: Alpine,
+        el: AlpineType.ElementWithXAttributes
+    ) {
         Alpine.bind(el, {
-            'x-id'() { return ['rover-options-group'] },
-            'x-bind:id'() { return this.$id('rover-options-group') },
-            'role': 'option',
-            'x-init'() {
-                this.$el.dataset.slot = 'rover-group';
+            'x-id'() { return ['rover-group'] },
 
-                this.$watch('__searchQuery', (query: string) => {
-                    // if (query.length > 0) {
-
-                        console.log(this.$el.querySelectorAll('[data-slot=rover-option]:'));
-                    // }
-                });
-
-                // this.$watch('__filteredKeys', () => {
-                //     let thereIsAnyVisibleOption = this.$el.querySelectorAll('[data-slot=rover-option]:not([style*="display: none"])').length > 0;
-
-                //     console.log(this.$el.querySelectorAll('[data-slot=rover-option]:not([style*="display: none"])'));
-
-                //     console.log('thereIsAnyVisibleOption', thereIsAnyVisibleOption);
-
-                //     if (!thereIsAnyVisibleOption) {
-                //         this.$el.style.display = 'none';
-                //     } else {
-                //         this.$el.style.display = '';
-                //     }
-                // });
+            'x-bind:id'() {
+                return this.$id('rover-group')
             },
-        });
+
+            'role': 'group',
+
+            'x-init'() {
+                const groupId = this.$id('rover-group')
+
+                this.$el.dataset.slot = 'rover-group'
+                this.$el.setAttribute('aria-labelledby', `${groupId}-label`)
+
+                this.$watch('__searchQuery', () => {
+                    queueMicrotask(() => {
+                        const hasVisibleOptions = this.$el.querySelectorAll(
+                            '[data-slot=rover-option]:not([hidden])'
+                        ).length > 0
+
+                        this.$el.hidden = !hasVisibleOptions
+                    })
+                })
+            },
+        })
     }
+
 
     /*--------------------------------------
      * button part directive handler

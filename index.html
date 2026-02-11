@@ -18,12 +18,12 @@
     <style>
 
         /* Rule 3: Hide separator if PREVIOUS sibling is a `hidden` option */
-        :is([data-slot=rover-option],[data-slot=rover-group])[style*="display: none"]+[data-slot=rover-separator] {
+        :is([data-slot=rover-option],[data-slot=rover-group]):is([hidden])+[data-slot=rover-separator] {
             display: none;
         }
 
         /* Rule 4: Hide separator if NEXT sibling is a `hidden` option */
-        [data-slot=rover-separator]:has(+ :is([data-slot=rover-option],[data-slot=rover-group])[style*="display: none"]) {
+        [data-slot=rover-separator]:has(+ :is([data-slot=rover-option],[data-slot=rover-group])[hidden]) {
             display: none;
         }
     </style>

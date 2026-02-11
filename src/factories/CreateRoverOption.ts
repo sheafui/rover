@@ -36,6 +36,13 @@ export default function CreateRoverOption(Alpine: AlpineType, nextId: string): R
                 this.__isVisible = this.__filteredKeys !== null ? this.__filteredKeys.includes(this.__uniqueKey) : true;
             });
 
+
+            this.$watch('__searchQuery', (query: string) => {
+                if (query.length) {
+                    this.__isVisible = this.__filteredKeys !== null ? this.__filteredKeys.includes(this.__uniqueKey) : true;
+                }
+            })
+
             this.$watch('__selectedKeys', (selectedKeys: string | string[]) => {
 
                 let thisElHasBeenSelected = false;
@@ -55,15 +62,12 @@ export default function CreateRoverOption(Alpine: AlpineType, nextId: string): R
                 }
             });
 
-            this.$watch('__isVisible', (isVisible: boolean) => {
-                if (!isVisible) {
-                    this.$el.setAttribute('hidden', 'true');
-                } else {
-                    this.$el.removeAttribute('hidden');
-                }
+            this.$watch('__isVisible', (visibility) => {
+                this.$el.hidden = visibility;
             });
 
-            this.$nextTick((): void => {
+
+            queueMicrotask((): void => {
                 if (disabled) {
                     this.$el.setAttribute('tabindex', '-1');
                 }

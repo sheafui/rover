@@ -88,6 +88,11 @@
         Alpine2.effect(() => {
           this.__isVisible = this.__filteredKeys !== null ? this.__filteredKeys.includes(this.__uniqueKey) : true;
         });
+        this.$watch("__searchQuery", (query) => {
+          if (query.length) {
+            this.__isVisible = this.__filteredKeys !== null ? this.__filteredKeys.includes(this.__uniqueKey) : true;
+          }
+        });
         this.$watch("__selectedKeys", (selectedKeys) => {
           let thisElHasBeenSelected = false;
           if (!this.__isMultiple) {
@@ -103,14 +108,10 @@
             this.$el.removeAttribute("data-selected");
           }
         });
-        this.$watch("__isVisible", (isVisible) => {
-          if (!isVisible) {
-            this.$el.setAttribute("hidden", "true");
-          } else {
-            this.$el.removeAttribute("hidden");
-          }
+        this.$watch("__isVisible", (visibility) => {
+          this.$el.hidden = visibility;
         });
-        this.$nextTick(() => {
+        queueMicrotask(() => {
           if (disabled) {
             this.$el.setAttribute("tabindex", "-1");
           }
@@ -725,16 +726,21 @@
     function handleOptionsGroup(Alpine3, el) {
       Alpine3.bind(el, {
         "x-id"() {
-          return ["rover-options-group"];
+          return ["rover-group"];
         },
         "x-bind:id"() {
-          return this.$id("rover-options-group");
+          return this.$id("rover-group");
         },
-        role: "option",
+        role: "group",
         "x-init"() {
+          const groupId = this.$id("rover-group");
           this.$el.dataset.slot = "rover-group";
-          this.$watch("__searchQuery", (query) => {
-            console.log(this.$el.querySelectorAll("[data-slot=rover-option]:"));
+          this.$el.setAttribute("aria-labelledby", `${groupId}-label`);
+          this.$watch("__searchQuery", () => {
+            queueMicrotask(() => {
+              const hasVisibleOptions = this.$el.querySelectorAll("[data-slot=rover-option]:not([hidden])").length > 0;
+              this.$el.hidden = !hasVisibleOptions;
+            });
           });
         }
       });
