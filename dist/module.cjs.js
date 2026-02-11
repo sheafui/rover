@@ -115,6 +115,13 @@ function CreateRoverOption(Alpine2, nextId) {
           this.$el.removeAttribute("data-selected");
         }
       });
+      this.$watch("__isVisible", (isVisible) => {
+        if (!isVisible) {
+          this.$el.setAttribute("hidden", "true");
+        } else {
+          this.$el.removeAttribute("hidden");
+        }
+      });
       this.$nextTick(() => {
         if (disabled) {
           this.$el.setAttribute("tabindex", "-1");
@@ -749,6 +756,9 @@ function rover(Alpine2) {
       role: "option",
       "x-init"() {
         this.$el.dataset.slot = "rover-group";
+        this.$watch("__searchQuery", (query) => {
+          console.log(this.$el.querySelectorAll("[data-slot=rover-option]:"));
+        });
       }
     });
   }

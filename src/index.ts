@@ -125,7 +125,6 @@ export default function rover(Alpine: Alpine): void {
             'x-bind:id'() { return this.$id('rover-option') },
             'role': 'option',
             'x-show'(this: RoverOptionContext) {
-                // return this.$data.__isVisible(this.$el.dataset.key as string);
                 return this.$data.__isVisible;
             },
             'x-data'() {
@@ -147,6 +146,13 @@ export default function rover(Alpine: Alpine): void {
             'role': 'option',
             'x-init'() {
                 this.$el.dataset.slot = 'rover-group';
+
+                this.$watch('__searchQuery', (query: string) => {
+                    // if (query.length > 0) {
+
+                        console.log(this.$el.querySelectorAll('[data-slot=rover-option]:'));
+                    // }
+                });
 
                 // this.$watch('__filteredKeys', () => {
                 //     let thereIsAnyVisibleOption = this.$el.querySelectorAll('[data-slot=rover-option]:not([style*="display: none"])').length > 0;

@@ -55,6 +55,14 @@ export default function CreateRoverOption(Alpine: AlpineType, nextId: string): R
                 }
             });
 
+            this.$watch('__isVisible', (isVisible: boolean) => {
+                if (!isVisible) {
+                    this.$el.setAttribute('hidden', 'true');
+                } else {
+                    this.$el.removeAttribute('hidden');
+                }
+            });
+
             this.$nextTick((): void => {
                 if (disabled) {
                     this.$el.setAttribute('tabindex', '-1');
