@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rover Stress Test - 1000+ Items</title>
+
+    <script src="./dist/cdn.js"></script>
+
+    <link rel="icon" href="data:,">
+
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <style>
+        .perf-excellent { color: #10b981; }
+        .perf-good { color: #3b82f6; }
+        .perf-ok { color: #f59e0b; }
+        .perf-poor { color: #ef4444; }
+    </style>
+</head>
+
+<body 
+    x-data="stressTest()" 
+    @keydown.window="trackKeyPress($event)" 
+    class="bg-neutral-950 text-white p-8"
+>
+
+    <!-- Performance Dashboard -->
+    <div class="max-w-6xl mx-auto mb-8">
+        <div class="bg-neutral-900 border border-neutral-700 rounded-lg p-6">
+            <h1 class="text-2xl font-bold mb-4">🚀 Rover Stress Test Dashboard</h1>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <!-- Total Items -->
+                <div class="bg-neutral-800 rounded p-4">
+                    <div class="text-neutral-400 text-sm">Total Items</div>
+                    <div class="text-2xl font-bold" x-text="totalItems"></div>
+                </div>
+
+                <!-- Visible Items -->
+                <div class="bg-neutral-800 rounded p-4">
+                    <div class="text-neutral-400 text-sm">Visible Items</div>
+                    <div class="text-2xl font-bold" x-text="visibleItems"></div>
+                </div>
+
+                <!-- Navigation Speed -->
+                <div class="bg-neutral-800 rounded p-4">
+                    <div class="text-neutral-400 text-sm">Navigation Speed</div>
+                    <div class="text-2xl font-bold" 
+                         :class="{
+                            'perf-excellent': navSpeed < 10,
+                            'perf-good': navSpeed >= 10 && navSpeed < 30,
+                            'perf-ok': navSpeed >= 30 && navSpeed < 100,
+                            'perf-poor': navSpeed >= 100
+                         }"
+                         x-text="navSpeed + 'ms'"></div>
+                </div>
+
+                <!-- Search Speed -->
+                <div class="bg-neutral-800 rounded p-4">
+                    <div class="text-neutral-400 text-sm">Search Speed</div>
+                    <div class="text-2xl font-bold"
+                         :class="{
+                            'perf-excellent': searchSpeed < 20,
+                            'perf-good': searchSpeed >= 20 && searchSpeed < 50,
+                            'perf-ok': searchSpeed >= 50 && searchSpeed < 150,
+                            'perf-poor': searchSpeed >= 150
+                         }"
+                         x-text="searchSpeed + 'ms'"></div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex flex-wrap gap-4 mb-4">
+                <button @click="loadItems(100)" 
+                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded">
+                    Load 100 Items
+                </button>
+                <button @click="loadItems(500)" 
+                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded">
+                    Load 500 Items
+                </button>
+                <button @click="loadItems(1000)" 
+                        class="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded">
+                    Load 1,000 Items
+                </button>
+                <button @click="loadItems(5000)" 
+                        class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded">
+                    Load 5,000 Items ⚠️
+                </button>
+                <button @click="loadItems(10000)" 
+                        class="px-4 py-2 bg-red-800 hover:bg-red-900 rounded">
+                    Load 10,000 Items 🔥
+                </button>
+            </div>
+
+            <!-- Loading Status -->
+            <div x-show="loading" class="text-yellow-400 mb-4">
+                ⏳ Loading <span x-text="loadingCount"></span> items from API...
+            </div>
+
+            <!-- Performance Tips -->
+            <div class="text-sm text-neutral-400 space-y-1">
+                <div>💡 <strong>Excellent:</strong> &lt;10ms navigation, &lt;20ms search (green)</div>
+                <div>✅ <strong>Good:</strong> 10-30ms navigation, 20-50ms search (blue)</div>
+                <div>⚠️ <strong>OK:</strong> 30-100ms navigation, 50-150ms search (orange)</div>
+                <div>❌ <strong>Poor:</strong> &gt;100ms navigation, &gt;150ms search (red)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rover Component -->
+    <div class="max-w-6xl mx-auto">
+        <div x-rover class="w-full">
+            <div class="grid grid-cols-[auto_2rem] overflow-hidden">
+                <input 
+                    x-rover:input 
+                    x-on:input="measureSearchSpeed()"
+                    placeholder="Search countries, cities, or categories..."
+                    class="flex-1 col-start-1 col-span-full overflow-hidden row-start-1 w-full rounded-md bg-transparent py-2 text-neutral-300 placeholder-neutral-300 border border-neutral-500 px-4 focus:outline-none" />
+                <button x-rover:button type="button"
+                    class="col-start-2 row-start-1 bg-white/10 text-white flex items-center self-center justify-center size-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                    </svg>
+                </button>
+            </div>
+
+            <ul 
+                x-rover:options 
+                static 
+                x-cloak
+                class="mt-1 max-h-96 w-full rounded-md border border-neutral-700 bg-white/5 text-white overflow-auto shadow-lg focus:outline-none">
+                
+                <li class="py-4 text-center" x-rover:empty>
+                    No results found - try searching for a country or city
+                </li>
+
+                <!-- Loading state -->
+                <template x-if="loading">
+                    <li class="py-8 text-center text-neutral-400">
+                        <div class="animate-pulse">Loading items...</div>
+                    </li>
+                </template>
+
+                <!-- Dynamically loaded items -->
+                <template x-for="(item, index) in items" x-bind:key="item.id">
+                    <li 
+                        x-init="console.log('Initialized item:', item.name)"
+                        x-rover:option 
+                        x-bind:value="String(item.name)" 
+                        class="px-4 py-2 data-active:bg-white/5 hover:bg-white/10 cursor-pointer transition-colors border-b border-neutral-800">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="font-medium" x-text="item.name"></div>
+                                <div class="text-xs text-neutral-400" x-text="item.category"></div>
+                            </div>
+                            <div class="text-xs text-neutral-500" x-text="'#' + (index + 1)"></div>
+                        </div>
+                    </li>
+                </template>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="max-w-6xl mx-auto mt-8 bg-blue-900/20 border border-blue-700 rounded-lg p-6">
+        <h3 class="font-bold mb-3">🧪 How to Test:</h3>
+        <ol class="space-y-2 text-sm">
+            <li><strong>1.</strong> Click a button to load items (start with 100, work your way up)</li>
+            <li><strong>2.</strong> Use <kbd class="px-2 py-1 bg-neutral-800 rounded">↑</kbd> and <kbd class="px-2 py-1 bg-neutral-800 rounded">↓</kbd> arrow keys to navigate</li>
+            <li><strong>3.</strong> Type in the search box to filter items</li>
+            <li><strong>4.</strong> Watch the dashboard for performance metrics</li>
+            <li><strong>5.</strong> Navigation speed is measured on every arrow key press</li>
+            <li><strong>6.</strong> Search speed is measured on every keystroke</li>
+        </ol>
+    </div>
+
+    <script>
+        function stressTest() {
+            return {
+                items: [],
+                loading: false,
+                loadingCount: 0,
+                totalItems: 0,
+                visibleItems: 0,
+                navSpeed: 0,
+                searchSpeed: 0,
+                lastNavTime: 0,
+                lastSearchTime: 0,
+
+                // Mock API data generator
+                async loadItems(count) {
+                    this.loading = true;
+                    this.loadingCount = count;
+                    
+                    const startTime = performance.now();
+
+                    // Simulate API call
+                    // await new Promise(resolve => setTimeout(resolve, 500));
+
+                    // Generate mock data
+                    this.items = [];
+                    
+                    const categories = ['Country', 'City', 'Region', 'Landmark', 'Mountain', 'River', 'Ocean', 'Desert'];
+                    const adjectives = ['Beautiful', 'Ancient', 'Modern', 'Historic', 'Scenic', 'Remote', 'Vibrant', 'Peaceful'];
+                    const places = [
+                        'Tokyo', 'Paris', 'London', 'New York', 'Sydney', 'Dubai', 'Singapore', 'Rome',
+                        'Barcelona', 'Amsterdam', 'Berlin', 'Vienna', 'Prague', 'Budapest', 'Lisbon', 'Madrid',
+                        'Stockholm', 'Copenhagen', 'Oslo', 'Helsinki', 'Reykjavik', 'Dublin', 'Edinburgh', 'Brussels',
+                        'Warsaw', 'Athens', 'Istanbul', 'Moscow', 'St Petersburg', 'Cairo', 'Jerusalem', 'Beirut',
+                        'Bangkok', 'Mumbai', 'Delhi', 'Shanghai', 'Beijing', 'Seoul', 'Osaka', 'Hong Kong',
+                        'Melbourne', 'Auckland', 'Wellington', 'Fiji', 'Bali', 'Phuket', 'Maldives', 'Seychelles',
+                        'Cape Town', 'Nairobi', 'Marrakech', 'Lagos', 'Accra', 'Addis Ababa', 'Casablanca', 'Tunis',
+                        'Rio', 'Buenos Aires', 'Lima', 'Bogota', 'Santiago', 'Montevideo', 'Quito', 'La Paz',
+                        'Toronto', 'Vancouver', 'Montreal', 'Mexico City', 'Havana', 'San Juan', 'Kingston', 'Nassau'
+                    ];
+
+                    for (let i = 0; i < count; i++) {
+                        const place = places[i % places.length];
+                        const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+                        const category = categories[Math.floor(Math.random() * categories.length)];
+                        
+                        this.items.push({
+                            id: `item-${i}`,
+                            name: count > 500 ? `${adjective} ${place} ${i}` : `${adjective} ${place}`,
+                            category: category,
+                        });
+                    }
+
+                    this.totalItems = count;
+                    this.visibleItems = count;
+                    
+                    const loadTime = performance.now() - startTime;
+                    console.log(`✅ Loaded ${count} items in ${loadTime.toFixed(2)}ms`);
+
+                    this.loading = false;
+                },
+
+                trackKeyPress(event) {
+                    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
+                        return;
+                    }
+
+                    const startTime = performance.now();
+
+                    // Use requestAnimationFrame to measure after DOM update
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            const endTime = performance.now();
+                            const speed = endTime - startTime;
+                            
+                            // Exponential moving average for smoother display
+                            this.navSpeed = this.navSpeed === 0 
+                                ? Math.round(speed) 
+                                : Math.round(this.navSpeed * 0.7 + speed * 0.3);
+
+                            console.log(`⌨️ Navigation: ${speed.toFixed(2)}ms`);
+                        });
+                    });
+                },
+
+                measureSearchSpeed() {
+                    const startTime = performance.now();
+
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            const endTime = performance.now();
+                            const speed = endTime - startTime;
+                            
+                            // Exponential moving average
+                            this.searchSpeed = this.searchSpeed === 0 
+                                ? Math.round(speed) 
+                                : Math.round(this.searchSpeed * 0.7 + speed * 0.3);
+
+                            // Count visible items
+                            const visibleCount = document.querySelectorAll('[data-slot="rover-option"]:not([hidden])').length;
+                            this.visibleItems = visibleCount;
+
+                            console.log(`🔍 Search: ${speed.toFixed(2)}ms (${visibleCount} visible)`);
+                        });
+                    });
+                },
+
+                init() {
+                    console.log('🚀 Stress test initialized');
+                    console.log('💡 Click a button to load items and start testing!');
+                    
+                    // Load initial 100 items
+                    setTimeout(() => this.loadItems(100), 500);
+                }
+            };
+        }
+    </script>
+</body>
+
+</html>

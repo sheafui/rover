@@ -86,6 +86,7 @@ function CreateRoverOption(Alpine2, id) {
       this.$el.dataset.slot = SLOT_NAME2;
       this.$el.dataset.key = this.__uniqueKey;
       let value = Alpine2.extractProp(this.$el, "value", "");
+      console.log("Option init:", this.__uniqueKey, "with value:", value);
       let disabled = Alpine2.extractProp(this.$el, "disabled", false, false);
       this.$el.dataset.value = value;
       this.__add(this.__uniqueKey, value, disabled);
@@ -322,6 +323,8 @@ function CreateRoverRoot({
   const collection = new RoverCollection_default();
   const SLOT_NAME3 = "rover-root";
   return {
+    __optionsEls: void 0,
+    __groupsEls: void 0,
     __state: null,
     __isOpen: false,
     __isMultiple: false,
@@ -378,50 +381,52 @@ function CreateRoverRoot({
           this.__activate(this.__filteredKeys[0]);
         }
       });
-      effect(() => {
-        const activeKey = this.__activatedKey;
-        const visibleKeys = this.__filteredKeys ? new Set(this.__filteredKeys) : null;
-        const selectedKeys = new Set(Array.isArray(this.__selectedKeys) ? this.__selectedKeys : this.__selectedKeys ? [this.__selectedKeys] : []);
-        requestAnimationFrame(() => {
-          const options = this.$el.querySelectorAll("[data-slot=rover-option]");
-          options.forEach((opt) => {
-            const htmlOpt = opt;
-            const key = htmlOpt.dataset.key;
-            if (!key)
-              return;
-            if (visibleKeys !== null) {
-              htmlOpt.hidden = !visibleKeys.has(key);
-            } else {
-              htmlOpt.hidden = false;
-            }
-            if (key === activeKey) {
-              htmlOpt.setAttribute("data-active", "true");
-              htmlOpt.setAttribute("aria-current", "true");
-              htmlOpt.scrollIntoView({
-                behavior: "smooth",
-                block: "nearest"
-              });
-            } else {
-              htmlOpt.removeAttribute("data-active");
-              htmlOpt.removeAttribute("aria-current");
-            }
-            if (selectedKeys.has(key)) {
-              htmlOpt.setAttribute("aria-selected", "true");
-              htmlOpt.setAttribute("data-selected", "true");
-            } else {
-              htmlOpt.setAttribute("aria-selected", "false");
-              htmlOpt.removeAttribute("data-selected");
-            }
-          });
-          const groups = this.$el.querySelectorAll("[data-slot=rover-group]");
-          groups.forEach((group) => {
-            const htmlGroup = group;
-            const options2 = htmlGroup.querySelectorAll("[data-slot=rover-option]");
-            const hasVisibleOption = Array.from(options2).some((opt) => {
+      this.$nextTick(() => {
+        this.__optionsEls = Array.from(this.$el.querySelectorAll("[data-slot=rover-option]"));
+        this.__groupsEls = Array.from(this.$el.querySelectorAll("[data-slot=rover-group]"));
+        effect(() => {
+          const activeKey = this.__activatedKey;
+          const visibleKeys = this.__filteredKeys ? new Set(this.__filteredKeys) : null;
+          const selectedKeys = new Set(Array.isArray(this.__selectedKeys) ? this.__selectedKeys : this.__selectedKeys ? [this.__selectedKeys] : []);
+          requestAnimationFrame(() => {
+            const options = this.__optionsEls;
+            console.log(this.__optionsEls);
+            options.forEach((opt) => {
               const htmlOpt = opt;
-              return visibleKeys ? visibleKeys.has(htmlOpt.dataset.key || "") : true;
+              const key = htmlOpt.dataset.key;
+              if (!key)
+                return;
+              if (visibleKeys !== null) {
+                htmlOpt.hidden = !visibleKeys.has(key);
+              } else {
+                htmlOpt.hidden = false;
+              }
+              if (key === activeKey) {
+                htmlOpt.setAttribute("data-active", "true");
+                htmlOpt.setAttribute("aria-current", "true");
+                htmlOpt.scrollIntoView({block: "nearest"});
+              } else {
+                htmlOpt.removeAttribute("data-active");
+                htmlOpt.removeAttribute("aria-current");
+              }
+              if (selectedKeys.has(key)) {
+                htmlOpt.setAttribute("aria-selected", "true");
+                htmlOpt.setAttribute("data-selected", "true");
+              } else {
+                htmlOpt.setAttribute("aria-selected", "false");
+                htmlOpt.removeAttribute("data-selected");
+              }
             });
-            htmlGroup.hidden = !hasVisibleOption;
+            const groups = this.__groupsEls;
+            groups.forEach((group) => {
+              const htmlGroup = group;
+              const options2 = htmlGroup.querySelectorAll("[data-slot=rover-option]");
+              const hasVisibleOption = Array.from(options2).some((opt) => {
+                const htmlOpt = opt;
+                return visibleKeys ? visibleKeys.has(htmlOpt.dataset.key || "") : true;
+              });
+              htmlGroup.hidden = !hasVisibleOption;
+            });
           });
         });
       });

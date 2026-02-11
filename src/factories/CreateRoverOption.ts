@@ -3,12 +3,6 @@ import { RoverOptionData, RoverOptionContext } from 'src/types';
 
 export const SLOT_NAME = 'rover-option';
 
-/**
- * OPTIMIZED VERSION - NO INDIVIDUAL WATCHERS
- * 
- * All reactive logic moved to CreateRoverRoot for better performance
- * This version just sets up the option and adds it to the collection
- */
 export default function CreateRoverOption(Alpine: AlpineType, id: number): RoverOptionData {
     return {
         __uniqueKey: 'option-' + id,
@@ -21,6 +15,9 @@ export default function CreateRoverOption(Alpine: AlpineType, id: number): Rover
 
             // Extract props
             let value = Alpine.extractProp(this.$el, 'value', '') as string;
+
+            console.log('Option init:', this.__uniqueKey, 'with value:', value);
+            
             let disabled = Alpine.extractProp(this.$el, 'disabled', false, false) as boolean;
 
             this.$el.dataset.value = value;
@@ -28,12 +25,6 @@ export default function CreateRoverOption(Alpine: AlpineType, id: number): Rover
             // Add to collection
             this.__add(this.__uniqueKey, value, disabled);
             this.__pushOptionToItems(String(id));
-
-            // ❌ REMOVED: All watchers moved to CreateRoverRoot
-            // ❌ No more: this.$watch('__activatedKey', ...)
-            // ❌ No more: this.$watch('__searchQuery', ...)
-            // ❌ No more: this.$watch('__selectedKeys', ...)
-            // ❌ No more: this.$watch('__isVisible', ...)
 
             // Set disabled attribute if needed
             this.$nextTick((): void => {
@@ -45,7 +36,6 @@ export default function CreateRoverOption(Alpine: AlpineType, id: number): Rover
 
         destroy() {
             this.__forget(this.__uniqueKey);
-            // No watchers to clean up!
         }
     }
 }

@@ -20,6 +20,10 @@ export default function CreateRoverRoot(
     const SLOT_NAME = 'rover-root';
 
     return {
+        // cache
+        __optionsEls: undefined,
+        __groupsEls: undefined,
+        // states
         __state: null,
         __isOpen: false,
         __isMultiple: false,
@@ -88,74 +92,86 @@ export default function CreateRoverRoot(
                 }
             });
 
-            // HANDLING INDIVIDUAL OPTION VISIBILITY, SELECTION, ACTIVE STATE 
-            effect(() => {
-                const activeKey = this.__activatedKey;
-                const visibleKeys = this.__filteredKeys ? new Set(this.__filteredKeys) : null;
-                const selectedKeys = new Set(
-                    Array.isArray(this.__selectedKeys)
-                        ? this.__selectedKeys
-                        : this.__selectedKeys ? [this.__selectedKeys] : []
-                );
+            this.$nextTick(() => {
+                this.__optionsEls = Array.from(
+                    this.$el.querySelectorAll('[data-slot=rover-option]')
+                ) as HTMLElement[];
 
-                // Batch all DOM updates in a single animation frame
-                requestAnimationFrame(() => {
-                    const options = this.$el.querySelectorAll('[data-slot=rover-option]');
+                this.__groupsEls = Array.from(
+                    this.$el.querySelectorAll('[data-slot=rover-group]')
+                ) as HTMLElement[];
 
-                    options.forEach((opt: Element) => {
-                        const htmlOpt = opt as HTMLElement;
-                        const key = htmlOpt.dataset.key;
+                // HANDLING INDIVIDUAL OPTION VISIBILITY, SELECTION, ACTIVE STATE 
+                effect(() => {
+                    const activeKey = this.__activatedKey;
+                    const visibleKeys = this.__filteredKeys ? new Set(this.__filteredKeys) : null;
+                    const selectedKeys = new Set(
+                        Array.isArray(this.__selectedKeys)
+                            ? this.__selectedKeys
+                            : this.__selectedKeys ? [this.__selectedKeys] : []
+                    );
 
-                        if (!key) return;
+                    // Batch all DOM updates in a single animation frame
+                    requestAnimationFrame(() => {
+                        const options = this.__optionsEls;
 
-                        if (visibleKeys !== null) {
-                            htmlOpt.hidden = !visibleKeys.has(key);
-                        } else {
-                            htmlOpt.hidden = false;
-                        }
+                        console.log(this.__optionsEls)
 
-                        if (key === activeKey) {
-                            htmlOpt.setAttribute('data-active', 'true');
-                            htmlOpt.setAttribute('aria-current', 'true');
-
-                            // Scroll into view if needed
-                            htmlOpt.scrollIntoView({
-                                behavior: "smooth",
-                                block: 'nearest'
-                            });
-
-                        } else {
-                            htmlOpt.removeAttribute('data-active');
-                            htmlOpt.removeAttribute('aria-current');
-                        }
-
-                        if (selectedKeys.has(key)) {
-                            htmlOpt.setAttribute('aria-selected', 'true');
-                            htmlOpt.setAttribute('data-selected', 'true');
-                        } else {
-                            htmlOpt.setAttribute('aria-selected', 'false');
-                            htmlOpt.removeAttribute('data-selected');
-                        }
-                    });
-
-                    // handle groups visibility based on visible options
-                    const groups = this.$el.querySelectorAll('[data-slot=rover-group]');
-
-                    groups.forEach((group: Element) => {
-                        const htmlGroup = group as HTMLElement;
-                        const options = htmlGroup.querySelectorAll('[data-slot=rover-option]');
-                        // Check if group has any visible options
-                        const hasVisibleOption = Array.from(options).some((opt: Element) => {
+                        options.forEach((opt: Element) => {
                             const htmlOpt = opt as HTMLElement;
-                            return visibleKeys
-                                ? visibleKeys.has(htmlOpt.dataset.key || '')
-                                : true;
+                            const key = htmlOpt.dataset.key;
+
+                            if (!key) return;
+
+                            if (visibleKeys !== null) {
+                                htmlOpt.hidden = !visibleKeys.has(key);
+                            } else {
+                                htmlOpt.hidden = false;
+                            }
+
+                            if (key === activeKey) {
+                                htmlOpt.setAttribute('data-active', 'true');
+                                htmlOpt.setAttribute('aria-current', 'true');
+
+                                // Scroll into view if needed
+                                htmlOpt.scrollIntoView({ block: 'nearest' });
+
+                            } else {
+                                htmlOpt.removeAttribute('data-active');
+                                htmlOpt.removeAttribute('aria-current');
+                            }
+
+                            if (selectedKeys.has(key)) {
+                                htmlOpt.setAttribute('aria-selected', 'true');
+                                htmlOpt.setAttribute('data-selected', 'true');
+                            } else {
+                                htmlOpt.setAttribute('aria-selected', 'false');
+                                htmlOpt.removeAttribute('data-selected');
+                            }
                         });
 
-                        htmlGroup.hidden = !hasVisibleOption;
+                        // handle groups visibility based on visible options
+                        const groups = this.__groupsEls;
+
+                        groups.forEach((group: Element) => {
+                            const htmlGroup = group as HTMLElement;
+                            const options = htmlGroup.querySelectorAll('[data-slot=rover-option]');
+                            // Check if group has any visible options
+                            const hasVisibleOption = Array.from(options).some((opt: Element) => {
+
+                                const htmlOpt = opt as HTMLElement;
+
+                                return visibleKeys
+                                    ? visibleKeys.has(htmlOpt.dataset.key || '')
+                                    : true;
+                            });
+
+                            htmlGroup.hidden = !hasVisibleOption;
+                        });
                     });
                 });
             });
+
 
             // Initialize multiple/single mode
             if (this.__isMultiple) {
