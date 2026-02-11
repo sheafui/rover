@@ -99,6 +99,7 @@ export default function CreateRoverRoot(
                     this.__filteredKeys = null;
                 }
 
+                // if no visible active item, deactivate the active key on the collection.
                 if (this.__activatedKey && this.__filteredKeys && !this.__filteredKeys.includes(this.__activatedKey)) {
                     this.__deactivate();
                 }
