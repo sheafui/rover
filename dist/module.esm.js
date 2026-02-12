@@ -705,6 +705,40 @@ var rover = (dataStack) => ({
   }
 });
 
+// src/magics/roverOption.ts
+var roverOption = (dataStack) => ({
+  activate(key) {
+    dataStack.collection.activate(key);
+  },
+  deactivate() {
+    dataStack.collection.deactivate();
+  },
+  getValueByKey(key) {
+    return dataStack.collection.getValueByKey(key);
+  },
+  getActiveItem() {
+    return dataStack.collection.getActiveItem();
+  },
+  activateNext() {
+    dataStack.collection.activateNext();
+  },
+  activatePrev() {
+    dataStack.collection.activatePrev();
+  },
+  activateFirst() {
+    dataStack.collection.activateFirst();
+  },
+  activateLast() {
+    dataStack.collection.activateLast();
+  },
+  searchUsing(query) {
+    return dataStack.collection.search(query);
+  },
+  getKeyByIndex(index) {
+    return dataStack.collection.getKeyByIndex(index);
+  }
+});
+
 // src/index.ts
 function rover2(Alpine2) {
   Alpine2.directive("rover", (el, {value, modifiers, expression}, {Alpine: Alpine3, effect, evaluate}) => {
@@ -743,6 +777,9 @@ function rover2(Alpine2) {
   });
   Alpine2.magic("rover", (el) => {
     return rover(Alpine2.$data(el));
+  });
+  Alpine2.magic("roverOption", (el) => {
+    return roverOption(Alpine2.$data(el));
   });
   function handleRoot(Alpine3, el, effect) {
     Alpine3.bind(el, {
