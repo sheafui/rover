@@ -65,7 +65,7 @@ export default function rover(Alpine: Alpine): void {
         Alpine.bind(el, {
             'x-data'() {
                 return {
-                    ...CreateRoverRoot({ el, effect })
+                    ...CreateRoverRoot({ effect })
                 }
             }
         });

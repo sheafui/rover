@@ -263,7 +263,6 @@ function createInputManager(root) {
 
 // src/factories/CreateRoverRoot.ts
 function CreateRoverRoot({
-  el,
   effect
 }) {
   const collection = new RoverCollection_default();
@@ -383,8 +382,6 @@ function CreateRoverRoot({
           });
         });
       });
-      this.__isDisabled = Alpine.extractProp(el, "disabled", false);
-      this.__compareBy = Alpine.extractProp(el, "by", "");
       this.__registerEventsDelector();
       this.$nextTick(() => {
         if (!this.$refs.__input) {
@@ -455,7 +452,7 @@ function CreateRoverRoot({
       return ++this.__s_id;
     },
     __registerEventsDelector() {
-      const findClosestOption = (el2) => Alpine.findClosest(el2, (node) => node.dataset.slot === SLOT_NAME);
+      const findClosestOption = (el) => Alpine.findClosest(el, (node) => node.dataset.slot === SLOT_NAME);
       const delegate = (handler) => {
         return function(e) {
           e.stopPropagation();
@@ -711,7 +708,7 @@ function rover2(Alpine2) {
     Alpine3.bind(el, {
       "x-data"() {
         return {
-          ...CreateRoverRoot({el, effect})
+          ...CreateRoverRoot({effect})
         };
       }
     });

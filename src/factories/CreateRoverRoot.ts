@@ -6,10 +6,11 @@ import { SLOT_NAME as OPTION_SLOT_NAME } from "./CreateRoverOption";
 import { createInputManager } from "src/InputManager";
 
 export default function CreateRoverRoot(
-    { el,
+    { 
+        // el,
         effect
     }: {
-        el: AlpineType.ElementWithXAttributes,
+        // el: AlpineType.ElementWithXAttributes,
         effect: AlpineType.DirectiveUtilities['effect']
     }
 ): RoverRootData {
@@ -195,9 +196,6 @@ export default function CreateRoverRoot(
                     });
                 });
             });
-
-            this.__isDisabled = Alpine.extractProp(el, 'disabled', false) as boolean;
-            this.__compareBy = Alpine.extractProp(el, 'by', '') as string;
 
             this.__registerEventsDelector();
 
