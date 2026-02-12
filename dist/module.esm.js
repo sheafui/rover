@@ -429,8 +429,14 @@ function CreateRoverRoot({
       if (this.__isOpen)
         return;
       this.__isOpen = true;
-      let input = this.$refs.__input;
-      this.__onOpen();
+      this.$nextTick(() => {
+        if (this.$refs.__input) {
+          this.$refs.__input.focus({preventScroll: true});
+        }
+        if (!this.__getActiveItem() && this.collection.items.length) {
+          this.__activateFirst();
+        }
+      });
     },
     __pushSeparatorToItems(key) {
       this.__items.push({
@@ -647,6 +653,12 @@ function CreateRoverOptions(Alpine2) {
 
 // src/magics/rover.ts
 var rover = (dataStack) => ({
+  get isOpen() {
+    return dataStack.__isOpen;
+  },
+  get collection() {
+    return dataStack.collection;
+  },
   activate(key) {
     dataStack.collection.activate(key);
   },
@@ -800,7 +812,9 @@ function rover2(Alpine2) {
   function handleRoot(Alpine3, el, effect) {
     Alpine3.bind(el, {
       "x-data"() {
-        return CreateRoverRoot({el, effect});
+        return {
+          ...CreateRoverRoot({el, effect})
+        };
       }
     });
   }

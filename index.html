@@ -30,14 +30,8 @@
 
 <body class="flex mt-20 justify-center bg-neutral-950">
 
-    <div
-        class="space-y-4"
-        x-data="selectComponent"
-    >
-        <div 
-           x-rover 
-           class="w-[360px]"
-        >
+    <div class="space-y-4" x-rover x-data="selectComponent" >
+        <div class="w-[360px]">
             <div class="grid grid-cols-[auto_2rem] overflow-hidden">
                 <input x-rover:input placeholder="Search..."
                     class="flex-1 col-start-1 col-span-full overflow-hidden row-start-1 w-full rounded-md bg-transparent py-2 text-neutral-300 placeholder-neutral-300 border border-neutral-500 px-4 focus:outline-none" />
@@ -57,7 +51,12 @@
                 </li>
 
                 <template x-for="(item, index) in items" x-bind:key="index">
-                    <li x-rover:option="item" x-text="item" class="px-4 data-active:bg-white/5 py-2">
+                    <li 
+                        x-on:click="console.log('clicked', $rover.isOpen)"
+                        x-rover:option="item" 
+                        x-text="item" 
+                        class="px-4 data-active:bg-white/5 py-2"
+                    >
                     </li>
                 </template>
             </ul>
@@ -69,19 +68,13 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('selectComponent', () => ({
             items: ['tenjarine', 'apple', 'banana', 'cherry', 'orange', 'mango', 'grape'],
-            init(){
-                console.log(this.$rover)
-                // console.log(this.$roverOptions);
-
-                // this.$roverOptions.onOpen(()=>{
-                //     console.log('opened');
-                // });           
-                
-                // this.$roverOptions.onClose(()=>{
-
-                // });           
+            init() {
+                this.$nextTick(() => {
+                    console.log(this.$rover.collection);
+                })
             },
-            
+
+
             activateSelectedOrFirst(activateSelected = true) {
                 if (!this.$roverOptions.isOpen) return;
 

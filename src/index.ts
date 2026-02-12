@@ -6,6 +6,7 @@ import CreateRoverRoot from "./factories/CreateRoverRoot";
 import CreateRoverOptions from "./factories/CreateRoverOptions";
 import { RoverOptionContext, RoverOptionsContext, RoverRootContext } from "./types";
 import registerMagics from "./magics";
+import { DefaultDeserializer } from "node:v8";
 
 
 type RoverValue =
@@ -63,7 +64,9 @@ export default function rover(Alpine: Alpine): void {
     ) {
         Alpine.bind(el, {
             'x-data'() {
-                return CreateRoverRoot({ el, effect });
+                return {
+                    ...CreateRoverRoot({ el, effect })
+                }
             }
         });
     }

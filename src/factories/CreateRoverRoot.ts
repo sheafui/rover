@@ -193,9 +193,15 @@ export default function CreateRoverRoot(
 
             this.__isOpen = true;
 
-            let input = this.$refs.__input;
+            this.$nextTick(() => {
+                if (this.$refs.__input) {
+                    this.$refs.__input.focus({ preventScroll: true });
+                }
 
-            this.__onOpen();
+                if (!this.__getActiveItem() && this.collection.items.length) {
+                    this.__activateFirst();
+                }
+            });
         },
 
         __pushSeparatorToItems(key: string) {

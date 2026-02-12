@@ -1,6 +1,12 @@
 import { Item, RoverRootContext } from "src/types";
 
 export const rover = (dataStack: RoverRootContext) => ({
+    get isOpen() {
+        return dataStack.__isOpen;
+    },
+    get collection(){
+        return dataStack.collection;
+    },
     activate(key: string) {
         dataStack.collection.activate(key)
     },
