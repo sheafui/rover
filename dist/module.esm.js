@@ -731,6 +731,22 @@ var roverOption = (dataStack) => ({
   }
 });
 
+// src/magics/roverOptions.ts
+var roverOptions = (dataStack) => ({
+  isOpen() {
+    return dataStack.__isOpen;
+  },
+  open() {
+    dataStack.__open();
+  },
+  close() {
+    dataStack.__close();
+  },
+  isStatic() {
+    return dataStack.__static;
+  }
+});
+
 // src/index.ts
 function rover2(Alpine2) {
   Alpine2.directive("rover", (el, {value, modifiers, expression}, {Alpine: Alpine3, effect, evaluate}) => {
@@ -766,12 +782,15 @@ function rover2(Alpine2) {
         console.error("invalid x-rover value", value, "use input, button, option, options, group or leave mepty for root level instead");
         break;
     }
-  });
+  }).before("bind");
   Alpine2.magic("rover", (el) => {
     return rover(Alpine2.$data(el));
   });
   Alpine2.magic("roverOption", (el) => {
     return roverOption(Alpine2.$data(el));
+  });
+  Alpine2.magic("roverOptions", (el) => {
+    return roverOptions(Alpine2.$data(el));
   });
   function handleRoot(Alpine3, el, effect) {
     Alpine3.bind(el, {
@@ -857,7 +876,19 @@ function rover2(Alpine2) {
         return this.$id("rover-button");
       },
       tabindex: "-1",
-      "aria-haspopup": "true"
+      "aria-haspopup": "true",
+      "x-on:click"(e) {
+        if (this.__isDisabled)
+          return;
+        if (this.__isOpen) {
+          this.__close();
+          this.__resetInput();
+        } else {
+          e.preventDefault();
+          this.__open();
+        }
+        requestAnimationFrame(() => this.$refs.__input.focus({preventScroll: true}));
+      }
     });
   }
   function handleEmptyState(Alpine3, el) {

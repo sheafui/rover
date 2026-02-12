@@ -8,6 +8,7 @@ import { RoverOptionContext, RoverOptionsContext, RoverRootContext } from "./typ
 
 import { rover as roverMagic } from "./magics/rover";
 import { roverOption as roverOptionMagic } from "./magics/roverOption";
+import { roverOptions as roverOptionsMagic } from "./magics/roverOptions";
 type RoverValue =
     | null
     | 'input'
@@ -50,7 +51,7 @@ export default function rover(Alpine: Alpine): void {
                 console.error('invalid x-rover value', value, 'use input, button, option, options, group or leave mepty for root level instead');
                 break;
         }
-    });
+    }).before('bind');
 
 
     Alpine.magic('rover', (el) => {
@@ -59,6 +60,10 @@ export default function rover(Alpine: Alpine): void {
 
     Alpine.magic('roverOption', (el) => {
         return roverOptionMagic(Alpine.$data(el) as RoverRootContext);
+    });
+
+    Alpine.magic('roverOptions', (el) => {
+        return roverOptionsMagic(Alpine.$data(el) as RoverRootContext);
     });
 
 
@@ -157,19 +162,19 @@ export default function rover(Alpine: Alpine): void {
             'x-bind:id'() { return this.$id('rover-button') },
             'tabindex': '-1',
             'aria-haspopup': 'true',
-            // 'x-on:click'(e) {
-            //     if (this.__isDisabled) return
+            'x-on:click'(e) {
+                if (this.__isDisabled) return
 
-            //     if (this.__isOpen) {
-            //         this.__close()
-            //         this.__resetInput()
-            //     } else {
-            //         e.preventDefault()
-            //         this.__open()
-            //     }
+                if (this.__isOpen) {
+                    this.__close()
+                    this.__resetInput()
+                } else {
+                    e.preventDefault()
+                    this.__open()
+                }
 
-            //     requestAnimationFrame(() => this.$refs.__input.focus({ preventScroll: true }))
-            // },
+                requestAnimationFrame(() => this.$refs.__input.focus({ preventScroll: true }))
+            },
         })
     }
 
