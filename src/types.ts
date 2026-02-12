@@ -21,7 +21,6 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     collection: RoverCollection;
     __optionsEls: NodeListOf<HTMLElement> | undefined;
     __groupsEls: NodeListOf<HTMLElement> | undefined;
-    __state: string | string[] | null;
     __isOpen: boolean;
     __isTyping: boolean;
     __isLoading: boolean;
@@ -33,7 +32,6 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __items: UIItem[];
     __optionsEl: HTMLElement | undefined;
     __activatedKey: string | null | undefined;
-    __selectedKeys: string | string[] | null | undefined;
     __filteredKeys: string[] | null;
     __filteredKeysSet: Set<string>;
     __searchQuery: string;
@@ -59,8 +57,6 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __activateSelectedOrFirst?: (activateSelected?: boolean) => void;
     __registerEventsDelector: () => void;
     __close: () => void;
-    __handleSelection: (key: string) => void;
-    __selectActive: () => void;
     __startTyping: () => void;
     __stopTyping: () => void;
     __resetInput: () => void;

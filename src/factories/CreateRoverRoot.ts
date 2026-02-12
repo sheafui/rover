@@ -24,7 +24,6 @@ export default function CreateRoverRoot(
         __optionsEls: undefined,
         __groupsEls: undefined,
         // states
-        __state: null,
         __isOpen: false,
         __isTyping: false,
         __isLoading: false,
@@ -126,14 +125,15 @@ export default function CreateRoverRoot(
                 // HANDLING INDIVIDUAL OPTION VISIBILITY, SELECTION, ACTIVE STATE 
                 effect(() => {
                     const activeKey = this.__activatedKey;
+
                     const visibleKeys = this.__filteredKeys ? new Set(this.__filteredKeys) : null;
 
-                    const selectedKeys = new Set(Array.isArray(this.__selectedKeys)
-                        ? this.__selectedKeys
-                        : this.__selectedKeys
-                            ? [this.__selectedKeys]
-                            : []
-                    );
+                    // const selectedKeys = new Set(Array.isArray(this.__selectedKeys)
+                    //     ? this.__selectedKeys
+                    //     : this.__selectedKeys
+                    //         ? [this.__selectedKeys]
+                    //         : []
+                    // );
 
                     // Batch all DOM updates
                     requestAnimationFrame(() => {
@@ -164,13 +164,13 @@ export default function CreateRoverRoot(
                                 htmlOpt.removeAttribute('aria-current');
                             }
 
-                            if (selectedKeys.has(key)) {
-                                htmlOpt.setAttribute('aria-selected', 'true');
-                                htmlOpt.setAttribute('data-selected', 'true');
-                            } else {
-                                htmlOpt.setAttribute('aria-selected', 'false');
-                                htmlOpt.removeAttribute('data-selected');
-                            }
+                            // if (selectedKeys.has(key)) {
+                            //     htmlOpt.setAttribute('aria-selected', 'true');
+                            //     htmlOpt.setAttribute('data-selected', 'true');
+                            // } else {
+                            //     htmlOpt.setAttribute('aria-selected', 'false');
+                            //     htmlOpt.removeAttribute('data-selected');
+                            // }
                         });
 
                         // handle groups visibility based on visible options
@@ -244,54 +244,6 @@ export default function CreateRoverRoot(
         __close() {
             this.__isOpen = false;
             this.__deactivate();
-        },
-
-        __handleSelection(key: string) {
-
-            let value = this.__getValueByKey(key);
-
-            if (!this.__isMultiple) {
-                this.__selectedKeys = key;
-
-                if (this.__state === value) {
-                    this.__state = null;
-                    this.__selectedKeys = null;
-                } else {
-                    this.__state = value;
-                }
-
-                if (!this.__static) {
-                    this.__close();
-                }
-                console.log(this.__state);
-
-                return;
-            }
-
-            if (!Array.isArray(this.__selectedKeys)) {
-                this.__selectedKeys = [];
-            }
-
-            if (!Array.isArray(this.__state)) {
-                this.__state = [];
-            }
-
-            let index = this.__state.findIndex((j: unknown) => this.__compare(j, value));
-
-            let keyIndex = this.__selectedKeys.indexOf(key);
-
-            if (index === -1) {
-                this.__state.push(value);
-                this.__selectedKeys.push(key);
-            } else {
-                this.__state.splice(index, 1);
-                this.__selectedKeys.splice(keyIndex, 1);
-            }
-        },
-
-        __selectActive() {
-            if (!this.__activatedKey) return;
-            this.__handleSelection(this.__activatedKey);
         },
 
         __startTyping() {
