@@ -1,7 +1,7 @@
 import RoverCollection from "../core/RoverCollection";
 
 import type { default as AlpineType } from "alpinejs";
-import { Item, RoverRootData } from "src/types";
+import { Item, RoverInputContext, RoverRootData } from "src/types";
 import { SLOT_NAME as OPTION_SLOT_NAME } from "./CreateRoverOption";
 
 export default function CreateRoverRoot(
@@ -62,6 +62,16 @@ export default function CreateRoverRoot(
         __onOpenCallback: () => { },
         __onOpen(callback: () => void) {
             this.__onOpenCallback = callback;
+        },
+        __onCloseCallback: () => { },
+        __onClose(callback: () => void) {
+            this.__onCloseCallback = callback;
+        },
+        onkeydown: (handler: (event: KeyboardEvent, key: string | null) => void) => {
+            this.$root.addEventListener('keydown', (event: KeyboardEvent) => {
+                const activeKey = this.__activatedKey || null;
+                handler(event, activeKey);
+            });
         },
         init() {
             this.$el.dataset.slot = SLOT_NAME;
@@ -185,6 +195,12 @@ export default function CreateRoverRoot(
 
             this.__registerEventsDelector();
 
+            this.$nextTick(() => {
+                if (this.$refs.__input) {
+                    this.__handleInputEvents();
+                }
+            });
+
             // if there is not input tied with this rover, keep always open true
             this.$nextTick(() => {
                 if (!this.$refs.__input) {
@@ -225,27 +241,6 @@ export default function CreateRoverRoot(
                 key,
             });
         },
-
-        // __activateSelectedOrFirst(activateSelected = true) {
-        //     if (!this.__isOpen) return;
-
-        //     let activeItem = this.__getActiveItem();
-
-        //     if (activeItem) return;
-
-        //     if (activateSelected && this.__selectedKeys) {
-        //         const keyToActivate = this.__isMultiple
-        //             ? this.__selectedKeys[0]
-        //             : this.__selectedKeys;
-
-        //         if (keyToActivate) {
-        //             this.__activate(keyToActivate);
-        //             return;
-        //         }
-        //     }
-
-        //     this.__activateFirst();
-        // },
 
         __close() {
             this.__isOpen = false;
@@ -383,17 +378,7 @@ export default function CreateRoverRoot(
                     delegate((optionEl) => {
                         if (!optionEl.dataset.key) return;
 
-
-
-                        this.__handleSelection(optionEl.dataset.key);
-
-                        console.log('clicked', optionEl, optionEl.dataset.key)
-
-                        console.log('selected keys:', this.__selectedKeys);
-                        if (!this.__isMultiple && !this.__static) {
-                            // this§/;.__close()
-                            // this.__resetInput()
-                        }
+                        // this.__handleSelection(optionEl.dataset.key);
 
                         this.$nextTick(() => this.$refs?.__input?.focus({ preventScroll: true }))
                     })
@@ -421,39 +406,105 @@ export default function CreateRoverRoot(
                     })
                 );
 
-                this.$root.addEventListener('keydown', (e: KeyboardEvent) => {
-                    switch (e.key) {
-                        case 'ArrowDown':
-                            e.preventDefault(); e.stopPropagation();
-                            this.__activateNext();
-                            break;
+                // this.$root.addEventListener('keydown', (e: KeyboardEvent) => {
+                //     switch (e.key) {
+                //         case 'ArrowDown':
+                //             e.preventDefault(); e.stopPropagation();
+                //             this.__activateNext();
+                //             break;
 
-                        case 'ArrowUp':
-                            e.preventDefault(); e.stopPropagation();
-                            this.__activatePrev();
-                            break;
+                //         case 'ArrowUp':
+                //             e.preventDefault(); e.stopPropagation();
+                //             this.__activatePrev();
+                //             break;
 
-                        case 'Enter':
-                            e.preventDefault(); e.stopPropagation();
-                            this.__selectActive()
-                            if (!this.__isMultiple) {
-                                this.__close()
-                                this.__resetInput()
-                            }
-                            break;
+                //         case 'Enter':
+                //             e.preventDefault(); e.stopPropagation();
+                //             this.__selectActive()
+                //             if (!this.__isMultiple) {
+                //                 this.__close()
+                //                 this.__resetInput()
+                //             }
+                //             break;
 
-                        case 'Escape':
-                            e.preventDefault(); e.stopPropagation();
-                            this.__close();
-                            this.$nextTick(() => this.$refs?.__input?.focus({ preventScroll: true }))
-                            break;
+                //         case 'Escape':
+                //             e.preventDefault(); e.stopPropagation();
+                //             this.__close();
+                //             this.$nextTick(() => this.$refs?.__input?.focus({ preventScroll: true }))
+                //             break;
 
-                        default:
-                            if (this.__static) return;
-                            this.__open();
+                //         default:
+                //             if (this.__static) return;
+                //             this.__open();
+                //             break;
+                //     }
+                // });
+            });
+        },
+
+        __handleInputEvents() {
+
+            this.$refs.__input.addEventListener('focus', () => {
+                // on flat variant we need to activate the first key as
+                //  soon as the user focus the input
+                this.__startTyping();
+            })
+
+            this.$refs.__input.addEventListener('input', (e: InputEvent) => {
+                e.stopPropagation();
+
+                if (this.__isTyping) {
+                    this.__open();
+                }
+            });
+
+            this.$refs.__input.addEventListener('blur', () => {
+                this.__stopTyping();
+            });
+
+            this.$refs.__input.addEventListener('keydown', (e: KeyboardEvent) => {
+
+                switch (e.key) {
+                    case 'ArrowDown':
+                        e.preventDefault(); e.stopPropagation();
+                        if (!this.__isOpen) {
+                            this.__open()
                             break;
-                    }
-                });
+                        }
+                        this.__activateNext();
+                        break;
+
+                    case 'ArrowUp':
+                        e.preventDefault(); e.stopPropagation();
+
+                        if (!this.__isOpen) {
+                            this.__open()
+                            break;
+                        }
+
+                        this.__activatePrev();
+                        break;
+
+                    case 'Enter':
+                        e.preventDefault(); e.stopPropagation();
+
+                        this.__selectActive()
+
+                        this.__stopTyping()
+
+                        if (!this.__isMultiple) {
+                            this.__close()
+                            this.__resetInput()
+                        }
+
+                        break;
+                    default:
+                        if (this.__static) return;
+
+                        this.__open();
+
+                        break;
+                }
             });
         },
     }

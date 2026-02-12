@@ -84,9 +84,9 @@ export default function rover(Alpine: Alpine): void {
             'role': 'combobox',
             'tabindex': '0',
             'aria-autocomplete': 'list',
-            'x-data'() {
-                return CreateRoverInput(Alpine);
-            }
+            'x-init'() {
+                this.$el.dataset.slot = 'rover-input';
+            },
         });
     }
 
@@ -97,6 +97,15 @@ export default function rover(Alpine: Alpine): void {
             'role': 'listbox',
             'x-on:click.away'(this: RoverOptionsContext, $event) {
                 this.__handleClickAway($event)
+            },
+            'x-init'() {
+                this.$data.__static = Alpine.extractProp(this.$el, 'static', false) as boolean;
+
+                if (Alpine.bound(this.$el, 'keepActivated')) {
+                    this.__keepActivated = true;
+                }
+                return this.$el.dataset.slot = 'rover-options';
+
             },
             'x-data'() {
                 return CreateRoverOptions(Alpine);

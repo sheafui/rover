@@ -11,8 +11,6 @@ export default function CreateRoverInput(Alpine: AlpineType): RoverInputData {
             if (displayValueFn) this.__displayValue = displayValueFn;
 
             this.$el.dataset.slot = SLOT_NAME;
-
-            this.__handleEvents();
         },
 
         __handleEvents(this: RoverInputContext) {

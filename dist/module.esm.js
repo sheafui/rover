@@ -1,76 +1,11 @@
-// src/factories/CreateRoverInput.ts
-var SLOT_NAME = "rover-input";
-function CreateRoverInput(Alpine2) {
-  return {
-    init() {
-      let displayValueFn = Alpine2.extractProp(this.$el, "display-value", "");
-      if (displayValueFn)
-        this.__displayValue = displayValueFn;
-      this.$el.dataset.slot = SLOT_NAME;
-      this.__handleEvents();
-    },
-    __handleEvents() {
-      this.$el.addEventListener("focus", () => {
-        this.__startTyping();
-      });
-      this.$el.addEventListener("input", (e) => {
-        e.stopPropagation();
-        if (this.__isTyping) {
-          this.__open();
-        }
-      });
-      this.$el.addEventListener("blur", () => {
-        this.__stopTyping();
-      });
-      this.$el.addEventListener("keydown", (e) => {
-        switch (e.key) {
-          case "ArrowDown":
-            e.preventDefault();
-            e.stopPropagation();
-            if (!this.__isOpen) {
-              this.__open();
-              break;
-            }
-            this.__activateNext();
-            break;
-          case "ArrowUp":
-            e.preventDefault();
-            e.stopPropagation();
-            if (!this.__isOpen) {
-              this.__open();
-              break;
-            }
-            this.__activatePrev();
-            break;
-          case "Enter":
-            e.preventDefault();
-            e.stopPropagation();
-            this.__selectActive();
-            this.__stopTyping();
-            if (!this.__isMultiple) {
-              this.__close();
-              this.__resetInput();
-            }
-            break;
-          default:
-            if (this.__static)
-              return;
-            this.__open();
-            break;
-        }
-      });
-    }
-  };
-}
-
 // src/factories/CreateRoverOption.ts
-var SLOT_NAME2 = "rover-option";
+var SLOT_NAME = "rover-option";
 function CreateRoverOption(Alpine2, id, dirValue) {
   return {
     __uniqueKey: "option-" + id,
     __isVisible: true,
     init() {
-      this.$el.dataset.slot = SLOT_NAME2;
+      this.$el.dataset.slot = SLOT_NAME;
       this.$el.dataset.key = this.__uniqueKey;
       let value;
       if (dirValue !== null) {
@@ -349,6 +284,17 @@ function CreateRoverRoot({
     __onOpen(callback) {
       this.__onOpenCallback = callback;
     },
+    __onCloseCallback: () => {
+    },
+    __onClose(callback) {
+      this.__onCloseCallback = callback;
+    },
+    onkeydown: (handler) => {
+      this.$root.addEventListener("keydown", (event) => {
+        const activeKey = this.__activatedKey || null;
+        handler(event, activeKey);
+      });
+    },
     init() {
       this.$el.dataset.slot = SLOT_NAME3;
       effect(() => {
@@ -424,6 +370,11 @@ function CreateRoverRoot({
       this.__isDisabled = Alpine.extractProp(el, "disabled", false);
       this.__compareBy = Alpine.extractProp(el, "by", "");
       this.__registerEventsDelector();
+      this.$nextTick(() => {
+        if (this.$refs.__input) {
+          this.__handleInputEvents();
+        }
+      });
       this.$nextTick(() => {
         if (!this.$refs.__input) {
           this.__isOpen = true;
@@ -547,7 +498,7 @@ function CreateRoverRoot({
       return ++this.__s_id;
     },
     __registerEventsDelector() {
-      const findClosestOption = (el2) => Alpine.findClosest(el2, (node) => node.dataset.slot === SLOT_NAME2);
+      const findClosestOption = (el2) => Alpine.findClosest(el2, (node) => node.dataset.slot === SLOT_NAME);
       const delegate = (handler) => {
         return function(e) {
           e.stopPropagation();
@@ -566,11 +517,6 @@ function CreateRoverRoot({
         this.__optionsEl.addEventListener("click", delegate((optionEl) => {
           if (!optionEl.dataset.key)
             return;
-          this.__handleSelection(optionEl.dataset.key);
-          console.log("clicked", optionEl, optionEl.dataset.key);
-          console.log("selected keys:", this.__selectedKeys);
-          if (!this.__isMultiple && !this.__static) {
-          }
           this.$nextTick(() => this.$refs?.__input?.focus({preventScroll: true}));
         }));
         this.__optionsEl.addEventListener("mouseover", delegate((optionEl) => {
@@ -590,44 +536,64 @@ function CreateRoverRoot({
             return;
           this.__deactivate();
         }));
-        this.$root.addEventListener("keydown", (e) => {
-          switch (e.key) {
-            case "ArrowDown":
-              e.preventDefault();
-              e.stopPropagation();
-              this.__activateNext();
-              break;
-            case "ArrowUp":
-              e.preventDefault();
-              e.stopPropagation();
-              this.__activatePrev();
-              break;
-            case "Enter":
-              e.preventDefault();
-              e.stopPropagation();
-              this.__selectActive();
-              if (!this.__isMultiple) {
-                this.__close();
-                this.__resetInput();
-              }
-              break;
-            case "Escape":
-              e.preventDefault();
-              e.stopPropagation();
-              this.__close();
-              this.$nextTick(() => this.$refs?.__input?.focus({preventScroll: true}));
-              break;
-            default:
-              if (this.__static)
-                return;
+      });
+    },
+    __handleInputEvents() {
+      this.$refs.__input.addEventListener("focus", () => {
+        this.__startTyping();
+      });
+      this.$refs.__input.addEventListener("input", (e) => {
+        e.stopPropagation();
+        if (this.__isTyping) {
+          this.__open();
+        }
+      });
+      this.$refs.__input.addEventListener("blur", () => {
+        this.__stopTyping();
+      });
+      this.$refs.__input.addEventListener("keydown", (e) => {
+        switch (e.key) {
+          case "ArrowDown":
+            e.preventDefault();
+            e.stopPropagation();
+            if (!this.__isOpen) {
               this.__open();
               break;
-          }
-        });
+            }
+            this.__activateNext();
+            break;
+          case "ArrowUp":
+            e.preventDefault();
+            e.stopPropagation();
+            if (!this.__isOpen) {
+              this.__open();
+              break;
+            }
+            this.__activatePrev();
+            break;
+          case "Enter":
+            e.preventDefault();
+            e.stopPropagation();
+            this.__selectActive();
+            this.__stopTyping();
+            if (!this.__isMultiple) {
+              this.__close();
+              this.__resetInput();
+            }
+            break;
+          default:
+            if (this.__static)
+              return;
+            this.__open();
+            break;
+        }
       });
     }
   };
 }
+
+// src/factories/CreateRoverInput.ts
+var SLOT_NAME2 = "rover-input";
 
 // src/factories/CreateRoverOptions.ts
 function CreateRoverOptions(Alpine2) {
@@ -644,7 +610,7 @@ function CreateRoverOptions(Alpine2) {
       if (this.__static)
         return;
       let target = event.target;
-      if (target.dataset.slot && target.dataset.slot === SLOT_NAME) {
+      if (target.dataset.slot && target.dataset.slot === SLOT_NAME2) {
         return;
       }
       this.__close();
@@ -664,6 +630,17 @@ var rover = (el) => {
     },
     onOpen(callback) {
       data.__onOpen(callback);
+    },
+    navigator: () => {
+      return data.navigator;
+    },
+    get input() {
+      return queueMicrotask(() => {
+        this.$refs.input;
+      });
+    },
+    onClose(callback) {
+      data.__onClose(callback);
     },
     activate(key) {
       data.collection.activate(key);
@@ -834,8 +811,8 @@ function rover2(Alpine2) {
       role: "combobox",
       tabindex: "0",
       "aria-autocomplete": "list",
-      "x-data"() {
-        return CreateRoverInput(Alpine3);
+      "x-init"() {
+        this.$el.dataset.slot = "rover-input";
       }
     });
   }
@@ -848,6 +825,13 @@ function rover2(Alpine2) {
       role: "listbox",
       "x-on:click.away"($event) {
         this.__handleClickAway($event);
+      },
+      "x-init"() {
+        this.$data.__static = Alpine2.extractProp(this.$el, "static", false);
+        if (Alpine2.bound(this.$el, "keepActivated")) {
+          this.__keepActivated = true;
+        }
+        return this.$el.dataset.slot = "rover-options";
       },
       "x-data"() {
         return CreateRoverOptions(Alpine2);

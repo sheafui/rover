@@ -75,7 +75,8 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __nextSeparatorId: () => number;
     __onOpenCallback: () => void;
     __onOpen: (callback: () => void) => void;
-
+    __onCloseCallback: () => void;
+    __onClose: (callback: () => void) => void;
 }
 
 export type RoverRootContext = RoverRootData & Magics<RoverRootData>;

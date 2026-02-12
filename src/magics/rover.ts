@@ -13,12 +13,15 @@ export const rover = (el: ElementWithXAttributes) => {
         onOpen(callback: () => void) {
             data.__onOpen(callback);
         },
-        // onClose(callback: () => void) {
-        //     data.__onClose(callback);
-        // },
-        // onChange(callback: () => void) {
-        //     data.__onChange(callback);
-        // },  
+        navigator: () => {
+            return data.navigator;
+        },
+        get input() {
+            return queueMicrotask(() => { this.$refs.input })
+        },
+        onClose(callback: () => void) {
+            data.__onClose(callback);
+        },
         activate(key: string) {
             data.collection.activate(key)
         },
