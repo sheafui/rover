@@ -345,6 +345,9 @@
       __activateLast: () => collection.activateLast(),
       __searchUsingQuery: (query) => collection.search(query),
       __getKeyByIndex: (index) => collection.getKeyByIndex(index),
+      __onClose: (callback) => callback(),
+      __onOpen: (callback) => callback(),
+      __onChange: (callback) => callback(),
       init() {
         this.$el.dataset.slot = SLOT_NAME3;
         effect(() => {
@@ -431,10 +434,7 @@
           return;
         this.__isOpen = true;
         let input = this.$refs.__input;
-        requestAnimationFrame(() => {
-          input?.focus({preventScroll: true});
-          this.__activateSelectedOrFirst();
-        });
+        this.__onOpen();
       },
       __pushSeparatorToItems(key) {
         this.__items.push({
@@ -453,21 +453,6 @@
           type: "o",
           key
         });
-      },
-      __activateSelectedOrFirst(activateSelected = true) {
-        if (!this.__isOpen)
-          return;
-        let activeItem = this.__getActiveItem();
-        if (activeItem)
-          return;
-        if (activateSelected && this.__selectedKeys) {
-          const keyToActivate = this.__isMultiple ? this.__selectedKeys[0] : this.__selectedKeys;
-          if (keyToActivate) {
-            this.__activate(keyToActivate);
-            return;
-          }
-        }
-        this.__activateFirst();
       },
       __close() {
         this.__isOpen = false;
@@ -737,6 +722,13 @@
     isOpen() {
       return dataStack.__isOpen;
     },
+    onOpen(callback) {
+      console.log(dataStack);
+      dataStack.__onOpen(callback);
+    },
+    onClose(callback) {
+      dataStack.__onClose(callback);
+    },
     open() {
       dataStack.__open();
     },
@@ -747,6 +739,31 @@
       return dataStack.__static;
     }
   });
+
+  // src/magics/index.ts
+  function registerMagics(Alpine2) {
+    Alpine2.magic("rover", (el) => {
+      return rover(Alpine2.$data(el));
+    });
+    Alpine2.magic("roverOption", (el) => {
+      let optionEl = Alpine2.findClosest(el, (i) => {
+        return i.hasAttribute("x-option:option");
+      });
+      if (!optionEl)
+        throw "No x-rover:option directive found, this magic meant to be used per option context...";
+      let dataStack = Alpine2.$data(optionEl);
+      return roverOption(dataStack);
+    });
+    Alpine2.magic("roverOptions", (el) => {
+      let optionEl = Alpine2.findClosest(el, (i) => {
+        return i.hasAttribute("x-option:options");
+      });
+      if (!optionEl)
+        throw "No x-rover:options directive found, this magic meant to be used per options context...";
+      let dataStack = Alpine2.$data(optionEl);
+      return roverOptions(dataStack);
+    });
+  }
 
   // src/index.ts
   function rover2(Alpine2) {
@@ -784,15 +801,7 @@
           break;
       }
     }).before("bind");
-    Alpine2.magic("rover", (el) => {
-      return rover(Alpine2.$data(el));
-    });
-    Alpine2.magic("roverOption", (el) => {
-      return roverOption(Alpine2.$data(el));
-    });
-    Alpine2.magic("roverOptions", (el) => {
-      return roverOptions(Alpine2.$data(el));
-    });
+    registerMagics(Alpine2);
     function handleRoot(Alpine3, el, effect) {
       Alpine3.bind(el, {
         "x-data"() {

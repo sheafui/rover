@@ -5,10 +5,9 @@ import CreateRoverOption from "./factories/CreateRoverOption";
 import CreateRoverRoot from "./factories/CreateRoverRoot";
 import CreateRoverOptions from "./factories/CreateRoverOptions";
 import { RoverOptionContext, RoverOptionsContext, RoverRootContext } from "./types";
+import registerMagics from "./magics";
 
-import { rover as roverMagic } from "./magics/rover";
-import { roverOption as roverOptionMagic } from "./magics/roverOption";
-import { roverOptions as roverOptionsMagic } from "./magics/roverOptions";
+
 type RoverValue =
     | null
     | 'input'
@@ -53,18 +52,8 @@ export default function rover(Alpine: Alpine): void {
         }
     }).before('bind');
 
-
-    Alpine.magic('rover', (el) => {
-        return roverMagic(Alpine.$data(el) as RoverRootContext);
-    });
-
-    Alpine.magic('roverOption', (el) => {
-        return roverOptionMagic(Alpine.$data(el) as RoverRootContext);
-    });
-
-    Alpine.magic('roverOptions', (el) => {
-        return roverOptionsMagic(Alpine.$data(el) as RoverRootContext);
-    });
+    // magics registration
+    registerMagics(Alpine);
 
 
     function handleRoot(

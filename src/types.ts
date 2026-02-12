@@ -57,7 +57,7 @@ export interface RoverRootData extends XDataContext {
     __getKeyByIndex: (index: number | null | undefined) => string | null;
     // __isVisible: (key: string) => boolean;
     __open: () => void;
-    __activateSelectedOrFirst: (activateSelected?: boolean) => void;
+    __activateSelectedOrFirst?: (activateSelected?: boolean) => void;
     __registerEventsDelector: () => void;
     __close: () => void;
     __handleSelection: (key: string) => void;
@@ -73,6 +73,11 @@ export interface RoverRootData extends XDataContext {
     __nextOptionId: () => number;
     __nextGroupId: () => number;
     __nextSeparatorId: () => number;
+    
+    // callback
+    __onOpen: (callback: () => unknown) => unknown;
+    __onClose: (callback: () => unknown) => unknown;
+    __onChange: (callback: () => unknown) => unknown;
 }
 
 export type RoverRootContext = RoverRootData & Magics<RoverRootData>;

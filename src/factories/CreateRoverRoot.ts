@@ -59,6 +59,11 @@ export default function CreateRoverRoot(
         __searchUsingQuery: (query: string) => collection.search(query),
         __getKeyByIndex: (index: number) => collection.getKeyByIndex(index),
 
+        // hooks
+        __onClose: (callback) => callback(),
+        __onOpen: (callback) => callback(),
+        __onChange: (callback) => callback(),
+
         init() {
             this.$el.dataset.slot = SLOT_NAME;
 
@@ -196,10 +201,7 @@ export default function CreateRoverRoot(
 
             let input = this.$refs.__input;
 
-            requestAnimationFrame(() => {
-                input?.focus({ preventScroll: true });
-                this.__activateSelectedOrFirst();
-            })
+            this.__onOpen();
         },
 
         __pushSeparatorToItems(key: string) {
@@ -223,26 +225,26 @@ export default function CreateRoverRoot(
             });
         },
 
-        __activateSelectedOrFirst(activateSelected = true) {
-            if (!this.__isOpen) return;
+        // __activateSelectedOrFirst(activateSelected = true) {
+        //     if (!this.__isOpen) return;
 
-            let activeItem = this.__getActiveItem();
+        //     let activeItem = this.__getActiveItem();
 
-            if (activeItem) return;
+        //     if (activeItem) return;
 
-            if (activateSelected && this.__selectedKeys) {
-                const keyToActivate = this.__isMultiple
-                    ? this.__selectedKeys[0]
-                    : this.__selectedKeys;
+        //     if (activateSelected && this.__selectedKeys) {
+        //         const keyToActivate = this.__isMultiple
+        //             ? this.__selectedKeys[0]
+        //             : this.__selectedKeys;
 
-                if (keyToActivate) {
-                    this.__activate(keyToActivate);
-                    return;
-                }
-            }
+        //         if (keyToActivate) {
+        //             this.__activate(keyToActivate);
+        //             return;
+        //         }
+        //     }
 
-            this.__activateFirst();
-        },
+        //     this.__activateFirst();
+        // },
 
         __close() {
             this.__isOpen = false;

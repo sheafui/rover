@@ -28,62 +28,56 @@
     </style>
 </head>
 
-<body x-data="{
-        items: ['tenjarine', 'apple', 'banana', 'cherry', 'orange', 'mango', 'grape'],
-        open() {
-            if (this.$roverOptions.isOpen()) return
+<body class="flex mt-20 justify-center bg-neutral-950">
 
-            this.$roverOptions.open();
+    <div
+        class="space-y-4"
+        x-data="{
+            items: ['tenjarine', 'apple', 'banana', 'cherry', 'orange', 'mango', 'grape'],
+            init(){
 
-            let input = this.$refs.__input;
+                console.log(this.$roverOptions);
 
-            requestAnimationFrame(() => {
-                input?.focus({ preventScroll: true });
-                this.activateSelectedOrFirst();
-            });
-        },
+                this.$roverOptions.onOpen(()=>{
+                    console.log('opened');
+                });           
+                
+                this.$roverOptions.onClose(()=>{
 
-        resetInput() {
-            this.$refs.__input.value = '';
-        },
+                });           
+            },
+            
+            activateSelectedOrFirst(activateSelected = true) {
+                if (!this.$roverOptions.isOpen) return;
 
-        activateSelectedOrFirst(activateSelected = true) {
-            if (!this.$roverOptions.isOpen) return;
+                let activeItem = this.$rover.getActiveItem();
 
-            let activeItem = this.$rover.getActiveItem();
+                if (activeItem) return;
 
-            if (activeItem) return;
+                if (activateSelected && this.__selectedKeys) {
+                    const keyToActivate = this.__isMultiple
+                        ? this.__selectedKeys[0]
+                        : this.__selectedKeys;
 
-            if (activateSelected && this.__selectedKeys) {
-                const keyToActivate = this.__isMultiple
-                    ? this.__selectedKeys[0]
-                    : this.__selectedKeys;
-
-                if (keyToActivate) {
-                    this.$rover.activate(keyToActivate);
-                    return;
+                    if (keyToActivate) {
+                        this.$rover.activate(keyToActivate);
+                        return;
+                    }
                 }
-            }
 
-            this.$rover.activateFirst();
-        },
-    }" class="flex mt-20 justify-center bg-neutral-950">
-
-    <div class="space-y-4">
-        <div x-rover class="w-[360px]">
-            <div 
-                class="grid grid-cols-[auto_2rem] overflow-hidden"
-            >
-                <input 
-                    x-rover:input 
-                    placeholder="Search..."
-                    class="flex-1 col-start-1 col-span-full overflow-hidden row-start-1 w-full rounded-md bg-transparent py-2 text-neutral-300 placeholder-neutral-300 border border-neutral-500 px-4 focus:outline-none" 
-                />
-                <button 
-                    x-rover:button 
-                    type="button"
-                    class="col-start-2 row-start-1 border border-white/10 rounded-r-md text-white flex items-center self-center justify-center size-full"
-                >
+                this.$rover.activateFirst();
+            },
+        }"
+    >
+        <div 
+           x-rover 
+           class="w-[360px]"
+        >
+            <div class="grid grid-cols-[auto_2rem] overflow-hidden">
+                <input x-rover:input placeholder="Search..."
+                    class="flex-1 col-start-1 col-span-full overflow-hidden row-start-1 w-full rounded-md bg-transparent py-2 text-neutral-300 placeholder-neutral-300 border border-neutral-500 px-4 focus:outline-none" />
+                <button x-rover:button type="button"
+                    class="col-start-2 row-start-1 border border-white/10 rounded-r-md text-white flex items-center self-center justify-center size-full">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="size-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
@@ -91,24 +85,14 @@
                 </button>
             </div>
 
-            <ul 
-                x-rover:options 
-                x-cloak
-                class="mt-1 max-h-60  w-full rounded-md border border-neutral-700 bg-white/5 text-white overflow-auto shadow-lg focus:outline-none"
-            >
+            <ul x-rover:options x-cloak
+                class="mt-1 max-h-60  w-full rounded-md border border-neutral-700 bg-white/5 text-white overflow-auto shadow-lg focus:outline-none">
                 <li class="py-4 text-center" x-rover:empty>
                     No result found
                 </li>
 
-                <template 
-                    x-for="(item, index) in items" 
-                    x-bind:key="index"
-                >
-                    <li 
-                        x-rover:option="item" 
-                        x-text="item" 
-                        class="px-4 data-active:bg-white/5 py-2"
-                    >
+                <template x-for="(item, index) in items" x-bind:key="index">
+                    <li x-rover:option="item" x-text="item" class="px-4 data-active:bg-white/5 py-2">
                     </li>
                 </template>
             </ul>
@@ -117,7 +101,7 @@
 </body>
 
 <script>
-    function data(){
+    function data() {
 
     }
 </script>
