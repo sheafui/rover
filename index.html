@@ -71,13 +71,16 @@
 
     <div class="space-y-4">
         <div x-rover class="w-[360px]">
-            <div class="grid grid-cols-[auto_2rem] overflow-hidden">
-                <input x-rover:input 
-                placeholder="Search..."
-                    class="flex-1 col-start-1 col-span-full overflow-hidden row-start-1 w-full rounded-md bg-transparent py-2 text-neutral-300 placeholder-neutral-300 border border-neutral-500 px-4 focus:outline-none" />
+            <div 
+                class="grid grid-cols-[auto_2rem] overflow-hidden"
+            >
+                <input 
+                    x-rover:input 
+                    placeholder="Search..."
+                    class="flex-1 col-start-1 col-span-full overflow-hidden row-start-1 w-full rounded-md bg-transparent py-2 text-neutral-300 placeholder-neutral-300 border border-neutral-500 px-4 focus:outline-none" 
+                />
                 <button 
                     x-rover:button 
-                    x-on:click="console.log('button clicked')"
                     type="button"
                     class="col-start-2 row-start-1 border border-white/10 rounded-r-md text-white flex items-center self-center justify-center size-full"
                 >
@@ -97,8 +100,15 @@
                     No result found
                 </li>
 
-                <template x-for="(item, index) in items" x-bind:key="index">
-                    <li x-rover:option="item" x-text="item" class="px-4 data-active:bg-white/5 py-2">
+                <template 
+                    x-for="(item, index) in items" 
+                    x-bind:key="index"
+                >
+                    <li 
+                        x-rover:option="item" 
+                        x-text="item" 
+                        class="px-4 data-active:bg-white/5 py-2"
+                    >
                     </li>
                 </template>
             </ul>
