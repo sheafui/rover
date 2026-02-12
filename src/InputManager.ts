@@ -1,5 +1,8 @@
-import { InputManager, RoverRootContext } from "./types"
+import { InputManager, RoverRootContext } from "./types";
+
 export function createInputManager(root: RoverRootContext): InputManager {
+    const cleanup: (() => void)[] = [];
+
     return {
         on(eventKey, handler) {
             root.$nextTick(() => {
@@ -7,13 +10,21 @@ export function createInputManager(root: RoverRootContext): InputManager {
 
                 if (!inputEl) return;
 
-                console.log('Adding event listener for', eventKey, 'on input element', inputEl);
+                const listener = (event: HTMLElementEventMap[typeof eventKey]) => {
+                    const activeKey = root.__activatedKey ?? null;
+                    handler(event, activeKey);
+                };
 
-                inputEl.addEventListener(eventKey, (event: KeyboardEvent) => {
-                    const activeKey = root.__activatedKey ?? null
-                    handler(event, activeKey)
-                })
-            })
+                inputEl.addEventListener(eventKey, listener);
+
+                cleanup.push(() => {
+                    inputEl.removeEventListener(eventKey, listener);
+                });
+            });
+        },
+        
+        destroy() {
+            cleanup.forEach(fn => fn());
         }
-    }
+    };
 }

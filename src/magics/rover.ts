@@ -13,10 +13,6 @@ export const rover = (el: ElementWithXAttributes) => {
         onOpen(callback: () => void) {
             data.__onOpen(callback);
         },
-        navigator: () => {
-            return data.navigator;
-        },
-
         get input(): InputManager | null {
             return data.__inputManager;
         },

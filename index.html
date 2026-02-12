@@ -73,20 +73,70 @@
                 this.$rover.input.on('keydown', (event, activeKey) => {
 
                     console.log(event, activeKey);
-                    
+
                     if (event.key === 'Enter') {
+
+                        // this.__selectActive()
+                        //             this.__stopTyping()
+                        //             if (!this.__isMultiple) {
+                        //                 this.__close()
+                        //                 this.__resetInput()
+                        //             }
                         this.selectedKeys = activeKey;
                     }
                 });
-                
+
                 // this.$rover.options.on('click', (event, activeKey) => {
-                    
+
                 //     console.log(event, activeKey);
-                    
+
                 //     this.selectedKeys = activeKey;
                 // });
             },
 
+
+            handleSelection(key) {
+
+                let value = this.__getValueByKey(key);
+
+                if (!this.__isMultiple) {
+                    this.selectedKeys = key;
+
+                    if (this.state === value) {
+                        this.state = null;
+                        this.selectedKeys = null;
+                    } else {
+                        this.state = value;
+                    }
+
+                    if (!this.__static) {
+                        this.__close();
+                    }
+                    console.log(this.state);
+
+                    return;
+                }
+
+                if (!Array.isArray(this.selectedKeys)) {
+                    this.selectedKeys = [];
+                }
+
+                if (!Array.isArray(this.state)) {
+                    this.state = [];
+                }
+
+                let index = this.state.findIndex((j) => this.__compare(j, value));
+
+                let keyIndex = this.selectedKeys.indexOf(key);
+
+                if (index === -1) {
+                    this.state.push(value);
+                    this.selectedKeys.push(key);
+                } else {
+                    this.state.splice(index, 1);
+                    this.selectedKeys.splice(keyIndex, 1);
+                }
+            },
 
             activateSelectedOrFirst(activateSelected = true) {
                 if (!this.$rover.isOpen) return;

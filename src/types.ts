@@ -23,10 +23,8 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __groupsEls: NodeListOf<HTMLElement> | undefined;
     __state: string | string[] | null;
     __isOpen: boolean;
-    __isMultiple: boolean;
     __isTyping: boolean;
     __isLoading: boolean;
-    __isDisabled: boolean;
     __o_id: number;
     __g_id: number;
     __s_id: number;
@@ -34,7 +32,6 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __keepActivated: boolean;
     __items: UIItem[];
     __optionsEl: HTMLElement | undefined;
-    __compareBy: string | ((a: unknown, b: unknown) => boolean) | undefined;
     __activatedKey: string | null | undefined;
     __selectedKeys: string | string[] | null | undefined;
     __filteredKeys: string[] | null;
@@ -68,7 +65,6 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __stopTyping: () => void;
     __resetInput: () => void;
     __getCurrentValue: () => string;
-    __compare: (a: unknown, b: unknown) => boolean;
     __pushGroupToItems: (key: string) => void;
     __pushOptionToItems: (key: string) => void;
     __pushSeparatorToItems: (key: string) => void;
@@ -112,4 +108,8 @@ export type UIItem = {
     key?: string;
 }
 
-export type InputManager = { on: (eventKey: string, handler: (event: KeyboardEvent, key: string | null) => void) => void }
+export type InputManager = {
+    on<K extends keyof HTMLElementEventMap>(eventKey: K, handler: (event: HTMLElementEventMap[K], key: string | null) => void): void;
+    destroy: () => void
+}
+

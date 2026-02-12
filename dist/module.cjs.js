@@ -256,19 +256,26 @@ var RoverCollection_default = RoverCollection;
 
 // src/InputManager.ts
 function createInputManager(root) {
+  const cleanup = [];
   return {
     on(eventKey, handler) {
       root.$nextTick(() => {
         const inputEl = root.$refs.__input;
         if (!inputEl)
           return;
-        console.log("Adding event listener for", eventKey, "on input element", inputEl);
-        inputEl.addEventListener(eventKey, (event) => {
+        const listener = (event) => {
           var _a;
           const activeKey = (_a = root.__activatedKey) != null ? _a : null;
           handler(event, activeKey);
+        };
+        inputEl.addEventListener(eventKey, listener);
+        cleanup.push(() => {
+          inputEl.removeEventListener(eventKey, listener);
         });
       });
+    },
+    destroy() {
+      cleanup.forEach((fn) => fn());
     }
   };
 }
@@ -286,7 +293,6 @@ function CreateRoverRoot({
     __groupsEls: void 0,
     __state: null,
     __isOpen: false,
-    __isMultiple: false,
     __isTyping: false,
     __isLoading: false,
     __o_id: -1,
@@ -295,10 +301,8 @@ function CreateRoverRoot({
     __static: false,
     __keepActivated: true,
     __optionsEl: void 0,
-    __compareBy: void 0,
     __activatedKey: void 0,
     __selectedKeys: void 0,
-    __isDisabled: false,
     __items: [],
     __searchQuery: "",
     __filteredKeys: null,
@@ -336,6 +340,7 @@ function CreateRoverRoot({
     init() {
       this.$el.dataset.slot = SLOT_NAME2;
       this.__inputManager = createInputManager(this);
+      this.__handleSharedInputEvents();
       effect(() => {
         this.__isLoading = collection.pending.state;
       });
@@ -409,11 +414,6 @@ function CreateRoverRoot({
       this.__isDisabled = Alpine.extractProp(el, "disabled", false);
       this.__compareBy = Alpine.extractProp(el, "by", "");
       this.__registerEventsDelector();
-      this.$nextTick(() => {
-        if (this.$refs.__input) {
-          this.__handleInputEvents();
-        }
-      });
       this.$nextTick(() => {
         if (!this.$refs.__input) {
           this.__isOpen = true;
@@ -511,23 +511,6 @@ function CreateRoverRoot({
         return this.__state;
       return "";
     },
-    __compare(a, b) {
-      let by = this.__compareBy;
-      if (!this.__compareBy) {
-        by = (a2, b2) => Alpine.raw(a2) === Alpine.raw(b2);
-      } else if (typeof this.__compareBy === "string") {
-        const property = this.__compareBy;
-        by = (a2, b2) => {
-          if (!a2 || typeof a2 !== "object" || (!b2 || typeof b2 !== "object")) {
-            return Alpine.raw(a2) === Alpine.raw(b2);
-          }
-          const objA = a2;
-          const objB = b2;
-          return objA[property] === objB[property];
-        };
-      }
-      return by(a, b);
-    },
     __nextOptionId() {
       return ++this.__o_id;
     },
@@ -581,20 +564,19 @@ function CreateRoverRoot({
         }));
       });
     },
-    __handleInputEvents() {
-      this.$refs.__input.addEventListener("focus", () => {
+    __handleSharedInputEvents() {
+      this.__inputManager.on("focus", () => {
         this.__startTyping();
       });
-      this.$refs.__input.addEventListener("input", (e) => {
-        e.stopPropagation();
+      this.__inputManager.on("input", () => {
         if (this.__isTyping) {
           this.__open();
         }
       });
-      this.$refs.__input.addEventListener("blur", () => {
+      this.__inputManager.on("blur", () => {
         this.__stopTyping();
       });
-      this.$refs.__input.addEventListener("keydown", (e) => {
+      this.__inputManager.on("keydown", (e) => {
         switch (e.key) {
           case "ArrowDown":
             e.preventDefault();
@@ -614,23 +596,14 @@ function CreateRoverRoot({
             }
             this.__activatePrev();
             break;
-          case "Enter":
-            e.preventDefault();
-            e.stopPropagation();
-            this.__selectActive();
-            this.__stopTyping();
-            if (!this.__isMultiple) {
-              this.__close();
-              this.__resetInput();
-            }
-            break;
           default:
-            if (this.__static)
-              return;
-            this.__open();
             break;
         }
       });
+    },
+    destroy() {
+      var _a;
+      (_a = this.__inputManager) == null ? void 0 : _a.destroy();
     }
   };
 }
@@ -647,9 +620,6 @@ var rover = (el) => {
     },
     onOpen(callback) {
       data.__onOpen(callback);
-    },
-    navigator: () => {
-      return data.navigator;
     },
     get input() {
       return data.__inputManager;
