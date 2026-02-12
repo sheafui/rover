@@ -1,7 +1,5 @@
 import type { Alpine as AlpineType } from 'alpinejs';
 import { RoverOptionsContext, RoverOptionsData } from 'src/types';
-import { SLOT_NAME as INPUT_SLOT_NAME } from './CreateRoverInput';
-
 export default function CreateRoverOptions(Alpine: AlpineType): RoverOptionsData {
 
     const SLOT_NAME = 'rover-options';
@@ -21,11 +19,11 @@ export default function CreateRoverOptions(Alpine: AlpineType): RoverOptionsData
             if (this.__static) return;
 
 
-            let target = event.target as HTMLElement;
+            // let target = event.target as HTMLElement;
 
-            if (target.dataset.slot && target.dataset.slot === INPUT_SLOT_NAME) {
-                return;
-            }
+            // if (target.dataset.slot && target.dataset.slot === INPUT_SLOT_NAME) {
+            //     return;
+            // }
 
             this.__close();
         }

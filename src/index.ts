@@ -1,9 +1,7 @@
 import type { Alpine } from "alpinejs";
 import type { default as AlpineType } from "alpinejs";
-import CreateRoverInput from "./factories/CreateRoverInput";
 import CreateRoverOption from "./factories/CreateRoverOption";
 import CreateRoverRoot from "./factories/CreateRoverRoot";
-import CreateRoverOptions from "./factories/CreateRoverOptions";
 import { RoverOptionContext, RoverOptionsContext, RoverRootContext } from "./types";
 import registerMagics from "./magics";
 
@@ -104,11 +102,7 @@ export default function rover(Alpine: Alpine): void {
                 if (Alpine.bound(this.$el, 'keepActivated')) {
                     this.__keepActivated = true;
                 }
-                return this.$el.dataset.slot = 'rover-options';
-
-            },
-            'x-data'() {
-                return CreateRoverOptions(Alpine);
+                this.$el.dataset.slot = 'rover-options';
             },
             'x-show'() { return this.$data.__static ? true : this.$data.__isOpen; },
         })

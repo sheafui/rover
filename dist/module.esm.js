@@ -242,7 +242,7 @@ function CreateRoverRoot({
   effect
 }) {
   const collection = new RoverCollection_default();
-  const SLOT_NAME3 = "rover-root";
+  const SLOT_NAME2 = "rover-root";
   return {
     collection,
     __optionsEls: void 0,
@@ -296,7 +296,7 @@ function CreateRoverRoot({
       });
     },
     init() {
-      this.$el.dataset.slot = SLOT_NAME3;
+      this.$el.dataset.slot = SLOT_NAME2;
       effect(() => {
         this.__isLoading = collection.pending.state;
       });
@@ -592,32 +592,6 @@ function CreateRoverRoot({
   };
 }
 
-// src/factories/CreateRoverInput.ts
-var SLOT_NAME2 = "rover-input";
-
-// src/factories/CreateRoverOptions.ts
-function CreateRoverOptions(Alpine2) {
-  const SLOT_NAME3 = "rover-options";
-  return {
-    init() {
-      this.$data.__static = Alpine2.extractProp(this.$el, "static", false);
-      if (Alpine2.bound(this.$el, "keepActivated")) {
-        this.__keepActivated = true;
-      }
-      return this.$el.dataset.slot = SLOT_NAME3;
-    },
-    __handleClickAway(event) {
-      if (this.__static)
-        return;
-      let target = event.target;
-      if (target.dataset.slot && target.dataset.slot === SLOT_NAME2) {
-        return;
-      }
-      this.__close();
-    }
-  };
-}
-
 // src/magics/rover.ts
 var rover = (el) => {
   let data = Alpine.$data(el);
@@ -831,10 +805,7 @@ function rover2(Alpine2) {
         if (Alpine2.bound(this.$el, "keepActivated")) {
           this.__keepActivated = true;
         }
-        return this.$el.dataset.slot = "rover-options";
-      },
-      "x-data"() {
-        return CreateRoverOptions(Alpine2);
+        this.$el.dataset.slot = "rover-options";
       },
       "x-show"() {
         return this.$data.__static ? true : this.$data.__isOpen;
