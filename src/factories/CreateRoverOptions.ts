@@ -15,7 +15,7 @@ export default function CreateRoverOptions(Alpine: AlpineType): RoverOptionsData
             return this.$el.dataset.slot = SLOT_NAME;
         },
 
-        __handleClickAway(this: RoverOptionsContext, event: MouseEvent) {
+        __handleClickAway(this: RoverOptionsContext,) {
             if (this.__static) return;
 
 

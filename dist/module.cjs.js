@@ -255,17 +255,23 @@ var RoverCollection = class {
 var RoverCollection_default = RoverCollection;
 
 // src/InputManager.ts
-var input = () => ({
-  __input() {
-    let input2 = queueMicrotask(() => {
-      this.$refs.input;
-    });
-    return {
-      on(eventKey, handler) {
-      }
-    };
-  }
-});
+function createInputManager(root) {
+  return {
+    on(eventKey, handler) {
+      root.$nextTick(() => {
+        const inputEl = root.$refs.__input;
+        if (!inputEl)
+          return;
+        console.log("Adding event listener for", eventKey, "on input element", inputEl);
+        inputEl.addEventListener(eventKey, (event) => {
+          var _a;
+          const activeKey = (_a = root.__activatedKey) != null ? _a : null;
+          handler(event, activeKey);
+        });
+      });
+    }
+  };
+}
 
 // src/factories/CreateRoverRoot.ts
 function CreateRoverRoot({
@@ -297,6 +303,7 @@ function CreateRoverRoot({
     __searchQuery: "",
     __filteredKeys: null,
     __filteredKeysSet: new Set(),
+    __inputManager: null,
     __add: (k, v, d) => collection.add(k, v, d),
     __forget: (k) => collection.forget(k),
     __activate: (k) => collection.activate(k),
@@ -328,6 +335,7 @@ function CreateRoverRoot({
     },
     init() {
       this.$el.dataset.slot = SLOT_NAME2;
+      this.__inputManager = createInputManager(this);
       effect(() => {
         this.__isLoading = collection.pending.state;
       });
@@ -488,11 +496,11 @@ function CreateRoverRoot({
       this.__isTyping = false;
     },
     __resetInput() {
-      let input2 = this.$refs.__input;
-      if (!input2)
+      let input = this.$refs.__input;
+      if (!input)
         return;
       let value = this.__getCurrentValue();
-      input2.value = value;
+      input.value = value;
     },
     __getCurrentValue() {
       if (!this.$refs.__input)
@@ -623,8 +631,7 @@ function CreateRoverRoot({
             break;
         }
       });
-    },
-    ...input()
+    }
   };
 }
 
@@ -645,7 +652,7 @@ var rover = (el) => {
       return data.navigator;
     },
     get input() {
-      return data.__input();
+      return data.__inputManager;
     },
     onClose(callback) {
       data.__onClose(callback);

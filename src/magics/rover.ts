@@ -1,4 +1,5 @@
 import { ElementWithXAttributes } from "alpinejs";
+import { InputManager } from "src/InputManager";
 import { Item, RoverRootContext } from "src/types";
 
 export const rover = (el: ElementWithXAttributes) => {
@@ -17,8 +18,8 @@ export const rover = (el: ElementWithXAttributes) => {
             return data.navigator;
         },
 
-        get input() {
-            return data.__input();
+        get input(): InputManager | null {
+            return data.__inputManager;
         },
         onClose(callback: () => void) {
             data.__onClose(callback);

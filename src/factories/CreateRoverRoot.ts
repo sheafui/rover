@@ -1,9 +1,9 @@
 import RoverCollection from "../core/RoverCollection";
 
 import type { default as AlpineType } from "alpinejs";
-import { Item, RoverInputContext, RoverRootData } from "src/types";
+import { Item, RoverRootData } from "src/types";
 import { SLOT_NAME as OPTION_SLOT_NAME } from "./CreateRoverOption";
-import { input } from "src/InputManager";
+import { createInputManager } from "src/InputManager";
 
 export default function CreateRoverRoot(
     { el,
@@ -46,6 +46,9 @@ export default function CreateRoverRoot(
         __filteredKeys: null,
         __filteredKeysSet: new Set<string>(),
 
+        // input related 
+        __inputManager: null,
+
         __add: (k: string, v: string, d: boolean) => collection.add(k, v, d),
         __forget: (k: string) => collection.forget(k),
         __activate: (k: string) => collection.activate(k),
@@ -76,6 +79,8 @@ export default function CreateRoverRoot(
         },
         init() {
             this.$el.dataset.slot = SLOT_NAME;
+
+            this.__inputManager = createInputManager(this);
 
             // LOADING STUFF
             effect(() => {
@@ -507,6 +512,5 @@ export default function CreateRoverRoot(
                 }
             });
         },
-        ...input(),
     }
 }

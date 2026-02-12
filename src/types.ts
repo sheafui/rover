@@ -1,5 +1,6 @@
 import { Magics, XDataContext } from "alpinejs";
 import RoverCollection from "./core/RoverCollection";
+import { InputManager } from "./InputManager";
 
 export interface Options {
     searchThreshold?: number
@@ -40,6 +41,8 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __filteredKeys: string[] | null;
     __filteredKeysSet: Set<string>;
     __searchQuery: string;
+    // input related
+    __inputManager: InputManager | null;
 
     // Methods
     __add: (k: string, v: string, d: boolean) => void;
