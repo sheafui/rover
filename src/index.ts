@@ -4,7 +4,7 @@ import CreateRoverInput from "./factories/CreateRoverInput";
 import CreateRoverOption from "./factories/CreateRoverOption";
 import CreateRoverRoot from "./factories/CreateRoverRoot";
 import CreateRoverOptions from "./factories/CreateRoverOptions";
-import { RoverOptionContext, RoverOptionsContext, RoverRootContext } from "./types";
+import { Item, RoverOptionContext, RoverOptionsContext, RoverRootContext } from "./types";
 
 type RoverValue =
     | null
@@ -65,28 +65,28 @@ export default function rover(Alpine: Alpine): void {
                 dataStack.collection.deactivate()
             },
             getValueByKey(key: string) {
-                dataStack.collection.getValueByKey(key)
+                return dataStack.collection.getValueByKey(key)
             },
             getActiveItem() {
-
+                return dataStack.collection.getActiveItem()
             },
             activateNext() {
-
+                dataStack.collection.activateNext()
             },
             activatePrev() {
-
+                dataStack.collection.activatePrev()
             },
             activateFirst() {
-
+                dataStack.collection.activateFirst()
             },
             activateLast() {
-
+                dataStack.collection.activateLast()
             },
-            searchUsing() {
-
+            searchUsing(query: string): Item[] {
+                return dataStack.collection.search(query)
             },
-            getKeyByIndex() {
-
+            getKeyByIndex(index: number | null | undefined): string | null {
+                return dataStack.collection.getKeyByIndex(index)
             }
         }
     })

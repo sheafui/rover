@@ -719,21 +719,28 @@
           dataStack.collection.deactivate();
         },
         getValueByKey(key) {
-          dataStack.collection.getValueByKey(key);
+          return dataStack.collection.getValueByKey(key);
         },
         getActiveItem() {
+          return dataStack.collection.getActiveItem();
         },
         activateNext() {
+          dataStack.collection.activateNext();
         },
         activatePrev() {
+          dataStack.collection.activatePrev();
         },
         activateFirst() {
+          dataStack.collection.activateFirst();
         },
         activateLast() {
+          dataStack.collection.activateLast();
         },
-        searchUsing() {
+        searchUsing(query) {
+          return dataStack.collection.search(query);
         },
-        getKeyByIndex() {
+        getKeyByIndex(index) {
+          return dataStack.collection.getKeyByIndex(index);
         }
       };
     });
