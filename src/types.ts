@@ -1,6 +1,5 @@
 import { Magics, XDataContext } from "alpinejs";
 import RoverCollection from "./core/RoverCollection";
-import { InputManager } from "./InputManager";
 
 export interface Options {
     searchThreshold?: number
@@ -112,3 +111,5 @@ export type UIItem = {
 
     key?: string;
 }
+
+export type InputManager = { on: (eventKey: string, handler: (event: KeyboardEvent, key: string | null) => void) => void }

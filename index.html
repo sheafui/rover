@@ -73,10 +73,18 @@
                 this.$rover.input.on('keydown', (event, activeKey) => {
 
                     console.log(event, activeKey);
+                    
                     if (event.key === 'Enter') {
                         this.selectedKeys = activeKey;
                     }
                 });
+                
+                // this.$rover.options.on('click', (event, activeKey) => {
+                    
+                //     console.log(event, activeKey);
+                    
+                //     this.selectedKeys = activeKey;
+                // });
             },
 
 

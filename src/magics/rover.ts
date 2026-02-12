@@ -1,6 +1,5 @@
 import { ElementWithXAttributes } from "alpinejs";
-import { InputManager } from "src/InputManager";
-import { Item, RoverRootContext } from "src/types";
+import { InputManager, Item, RoverRootContext } from "src/types";
 
 export const rover = (el: ElementWithXAttributes) => {
     let data = Alpine.$data(el) as RoverRootContext;
