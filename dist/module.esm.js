@@ -789,9 +789,6 @@ function rover2(Alpine2) {
           this.__close();
         }
       },
-      "x-bind:key"() {
-        return this.__reRenderKey;
-      },
       "x-data"() {
         return CreateRoverRoot({el, effect});
       }
