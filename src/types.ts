@@ -17,7 +17,7 @@ export type ActiveIndex = { value: undefined | number };
 
 export type SearchIndex = Omit<Item, 'disabled'>;
 
-export interface RoverRootData extends XDataContext {
+export interface RoverRootData extends XDataContext, Record<string, unknown> {
     collection: RoverCollection;
     __optionsEls: NodeListOf<HTMLElement> | undefined;
     __groupsEls: NodeListOf<HTMLElement> | undefined;

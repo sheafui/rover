@@ -818,14 +818,8 @@
     }).before("bind");
     registerMagics(Alpine2);
     function handleRoot(Alpine3, el, effect) {
-      console.log(el);
-      Alpine3.bind(el, {
-        "x-data"() {
-          return {
-            ...CreateRoverRoot({el, effect})
-          };
-        }
-      });
+      let roverRootStack = CreateRoverRoot({el, effect});
+      Alpine3.addScopeToNode(el, roverRootStack);
     }
     function handleInput(Alpine3, el) {
       Alpine3.bind(el, {
