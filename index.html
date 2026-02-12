@@ -16,25 +16,71 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
     <style>
-
         /* Rule 3: Hide separator if PREVIOUS sibling is a `hidden` option */
-        :is([data-slot=rover-option],[data-slot=rover-group])[hidden]+[data-slot=rover-separator] {
-            display: none;
-        }
+        /* :is([data-slot=rover-option],[data-slot=rover-group])[hidden]+[data-slot=rover-separator] { */
+        /* display: none; */
+        /* } */
 
         /* Rule 4: Hide separator if NEXT sibling is a `hidden` option */
-        [data-slot=rover-separator]:has(+ :is([data-slot=rover-option],[data-slot=rover-group])[hidden]) {
+        /* [data-slot=rover-separator]:has(+ :is([data-slot=rover-option],[data-slot=rover-group])[hidden]) {
             display: none;
-        }
+        } */
     </style>
 </head>
 
-<body 
-    x-data="{
-        items: ['hiba','iman','sara','youssef','ali','khaled']
-    }" 
-    class="flex mt-20 justify-center bg-neutral-950"
->
+<body x-data="{
+        items: ['tenjarine', 'apple', 'banana', 'cherry', 'orange', 'mango', 'grape'],
+        open: false,
+        handleButtonClick(e) {
+
+            if (this.__isOpen) {
+                    this.close()
+                    this.resetInput()
+                } else {
+                    e.preventDefault()
+                    this.open()
+                }
+
+                requestAnimationFrame(() => this.$refs.__input.focus({ preventScroll: true }))
+            },
+        open() {
+            if (this.__isOpen) return
+
+            this.__isOpen = true;
+
+            let input = this.$refs.__input;
+
+            requestAnimationFrame(() => {
+                input?.focus({ preventScroll: true });
+                this.activateSelectedOrFirst();
+            })
+        },
+        activateSelectedOrFirst(activateSelected = true) {
+            if (!this.__isOpen) return;
+
+            let activeItem = this.$rover.getActiveItem();
+
+            if (activeItem) return;
+
+            if (activateSelected && this.__selectedKeys) {
+                const keyToActivate = this.__isMultiple
+                    ? this.__selectedKeys[0]
+                    : this.__selectedKeys;
+
+                if (keyToActivate) {
+                    this.$rover.activate(keyToActivate);
+                    return;
+                }
+            }
+
+            this.$rover.activateFirst();
+        },
+
+        close() {
+            this.__isOpen = false;
+            this.$rover.deactivate();
+        },
+    }" class="flex mt-20 justify-center bg-neutral-950">
 
     <div class="space-y-4">
         <div x-rover class="w-[360px]">
@@ -50,22 +96,15 @@
                 </button>
             </div>
 
-            <ul 
-                x-rover:options 
-                static 
-                x-cloak
+            <ul x-rover:options x-show="open" x-cloak
                 class="mt-1 max-h-60  w-full rounded-md border border-neutral-700 bg-white/5 text-white overflow-auto shadow-lg focus:outline-none">
                 <li class="py-4 text-center" x-rover:empty>
                     No result found
                 </li>
 
                 <template x-for="(item, index) in items" x-bind:key="index">
-                    <li 
-                        x-rover:option="item" 
-                        x-text="item"
-                        class="px-4 data-active:bg-white/5 py-2"
-                    >
-                    </li>   
+                    <li x-rover:option="item" x-text="item" class="px-4 data-active:bg-white/5 py-2">
+                    </li>
                 </template>
                 <!-- <li x-rover:option value="tenjarine"  class="px-4 data-active:bg-white/5  py-2">
                     tenjarine

@@ -50,6 +50,46 @@ export default function rover(Alpine: Alpine): void {
         }
     });
 
+
+    Alpine.magic('rover', (el) => {
+        let dataStack = Alpine.$data(el) as RoverRootContext
+
+        console.log('datastack:', dataStack);
+
+        // give all utilities access to the rover root data
+        return {
+            activate(key: string) {
+                dataStack.collection.activate(key)
+            },
+            deactivate() {
+                dataStack.collection.deactivate()
+            },
+            getValueByKey(key: string) {
+                dataStack.collection.getValueByKey(key)
+            },
+            getActiveItem() {
+
+            },
+            activateNext() {
+
+            },
+            activatePrev() {
+
+            },
+            activateFirst() {
+
+            },
+            activateLast() {
+
+            },
+            searchUsing() {
+
+            },
+            getKeyByIndex() {
+
+            }
+        }
+    })
     function handleRoot(
         Alpine: Alpine,
         el: AlpineType.ElementWithXAttributes,
@@ -113,9 +153,6 @@ export default function rover(Alpine: Alpine): void {
             'x-id'() { return ['rover-option'] },
             'x-bind:id'() { return this.$id('rover-option') },
             'role': 'option',
-            // 'x-show'(this: RoverOptionContext) {
-            //     return this.$data.__isVisible;
-            // },
             'x-data'(this: RoverOptionContext) {
                 let value: string | null = null;
 
@@ -157,19 +194,19 @@ export default function rover(Alpine: Alpine): void {
             'x-bind:id'() { return this.$id('rover-button') },
             'tabindex': '-1',
             'aria-haspopup': 'true',
-            'x-on:click'(e) {
-                if (this.__isDisabled) return
+            // 'x-on:click'(e) {
+            //     if (this.__isDisabled) return
 
-                if (this.__isOpen) {
-                    this.__close()
-                    this.__resetInput()
-                } else {
-                    e.preventDefault()
-                    this.__open()
-                }
+            //     if (this.__isOpen) {
+            //         this.__close()
+            //         this.__resetInput()
+            //     } else {
+            //         e.preventDefault()
+            //         this.__open()
+            //     }
 
-                requestAnimationFrame(() => this.$refs.__input.focus({ preventScroll: true }))
-            },
+            //     requestAnimationFrame(() => this.$refs.__input.focus({ preventScroll: true }))
+            // },
         })
     }
 

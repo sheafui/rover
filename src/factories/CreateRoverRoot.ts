@@ -20,6 +20,7 @@ export default function CreateRoverRoot(
     const SLOT_NAME = 'rover-root';
 
     return {
+        collection,
         // cache
         __optionsEls: undefined,
         __groupsEls: undefined,
@@ -111,11 +112,10 @@ export default function CreateRoverRoot(
                             : this.__selectedKeys ? [this.__selectedKeys] : []
                     );
 
-                    // Batch all DOM updates in a single animation frame
+                    // Batch all DOM updates
                     requestAnimationFrame(() => {
-                        const options = this.__optionsEls;
 
-                        console.log(this.__optionsEls)
+                        const options = this.__optionsEls;
 
                         options.forEach((opt: Element) => {
                             const htmlOpt = opt as HTMLElement;
@@ -156,6 +156,7 @@ export default function CreateRoverRoot(
                         groups.forEach((group: Element) => {
                             const htmlGroup = group as HTMLElement;
                             const options = htmlGroup.querySelectorAll('[data-slot=rover-option]');
+
                             // Check if group has any visible options
                             const hasVisibleOption = Array.from(options).some((opt: Element) => {
 
@@ -390,13 +391,13 @@ export default function CreateRoverRoot(
                     delegate((optionEl) => {
                         if (!optionEl.dataset.key) return;
 
-                        
-                        
+
+
                         this.__handleSelection(optionEl.dataset.key);
-                        
+
                         console.log('clicked', optionEl, optionEl.dataset.key)
 
-                        console.log('selected keys:',   this.__selectedKeys);
+                        console.log('selected keys:', this.__selectedKeys);
                         if (!this.__isMultiple && !this.__static) {
                             // this§/;.__close()
                             // this.__resetInput()

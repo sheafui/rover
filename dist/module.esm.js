@@ -309,6 +309,7 @@ function CreateRoverRoot({
   const collection = new RoverCollection_default();
   const SLOT_NAME3 = "rover-root";
   return {
+    collection,
     __optionsEls: void 0,
     __groupsEls: void 0,
     __state: null,
@@ -376,7 +377,6 @@ function CreateRoverRoot({
           const selectedKeys = new Set(Array.isArray(this.__selectedKeys) ? this.__selectedKeys : this.__selectedKeys ? [this.__selectedKeys] : []);
           requestAnimationFrame(() => {
             const options = this.__optionsEls;
-            console.log(this.__optionsEls);
             options.forEach((opt) => {
               const htmlOpt = opt;
               const key = htmlOpt.dataset.key;
@@ -707,6 +707,35 @@ function rover(Alpine2) {
         break;
     }
   });
+  Alpine2.magic("rover", (el) => {
+    let dataStack = Alpine2.$data(el);
+    console.log("datastack:", dataStack);
+    return {
+      activate(key) {
+        dataStack.collection.activate(key);
+      },
+      deactivate() {
+        dataStack.collection.deactivate();
+      },
+      getValueByKey(key) {
+        dataStack.collection.getValueByKey(key);
+      },
+      getActiveItem() {
+      },
+      activateNext() {
+      },
+      activatePrev() {
+      },
+      activateFirst() {
+      },
+      activateLast() {
+      },
+      searchUsing() {
+      },
+      getKeyByIndex() {
+      }
+    };
+  });
   function handleRoot(Alpine3, el, effect) {
     Alpine3.bind(el, {
       "x-on:keydown.escape"(e) {
@@ -800,19 +829,7 @@ function rover(Alpine2) {
         return this.$id("rover-button");
       },
       tabindex: "-1",
-      "aria-haspopup": "true",
-      "x-on:click"(e) {
-        if (this.__isDisabled)
-          return;
-        if (this.__isOpen) {
-          this.__close();
-          this.__resetInput();
-        } else {
-          e.preventDefault();
-          this.__open();
-        }
-        requestAnimationFrame(() => this.$refs.__input.focus({preventScroll: true}));
-      }
+      "aria-haspopup": "true"
     });
   }
   function handleEmptyState(Alpine3, el) {
