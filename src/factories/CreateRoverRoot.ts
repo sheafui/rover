@@ -260,6 +260,7 @@ export default function CreateRoverRoot(
         },
 
         __handleSelection(key: string) {
+
             let value = this.__getValueByKey(key);
 
             if (!this.__isMultiple) {
@@ -275,6 +276,7 @@ export default function CreateRoverRoot(
                 if (!this.__static) {
                     this.__close();
                 }
+                console.log(this.__state);
 
                 return;
             }
@@ -388,11 +390,16 @@ export default function CreateRoverRoot(
                     delegate((optionEl) => {
                         if (!optionEl.dataset.key) return;
 
+                        
+                        
                         this.__handleSelection(optionEl.dataset.key);
+                        
+                        console.log('clicked', optionEl, optionEl.dataset.key)
 
+                        console.log('selected keys:',   this.__selectedKeys);
                         if (!this.__isMultiple && !this.__static) {
-                            this.__close()
-                            this.__resetInput()
+                            // this§/;.__close()
+                            // this.__resetInput()
                         }
 
                         this.$nextTick(() => this.$refs?.__input?.focus({ preventScroll: true }))

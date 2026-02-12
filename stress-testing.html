@@ -150,9 +150,7 @@
                 <!-- Dynamically loaded items -->
                 <template x-for="(item, index) in items" x-bind:key="item.id">
                     <li 
-                        x-init="console.log('Initialized item:', item.name)"
-                        x-rover:option 
-                        x-bind:value="String(item.name)" 
+                        x-rover:option="item.name" 
                         class="px-4 py-2 data-active:bg-white/5 hover:bg-white/10 cursor-pointer transition-colors border-b border-neutral-800">
                         <div class="flex items-center justify-between">
                             <div>
@@ -291,7 +289,7 @@
                     console.log('💡 Click a button to load items and start testing!');
                     
                     // Load initial 100 items
-                    setTimeout(() => this.loadItems(100), 500);
+                    setTimeout(() => this.loadItems(100), 100);
                 }
             };
         }

@@ -113,17 +113,17 @@ export default function rover(Alpine: Alpine): void {
             'x-id'() { return ['rover-option'] },
             'x-bind:id'() { return this.$id('rover-option') },
             'role': 'option',
-            'x-show'(this: RoverOptionContext) {
-                return this.$data.__isVisible;
-            },
+            // 'x-show'(this: RoverOptionContext) {
+            //     return this.$data.__isVisible;
+            // },
             'x-data'(this: RoverOptionContext) {
-                let value = null;
+                let value: string | null = null;
 
                 if (expression !== '') {
                     value = evaluate(expression)
                 }
-                
-                return CreateRoverOption(Alpine, this.__nextOptionId(), String(value));
+
+                return CreateRoverOption(Alpine, this.__nextOptionId(), value);
             },
         });
     }

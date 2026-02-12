@@ -31,7 +31,7 @@
 
 <body 
     x-data="{
-        item: 'hiba'
+        items: ['hiba','iman','sara','youssef','ali','khaled']
     }" 
     class="flex mt-20 justify-center bg-neutral-950"
 >
@@ -58,16 +58,25 @@
                 <li class="py-4 text-center" x-rover:empty>
                     No result found
                 </li>
-                <li  value="tenjarine"  class="px-4 data-active:bg-white/5  py-2">
+
+                <template x-for="(item, index) in items" x-bind:key="index">
+                    <li 
+                        x-rover:option="item" 
+                        x-text="item"
+                        class="px-4 data-active:bg-white/5 py-2"
+                    >
+                    </li>   
+                </template>
+                <!-- <li x-rover:option value="tenjarine"  class="px-4 data-active:bg-white/5  py-2">
                     tenjarine
                 </li>
                 <li x-rover:option value="apple" class="px-4 data-active:bg-white/5 py-2">
                     Apple
-                </li>
+                </li> -->
 
                 <!-- the seperator used when the search make it look at the bottom and in that case we need to hide it -->
 
-                <li x-rover:separator class="w-full h-px bg-neutral-700"></li>
+                <!-- <li x-rover:separator class="w-full h-px bg-neutral-700"></li>
 
                 <li x-rover:option value="banana" class="px-4 data-active:bg-white/5 py-2">
                     Banana
@@ -75,9 +84,9 @@
 
                 <li x-rover:option value="cherry" class="px-4 data-active:bg-white/5 py-2">
                     Cherry
-                </li>
+                </li> -->
 
-                <li x-rover:separator class="w-full h-px bg-neutral-700"></li>
+                <!-- <li x-rover:separator class="w-full h-px bg-neutral-700"></li>
 
                 <li x-rover:group>
                     <div class="text-sm ml-2 underline">special fruits</div>
@@ -94,7 +103,7 @@
                             Grape
                         </li>
                     </ul>
-                </li>
+                </li> -->
             </ul>
 
         </div>

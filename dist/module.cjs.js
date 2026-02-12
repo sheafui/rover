@@ -511,6 +511,7 @@ function CreateRoverRoot({
         if (!this.__static) {
           this.__close();
         }
+        console.log(this.__state);
         return;
       }
       if (!Array.isArray(this.__selectedKeys)) {
@@ -603,9 +604,9 @@ function CreateRoverRoot({
           if (!optionEl.dataset.key)
             return;
           this.__handleSelection(optionEl.dataset.key);
+          console.log("clicked", optionEl, optionEl.dataset.key);
+          console.log("selected keys:", this.__selectedKeys);
           if (!this.__isMultiple && !this.__static) {
-            this.__close();
-            this.__resetInput();
           }
           this.$nextTick(() => {
             var _a, _b;
@@ -788,15 +789,12 @@ function rover(Alpine2) {
         return this.$id("rover-option");
       },
       role: "option",
-      "x-show"() {
-        return this.$data.__isVisible;
-      },
       "x-data"() {
         let value = null;
         if (expression !== "") {
           value = evaluate(expression);
         }
-        return CreateRoverOption(Alpine3, this.__nextOptionId(), String(value));
+        return CreateRoverOption(Alpine3, this.__nextOptionId(), value);
       }
     });
   }

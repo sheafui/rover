@@ -9,11 +9,11 @@ export default function CreateRoverOption(Alpine: AlpineType, id: number, dirVal
         __isVisible: true,
 
         init(this: RoverOptionContext) {
-            // Setup element
+            // Setup
             this.$el.dataset.slot = SLOT_NAME;
+
             this.$el.dataset.key = this.__uniqueKey;
 
-            // Extract props
             let value;
 
             if (dirValue !== null) {
