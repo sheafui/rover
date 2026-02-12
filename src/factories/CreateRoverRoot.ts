@@ -3,6 +3,7 @@ import RoverCollection from "../core/RoverCollection";
 import type { default as AlpineType } from "alpinejs";
 import { Item, RoverInputContext, RoverRootData } from "src/types";
 import { SLOT_NAME as OPTION_SLOT_NAME } from "./CreateRoverOption";
+import { input } from "src/InputManager";
 
 export default function CreateRoverRoot(
     { el,
@@ -208,7 +209,6 @@ export default function CreateRoverRoot(
                 }
             });
         },
-
         __open() {
             if (this.__isOpen) return
 
@@ -507,5 +507,6 @@ export default function CreateRoverRoot(
                 }
             });
         },
+        ...input(),
     }
 }

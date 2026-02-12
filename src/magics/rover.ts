@@ -16,8 +16,9 @@ export const rover = (el: ElementWithXAttributes) => {
         navigator: () => {
             return data.navigator;
         },
+
         get input() {
-            return queueMicrotask(() => { this.$refs.input })
+            return data.__input();
         },
         onClose(callback: () => void) {
             data.__onClose(callback);

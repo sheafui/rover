@@ -69,11 +69,12 @@
             init() {
                 this.$rover.onOpen(() => this.activateSelectedOrFirst());
 
-                // this.$rover.input.onKeyDown((key, activeKey, event) => {
-                //     if (event.key === 'Enter') {
-                //         this.selectedKeys = key;
-                //     }
-                // });
+                // interact with input events using rover
+                this.$rover.input.on('keydown', (event, activeKey) => {
+                    if (event.key === 'Enter') {
+                        this.selectedKeys = activeKey;
+                    }
+                });
             },
 
 

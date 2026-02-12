@@ -237,6 +237,19 @@
   };
   var RoverCollection_default = RoverCollection;
 
+  // src/InputManager.ts
+  var input = () => ({
+    __input() {
+      let input2 = queueMicrotask(() => {
+        this.$refs.input;
+      });
+      return {
+        on(eventKey, handler) {
+        }
+      };
+    }
+  });
+
   // src/factories/CreateRoverRoot.ts
   function CreateRoverRoot({
     el,
@@ -457,11 +470,11 @@
         this.__isTyping = false;
       },
       __resetInput() {
-        let input = this.$refs.__input;
-        if (!input)
+        let input2 = this.$refs.__input;
+        if (!input2)
           return;
         let value = this.__getCurrentValue();
-        input.value = value;
+        input2.value = value;
       },
       __getCurrentValue() {
         if (!this.$refs.__input)
@@ -589,7 +602,8 @@
               break;
           }
         });
-      }
+      },
+      ...input()
     };
   }
 
@@ -610,9 +624,7 @@
         return data.navigator;
       },
       get input() {
-        return queueMicrotask(() => {
-          this.$refs.input;
-        });
+        return data.__input();
       },
       onClose(callback) {
         data.__onClose(callback);
