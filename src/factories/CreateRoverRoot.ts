@@ -59,7 +59,7 @@ export default function CreateRoverRoot(
         __searchUsingQuery: (query: string) => collection.search(query),
         __getKeyByIndex: (index: number) => collection.getKeyByIndex(index),
 
-        __onOpenCallback: () => {},
+        __onOpenCallback: () => { },
         __onOpen(callback: () => void) {
             this.__onOpenCallback = callback;
         },
@@ -198,16 +198,11 @@ export default function CreateRoverRoot(
 
             this.__isOpen = true;
 
-            this.__onOpenCallback();
-            // this.$nextTick(() => {
-            //     if (this.$refs.__input) {
-            //         this.$refs.__input.focus({ preventScroll: true });
-            //     }
+            requestAnimationFrame(() => {
+                this.$refs?.__input?.focus({ preventScroll: true });
+            })
 
-            //     if (!this.__getActiveItem() && this.collection.items.length) {
-            //         this.__activateFirst();
-            //     }
-            // });
+            this.__onOpenCallback();
         },
 
         __pushSeparatorToItems(key: string) {

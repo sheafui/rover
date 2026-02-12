@@ -434,6 +434,9 @@ function CreateRoverRoot({
       if (this.__isOpen)
         return;
       this.__isOpen = true;
+      requestAnimationFrame(() => {
+        this.$refs?.__input?.focus({preventScroll: true});
+      });
       this.__onOpenCallback();
     },
     __pushSeparatorToItems(key) {

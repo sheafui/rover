@@ -452,6 +452,10 @@ function CreateRoverRoot({
       if (this.__isOpen)
         return;
       this.__isOpen = true;
+      requestAnimationFrame(() => {
+        var _a, _b;
+        (_b = (_a = this.$refs) == null ? void 0 : _a.__input) == null ? void 0 : _b.focus({preventScroll: true});
+      });
       this.__onOpenCallback();
     },
     __pushSeparatorToItems(key) {

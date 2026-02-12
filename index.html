@@ -64,7 +64,8 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('selectComponent', () => ({
             items: ['tenjarine', 'apple', 'banana', 'cherry', 'orange', 'mango', 'grape'],
-            
+            selectedKeys: null,
+
             init() {
                 queueMicrotask(() => {
                     this.$rover.onOpen(() => this.activateSelectedOrFirst());
