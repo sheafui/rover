@@ -32,21 +32,20 @@
         items: ['tenjarine', 'apple', 'banana', 'cherry', 'orange', 'mango', 'grape'],
         open: false,
         handleButtonClick(e) {
+            if (this.open) {
+                this.close()
+                this.resetInput()
+            } else {
+                e.preventDefault()
+                this.open()
+            }
 
-            if (this.__isOpen) {
-                    this.close()
-                    this.resetInput()
-                } else {
-                    e.preventDefault()
-                    this.open()
-                }
-
-                requestAnimationFrame(() => this.$refs.__input.focus({ preventScroll: true }))
-            },
+            requestAnimationFrame(() => this.$refs.__input.focus({ preventScroll: true }))
+        },
         open() {
-            if (this.__isOpen) return
+            if (this.open) return
 
-            this.__isOpen = true;
+            this.open = true;
 
             let input = this.$refs.__input;
 
@@ -56,7 +55,7 @@
             })
         },
         activateSelectedOrFirst(activateSelected = true) {
-            if (!this.__isOpen) return;
+            if (!this.open) return;
 
             let activeItem = this.$rover.getActiveItem();
 
@@ -77,7 +76,7 @@
         },
 
         close() {
-            this.__isOpen = false;
+            this.open = false;
             this.$rover.deactivate();
         },
     }" class="flex mt-20 justify-center bg-neutral-950">

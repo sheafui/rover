@@ -436,8 +436,6 @@ function CreateRoverRoot({
       });
       this.__isDisabled = Alpine.extractProp(el, "disabled", false);
       this.__compareBy = Alpine.extractProp(el, "by", "");
-      const initialValueFallback = this.__isMultiple ? [] : "";
-      let initialValue = Alpine.extractProp(el, "initial-value", initialValueFallback);
       this.__registerEventsDelector();
       this.$nextTick(() => {
         if (!this.$refs.__input) {

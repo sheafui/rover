@@ -107,7 +107,7 @@ export default function CreateRoverRoot(
                 effect(() => {
                     const activeKey = this.__activatedKey;
                     const visibleKeys = this.__filteredKeys ? new Set(this.__filteredKeys) : null;
-                    
+
                     const selectedKeys = new Set(Array.isArray(this.__selectedKeys)
                         ? this.__selectedKeys
                         : this.__selectedKeys
@@ -178,11 +178,6 @@ export default function CreateRoverRoot(
 
             this.__isDisabled = Alpine.extractProp(el, 'disabled', false) as boolean;
             this.__compareBy = Alpine.extractProp(el, 'by', '') as string;
-
-            const initialValueFallback: Array<string> | string = this.__isMultiple ? [] : '';
-
-            // @ts-expect-error - Alpine.extractProp types are too restrictive, awaiting fix
-            let initialValue = Alpine.extractProp(el, 'initial-value', initialValueFallback);
 
             this.__registerEventsDelector();
 
