@@ -362,6 +362,11 @@ function CreateRoverRoot({
     __activateLast: () => collection.activateLast(),
     __searchUsingQuery: (query) => collection.search(query),
     __getKeyByIndex: (index) => collection.getKeyByIndex(index),
+    __onOpenCallback: () => {
+    },
+    __onOpen(callback) {
+      this.__onOpenCallback = callback;
+    },
     init() {
       this.$el.dataset.slot = SLOT_NAME3;
       effect(() => {
@@ -447,14 +452,7 @@ function CreateRoverRoot({
       if (this.__isOpen)
         return;
       this.__isOpen = true;
-      this.$nextTick(() => {
-        if (this.$refs.__input) {
-          this.$refs.__input.focus({preventScroll: true});
-        }
-        if (!this.__getActiveItem() && this.collection.items.length) {
-          this.__activateFirst();
-        }
-      });
+      this.__onOpenCallback();
     },
     __pushSeparatorToItems(key) {
       this.__items.push({
@@ -682,6 +680,9 @@ var rover = (dataStack) => ({
   },
   get collection() {
     return dataStack.collection;
+  },
+  onOpen(callback) {
+    dataStack.__onOpen(callback);
   },
   activate(key) {
     dataStack.collection.activate(key);

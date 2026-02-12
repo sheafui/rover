@@ -7,6 +7,15 @@ export const rover = (dataStack: RoverRootContext) => ({
     get collection(){
         return dataStack.collection;
     },
+    onOpen(callback: () => void) {
+        dataStack.__onOpen(callback);
+    },
+    // onClose(callback: () => void) {
+    //     dataStack.__onClose(callback);
+    // },
+    // onChange(callback: () => void) {
+    //     dataStack.__onChange(callback);
+    // },  
     activate(key: string) {
         dataStack.collection.activate(key)
     },

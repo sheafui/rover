@@ -30,7 +30,7 @@
 
 <body class="flex mt-20 justify-center bg-neutral-950">
 
-    <div class="space-y-4" x-rover x-data="selectComponent" >
+    <div class="space-y-4" x-rover x-data="selectComponent">
         <div class="w-[360px]">
             <div class="grid grid-cols-[auto_2rem] overflow-hidden">
                 <input x-rover:input placeholder="Search..."
@@ -51,12 +51,8 @@
                 </li>
 
                 <template x-for="(item, index) in items" x-bind:key="index">
-                    <li 
-                        x-on:click="console.log('clicked', $rover.isOpen)"
-                        x-rover:option="item" 
-                        x-text="item" 
-                        class="px-4 data-active:bg-white/5 py-2"
-                    >
+                    <li x-on:click="console.log('clicked', $rover.isOpen)" x-rover:option="item" x-text="item"
+                        class="px-4 data-active:bg-white/5 py-2">
                     </li>
                 </template>
             </ul>
@@ -68,15 +64,16 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('selectComponent', () => ({
             items: ['tenjarine', 'apple', 'banana', 'cherry', 'orange', 'mango', 'grape'],
+            
             init() {
-                this.$nextTick(() => {
-                    console.log(this.$rover.collection);
-                })
+                queueMicrotask(() => {
+                    this.$rover.onOpen(() => this.activateSelectedOrFirst());
+                });
             },
 
 
             activateSelectedOrFirst(activateSelected = true) {
-                if (!this.$roverOptions.isOpen) return;
+                if (!this.$rover.isOpen) return;
 
                 let activeItem = this.$rover.getActiveItem();
 

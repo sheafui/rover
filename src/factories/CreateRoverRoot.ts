@@ -58,6 +58,11 @@ export default function CreateRoverRoot(
         __activateLast: () => collection.activateLast(),
         __searchUsingQuery: (query: string) => collection.search(query),
         __getKeyByIndex: (index: number) => collection.getKeyByIndex(index),
+
+        __onOpenCallback: () => {},
+        __onOpen(callback: () => void) {
+            this.__onOpenCallback = callback;
+        },
         init() {
             this.$el.dataset.slot = SLOT_NAME;
 
@@ -193,15 +198,16 @@ export default function CreateRoverRoot(
 
             this.__isOpen = true;
 
-            this.$nextTick(() => {
-                if (this.$refs.__input) {
-                    this.$refs.__input.focus({ preventScroll: true });
-                }
+            this.__onOpenCallback();
+            // this.$nextTick(() => {
+            //     if (this.$refs.__input) {
+            //         this.$refs.__input.focus({ preventScroll: true });
+            //     }
 
-                if (!this.__getActiveItem() && this.collection.items.length) {
-                    this.__activateFirst();
-                }
-            });
+            //     if (!this.__getActiveItem() && this.collection.items.length) {
+            //         this.__activateFirst();
+            //     }
+            // });
         },
 
         __pushSeparatorToItems(key: string) {
