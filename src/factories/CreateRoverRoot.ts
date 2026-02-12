@@ -93,6 +93,7 @@ export default function CreateRoverRoot(
                 }
             });
 
+
             this.$nextTick(() => {
                 this.__optionsEls = Array.from(
                     this.$el.querySelectorAll('[data-slot=rover-option]')
@@ -106,6 +107,7 @@ export default function CreateRoverRoot(
                 effect(() => {
                     const activeKey = this.__activatedKey;
                     const visibleKeys = this.__filteredKeys ? new Set(this.__filteredKeys) : null;
+                    
                     const selectedKeys = new Set(Array.isArray(this.__selectedKeys)
                         ? this.__selectedKeys
                         : this.__selectedKeys
