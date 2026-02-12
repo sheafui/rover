@@ -1,4 +1,4 @@
-import { Alpine } from "alpinejs";
+import type {  Alpine } from "alpinejs";
 import type { default as AlpineType } from "alpinejs";
 import CreateRoverInput from "./factories/CreateRoverInput";
 import CreateRoverOption from "./factories/CreateRoverOption";
@@ -6,7 +6,6 @@ import CreateRoverRoot from "./factories/CreateRoverRoot";
 import CreateRoverOptions from "./factories/CreateRoverOptions";
 import { RoverOptionContext, RoverOptionsContext, RoverRootContext } from "./types";
 import registerMagics from "./magics";
-import { DefaultDeserializer } from "node:v8";
 
 
 type RoverValue =
@@ -62,6 +61,9 @@ export default function rover(Alpine: Alpine): void {
         el: AlpineType.ElementWithXAttributes,
         effect: AlpineType.DirectiveUtilities['effect']
     ) {
+        // Alpine.addScopeToNode(el, ...CreateRoverRoot({ el, effect }));
+
+        console.log(el);
         Alpine.bind(el, {
             'x-data'() {
                 return {

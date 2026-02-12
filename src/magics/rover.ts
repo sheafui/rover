@@ -1,49 +1,57 @@
+import { ElementWithXAttributes } from "alpinejs";
 import { Item, RoverRootContext } from "src/types";
 
-export const rover = (dataStack: RoverRootContext) => ({
-    get isOpen() {
-        return dataStack.__isOpen;
-    },
-    get collection(){
-        return dataStack.collection;
-    },
-    onOpen(callback: () => void) {
-        dataStack.__onOpen(callback);
-    },
-    // onClose(callback: () => void) {
-    //     dataStack.__onClose(callback);
-    // },
-    // onChange(callback: () => void) {
-    //     dataStack.__onChange(callback);
-    // },  
-    activate(key: string) {
-        dataStack.collection.activate(key)
-    },
-    deactivate() {
-        dataStack.collection.deactivate()
-    },
-    getValueByKey(key: string) {
-        return dataStack.collection.getValueByKey(key)
-    },
-    getActiveItem() {
-        return dataStack.collection.getActiveItem()
-    },
-    activateNext() {
-        dataStack.collection.activateNext()
-    },
-    activatePrev() {
-        dataStack.collection.activatePrev()
-    },
-    activateFirst() {
-        dataStack.collection.activateFirst()
-    },
-    activateLast() {
-        dataStack.collection.activateLast()
-    },
-    searchUsing(query: string): Item[] {
-        return dataStack.collection.search(query)
-    },
-    getKeyByIndex(index: number | null | undefined): string | null {
-        return dataStack.collection.getKeyByIndex(index)
+export const rover = (el: ElementWithXAttributes) => {
+
+    let data = Alpine.$data(el) as RoverRootContext;
+
+    console.log('rover magic', data.__isOpen);
+
+    return {
+        get isOpen() {
+            return data.__isOpen;
+        },
+        get collection() {
+            return data.collection;
+        },
+        onOpen(callback: () => void) {
+            data.__onOpen(callback);
+        },
+        // onClose(callback: () => void) {
+        //     data.__onClose(callback);
+        // },
+        // onChange(callback: () => void) {
+        //     data.__onChange(callback);
+        // },  
+        activate(key: string) {
+            data.collection.activate(key)
+        },
+        deactivate() {
+            data.collection.deactivate()
+        },
+        getValueByKey(key: string) {
+            return data.collection.getValueByKey(key)
+        },
+        getActiveItem() {
+            return data.collection.getActiveItem()
+        },
+        activateNext() {
+            data.collection.activateNext()
+        },
+        activatePrev() {
+            data.collection.activatePrev()
+        },
+        activateFirst() {
+            data.collection.activateFirst()
+        },
+        activateLast() {
+            data.collection.activateLast()
+        },
+        searchUsing(query: string): Item[] {
+            return data.collection.search(query)
+        },
+        getKeyByIndex(index: number | null | undefined): string | null {
+            return data.collection.getKeyByIndex(index)
+        }
     }
-})
+}

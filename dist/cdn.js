@@ -654,47 +654,51 @@
   }
 
   // src/magics/rover.ts
-  var rover = (dataStack) => ({
-    get isOpen() {
-      return dataStack.__isOpen;
-    },
-    get collection() {
-      return dataStack.collection;
-    },
-    onOpen(callback) {
-      dataStack.__onOpen(callback);
-    },
-    activate(key) {
-      dataStack.collection.activate(key);
-    },
-    deactivate() {
-      dataStack.collection.deactivate();
-    },
-    getValueByKey(key) {
-      return dataStack.collection.getValueByKey(key);
-    },
-    getActiveItem() {
-      return dataStack.collection.getActiveItem();
-    },
-    activateNext() {
-      dataStack.collection.activateNext();
-    },
-    activatePrev() {
-      dataStack.collection.activatePrev();
-    },
-    activateFirst() {
-      dataStack.collection.activateFirst();
-    },
-    activateLast() {
-      dataStack.collection.activateLast();
-    },
-    searchUsing(query) {
-      return dataStack.collection.search(query);
-    },
-    getKeyByIndex(index) {
-      return dataStack.collection.getKeyByIndex(index);
-    }
-  });
+  var rover = (el) => {
+    let data = Alpine.$data(el);
+    console.log("rover magic", data.__isOpen);
+    return {
+      get isOpen() {
+        return data.__isOpen;
+      },
+      get collection() {
+        return data.collection;
+      },
+      onOpen(callback) {
+        data.__onOpen(callback);
+      },
+      activate(key) {
+        data.collection.activate(key);
+      },
+      deactivate() {
+        data.collection.deactivate();
+      },
+      getValueByKey(key) {
+        return data.collection.getValueByKey(key);
+      },
+      getActiveItem() {
+        return data.collection.getActiveItem();
+      },
+      activateNext() {
+        data.collection.activateNext();
+      },
+      activatePrev() {
+        data.collection.activatePrev();
+      },
+      activateFirst() {
+        data.collection.activateFirst();
+      },
+      activateLast() {
+        data.collection.activateLast();
+      },
+      searchUsing(query) {
+        return data.collection.search(query);
+      },
+      getKeyByIndex(index) {
+        return data.collection.getKeyByIndex(index);
+      }
+    };
+  };
 
   // src/magics/roverOption.ts
   var roverOption = (dataStack) => ({
@@ -754,8 +758,7 @@
       });
       if (!optionEl)
         throw "No x-rover directive found, this magic meant to be used under x-rover root context...";
-      let dataStack = Alpine2.$data(optionEl);
-      return rover(dataStack);
+      return rover(optionEl);
     });
     Alpine2.magic("roverOption", (el) => {
       let optionEl = Alpine2.findClosest(el, (i) => {
@@ -815,6 +818,7 @@
     }).before("bind");
     registerMagics(Alpine2);
     function handleRoot(Alpine3, el, effect) {
+      console.log(el);
       Alpine3.bind(el, {
         "x-data"() {
           return {

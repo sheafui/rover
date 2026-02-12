@@ -16,9 +16,7 @@ export default function registerMagics(Alpine: Alpine) {
 
         if (!optionEl) throw 'No x-rover directive found, this magic meant to be used under x-rover root context...'
 
-        let dataStack = Alpine.$data(optionEl as AlpineType.ElementWithXAttributes) as RoverRootContext;
-
-        return roverMagic(dataStack);
+        return roverMagic(optionEl as AlpineType.ElementWithXAttributes);
     });
 
     Alpine.magic('roverOption', (el) => {
