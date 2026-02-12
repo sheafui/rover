@@ -742,11 +742,17 @@ var roverOptions = (dataStack) => ({
 // src/magics/index.ts
 function registerMagics(Alpine2) {
   Alpine2.magic("rover", (el) => {
-    return rover(Alpine2.$data(el));
+    let optionEl = Alpine2.findClosest(el, (i) => {
+      return i.hasAttribute("x-rover");
+    });
+    if (!optionEl)
+      throw "No x-rover directive found, this magic meant to be used under x-rover root context...";
+    let dataStack = Alpine2.$data(optionEl);
+    return rover(dataStack);
   });
   Alpine2.magic("roverOption", (el) => {
     let optionEl = Alpine2.findClosest(el, (i) => {
-      return i.hasAttribute("x-option:option");
+      return i.hasAttribute("x-rover:option");
     });
     if (!optionEl)
       throw "No x-rover:option directive found, this magic meant to be used per option context...";
@@ -754,12 +760,12 @@ function registerMagics(Alpine2) {
     return roverOption(dataStack);
   });
   Alpine2.magic("roverOptions", (el) => {
-    let optionEl = Alpine2.findClosest(el, (i) => {
+    let optionEls = Alpine2.findClosest(el, (i) => {
       return i.hasAttribute("x-option:options");
     });
-    if (!optionEl)
+    if (!optionEls)
       throw "No x-rover:options directive found, this magic meant to be used per options context...";
-    let dataStack = Alpine2.$data(optionEl);
+    let dataStack = Alpine2.$data(optionEls);
     return roverOptions(dataStack);
   });
 }

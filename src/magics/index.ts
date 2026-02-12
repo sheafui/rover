@@ -9,13 +9,22 @@ import { RoverRootContext } from "src/types";
 export default function registerMagics(Alpine: Alpine) {
 
     Alpine.magic('rover', (el) => {
-        return roverMagic(Alpine.$data(el) as RoverRootContext);
+
+        let optionEl = Alpine.findClosest(el, i => {
+            return i.hasAttribute('x-rover')
+        })
+
+        if (!optionEl) throw 'No x-rover directive found, this magic meant to be used under x-rover root context...'
+
+        let dataStack = Alpine.$data(optionEl as AlpineType.ElementWithXAttributes) as RoverRootContext;
+
+        return roverMagic(dataStack);
     });
 
     Alpine.magic('roverOption', (el) => {
 
         let optionEl = Alpine.findClosest(el, i => {
-            return i.hasAttribute('x-option:option')
+            return i.hasAttribute('x-rover:option')
         })
 
         if (!optionEl) throw 'No x-rover:option directive found, this magic meant to be used per option context...'
@@ -27,13 +36,12 @@ export default function registerMagics(Alpine: Alpine) {
 
     Alpine.magic('roverOptions', (el) => {
 
-        let optionEl = Alpine.findClosest(el, i => {
+        let optionEls = Alpine.findClosest(el, i => {
             return i.hasAttribute('x-option:options')
         })
 
-        if (!optionEl) throw 'No x-rover:options directive found, this magic meant to be used per options context...'
-
-        let dataStack = Alpine.$data(optionEl as AlpineType.ElementWithXAttributes) as RoverRootContext;
+        if (!optionEls) throw 'No x-rover:options directive found, this magic meant to be used per options context...'
+        let dataStack = Alpine.$data(optionEls as AlpineType.ElementWithXAttributes) as RoverRootContext;
 
         return roverOptionsMagic(dataStack);
     });

@@ -32,42 +32,7 @@
 
     <div
         class="space-y-4"
-        x-data="{
-            items: ['tenjarine', 'apple', 'banana', 'cherry', 'orange', 'mango', 'grape'],
-            init(){
-
-                console.log(this.$roverOptions);
-
-                this.$roverOptions.onOpen(()=>{
-                    console.log('opened');
-                });           
-                
-                this.$roverOptions.onClose(()=>{
-
-                });           
-            },
-            
-            activateSelectedOrFirst(activateSelected = true) {
-                if (!this.$roverOptions.isOpen) return;
-
-                let activeItem = this.$rover.getActiveItem();
-
-                if (activeItem) return;
-
-                if (activateSelected && this.__selectedKeys) {
-                    const keyToActivate = this.__isMultiple
-                        ? this.__selectedKeys[0]
-                        : this.__selectedKeys;
-
-                    if (keyToActivate) {
-                        this.$rover.activate(keyToActivate);
-                        return;
-                    }
-                }
-
-                this.$rover.activateFirst();
-            },
-        }"
+        x-data="selectComponent"
     >
         <div 
            x-rover 
@@ -101,9 +66,44 @@
 </body>
 
 <script>
-    function data() {
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('selectComponent', () => ({
+            items: ['tenjarine', 'apple', 'banana', 'cherry', 'orange', 'mango', 'grape'],
+            init(){
+                console.log(this.$rover)
+                // console.log(this.$roverOptions);
 
-    }
+                // this.$roverOptions.onOpen(()=>{
+                //     console.log('opened');
+                // });           
+                
+                // this.$roverOptions.onClose(()=>{
+
+                // });           
+            },
+            
+            activateSelectedOrFirst(activateSelected = true) {
+                if (!this.$roverOptions.isOpen) return;
+
+                let activeItem = this.$rover.getActiveItem();
+
+                if (activeItem) return;
+
+                if (activateSelected && this.__selectedKeys) {
+                    const keyToActivate = this.__isMultiple
+                        ? this.__selectedKeys[0]
+                        : this.__selectedKeys;
+
+                    if (keyToActivate) {
+                        this.$rover.activate(keyToActivate);
+                        return;
+                    }
+                }
+
+                this.$rover.activateFirst();
+            },
+        }))
+    })
 </script>
 
 </html>
