@@ -672,8 +672,42 @@
     };
   }
 
+  // src/magics/rover.ts
+  var rover = (dataStack) => ({
+    activate(key) {
+      dataStack.collection.activate(key);
+    },
+    deactivate() {
+      dataStack.collection.deactivate();
+    },
+    getValueByKey(key) {
+      return dataStack.collection.getValueByKey(key);
+    },
+    getActiveItem() {
+      return dataStack.collection.getActiveItem();
+    },
+    activateNext() {
+      dataStack.collection.activateNext();
+    },
+    activatePrev() {
+      dataStack.collection.activatePrev();
+    },
+    activateFirst() {
+      dataStack.collection.activateFirst();
+    },
+    activateLast() {
+      dataStack.collection.activateLast();
+    },
+    searchUsing(query) {
+      return dataStack.collection.search(query);
+    },
+    getKeyByIndex(index) {
+      return dataStack.collection.getKeyByIndex(index);
+    }
+  });
+
   // src/index.ts
-  function rover(Alpine2) {
+  function rover2(Alpine2) {
     Alpine2.directive("rover", (el, {value, modifiers, expression}, {Alpine: Alpine3, effect, evaluate}) => {
       switch (value) {
         case null:
@@ -709,40 +743,7 @@
       }
     });
     Alpine2.magic("rover", (el) => {
-      let dataStack = Alpine2.$data(el);
-      console.log("datastack:", dataStack);
-      return {
-        activate(key) {
-          dataStack.collection.activate(key);
-        },
-        deactivate() {
-          dataStack.collection.deactivate();
-        },
-        getValueByKey(key) {
-          return dataStack.collection.getValueByKey(key);
-        },
-        getActiveItem() {
-          return dataStack.collection.getActiveItem();
-        },
-        activateNext() {
-          dataStack.collection.activateNext();
-        },
-        activatePrev() {
-          dataStack.collection.activatePrev();
-        },
-        activateFirst() {
-          dataStack.collection.activateFirst();
-        },
-        activateLast() {
-          dataStack.collection.activateLast();
-        },
-        searchUsing(query) {
-          return dataStack.collection.search(query);
-        },
-        getKeyByIndex(index) {
-          return dataStack.collection.getKeyByIndex(index);
-        }
-      };
+      return rover(Alpine2.$data(el));
     });
     function handleRoot(Alpine3, el, effect) {
       Alpine3.bind(el, {
@@ -875,6 +876,6 @@
 
   // builds/cdn.js
   document.addEventListener("alpine:init", () => {
-    window.Alpine.plugin(rover);
+    window.Alpine.plugin(rover2);
   });
 })();

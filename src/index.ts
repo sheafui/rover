@@ -1,11 +1,12 @@
-import { Alpine, evaluateLater } from "alpinejs";
+import { Alpine } from "alpinejs";
 import type { default as AlpineType } from "alpinejs";
 import CreateRoverInput from "./factories/CreateRoverInput";
 import CreateRoverOption from "./factories/CreateRoverOption";
 import CreateRoverRoot from "./factories/CreateRoverRoot";
 import CreateRoverOptions from "./factories/CreateRoverOptions";
-import { Item, RoverOptionContext, RoverOptionsContext, RoverRootContext } from "./types";
+import { RoverOptionContext, RoverOptionsContext, RoverRootContext } from "./types";
 
+import { rover as roverMagic } from "./magics/rover";
 type RoverValue =
     | null
     | 'input'
@@ -22,8 +23,8 @@ export default function rover(Alpine: Alpine): void {
     Alpine.directive('rover', (
         el: AlpineType.ElementWithXAttributes,
         { value, modifiers, expression }: AlpineType.DirectiveData,
-        { Alpine, effect, evaluate }: AlpineType.DirectiveUtilities) => {
-
+        { Alpine, effect, evaluate }: AlpineType.DirectiveUtilities
+    ) => {
 
         switch (value as RoverValue) {
             case null: handleRoot(Alpine, el, effect);
@@ -52,44 +53,11 @@ export default function rover(Alpine: Alpine): void {
 
 
     Alpine.magic('rover', (el) => {
-        let dataStack = Alpine.$data(el) as RoverRootContext
+        return roverMagic(Alpine.$data(el) as RoverRootContext);
+    });
 
-        console.log('datastack:', dataStack);
+    
 
-        // give all utilities access to the rover root data
-        return {
-            activate(key: string) {
-                dataStack.collection.activate(key)
-            },
-            deactivate() {
-                dataStack.collection.deactivate()
-            },
-            getValueByKey(key: string) {
-                return dataStack.collection.getValueByKey(key)
-            },
-            getActiveItem() {
-                return dataStack.collection.getActiveItem()
-            },
-            activateNext() {
-                dataStack.collection.activateNext()
-            },
-            activatePrev() {
-                dataStack.collection.activatePrev()
-            },
-            activateFirst() {
-                dataStack.collection.activateFirst()
-            },
-            activateLast() {
-                dataStack.collection.activateLast()
-            },
-            searchUsing(query: string): Item[] {
-                return dataStack.collection.search(query)
-            },
-            getKeyByIndex(index: number | null | undefined): string | null {
-                return dataStack.collection.getKeyByIndex(index)
-            }
-        }
-    })
     function handleRoot(
         Alpine: Alpine,
         el: AlpineType.ElementWithXAttributes,
