@@ -50,7 +50,7 @@ export default function rover(Alpine: Alpine): void {
                 console.error('invalid x-rover value', value, 'use input, button, option, options, group or leave mepty for root level instead');
                 break;
         }
-    }).before('bind');
+    }).before('data');
 
     // magics registration
     registerMagics(Alpine);
@@ -61,9 +61,16 @@ export default function rover(Alpine: Alpine): void {
         el: AlpineType.ElementWithXAttributes,
         effect: AlpineType.DirectiveUtilities['effect']
     ) {
-        let roverRootStack = CreateRoverRoot({ el, effect });
 
-        Alpine.addScopeToNode(el, roverRootStack);
+        // Alpine.bind(el, {'x-init'() { return CreateRoverRoot({ el, effect }) ; } });
+
+        Alpine.bind(el, {
+            'x-data'() {
+                return {
+                    ...CreateRoverRoot({ el, effect })
+                }
+            }
+        });
     }
 
     function handleInput(

@@ -2,11 +2,7 @@ import { ElementWithXAttributes } from "alpinejs";
 import { Item, RoverRootContext } from "src/types";
 
 export const rover = (el: ElementWithXAttributes) => {
-
     let data = Alpine.$data(el) as RoverRootContext;
-
-    console.log('rover magic', data.__isOpen);
-
     return {
         get isOpen() {
             return data.__isOpen;

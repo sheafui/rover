@@ -655,7 +655,6 @@ function CreateRoverOptions(Alpine2) {
 // src/magics/rover.ts
 var rover = (el) => {
   let data = Alpine.$data(el);
-  console.log("rover magic", data.__isOpen);
   return {
     get isOpen() {
       return data.__isOpen;
@@ -814,11 +813,16 @@ function rover2(Alpine2) {
         console.error("invalid x-rover value", value, "use input, button, option, options, group or leave mepty for root level instead");
         break;
     }
-  }).before("bind");
+  }).before("data");
   registerMagics(Alpine2);
   function handleRoot(Alpine3, el, effect) {
-    let roverRootStack = CreateRoverRoot({el, effect});
-    Alpine3.addScopeToNode(el, roverRootStack);
+    Alpine3.bind(el, {
+      "x-data"() {
+        return {
+          ...CreateRoverRoot({el, effect})
+        };
+      }
+    });
   }
   function handleInput(Alpine3, el) {
     Alpine3.bind(el, {

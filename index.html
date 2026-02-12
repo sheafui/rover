@@ -33,9 +33,14 @@
     <div class="space-y-4" x-rover x-data="selectComponent">
         <div class="w-[360px]">
             <div class="grid grid-cols-[auto_2rem] overflow-hidden">
-                <input x-rover:input placeholder="Search..."
-                    class="flex-1 col-start-1 col-span-full overflow-hidden row-start-1 w-full rounded-md bg-transparent py-2 text-neutral-300 placeholder-neutral-300 border border-neutral-500 px-4 focus:outline-none" />
-                <button x-rover:button type="button"
+                <input 
+                    x-rover:input
+                    placeholder="Search..."
+                    class="flex-1 col-start-1 col-span-full overflow-hidden row-start-1 w-full rounded-md bg-transparent py-2 text-neutral-300 placeholder-neutral-300 border border-neutral-500 px-4 focus:outline-none" 
+                />
+                <button 
+                    x-rover:button
+                    type="button"
                     class="col-start-2 row-start-1 border border-white/10 rounded-r-md text-white flex items-center self-center justify-center size-full">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="size-6">
@@ -44,7 +49,9 @@
                 </button>
             </div>
 
-            <ul x-rover:options x-cloak
+            <ul 
+                x-rover:options 
+                x-cloak
                 class="mt-1 max-h-60  w-full rounded-md border border-neutral-700 bg-white/5 text-white overflow-auto shadow-lg focus:outline-none">
                 <li class="py-4 text-center" x-rover:empty>
                     No result found
@@ -67,9 +74,9 @@
             selectedKeys: null,
 
             init() {
-                queueMicrotask(() => {
-                    this.$rover.onOpen(() => this.activateSelectedOrFirst());
-                });
+                 this.activateSelectedOrFirst();
+                // console.log('select component initialized',this.$rover.isOpen);
+                this.$rover.onOpen(() => this.activateSelectedOrFirst());
             },
 
 
