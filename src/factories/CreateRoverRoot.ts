@@ -58,12 +58,6 @@ export default function CreateRoverRoot(
         __activateLast: () => collection.activateLast(),
         __searchUsingQuery: (query: string) => collection.search(query),
         __getKeyByIndex: (index: number) => collection.getKeyByIndex(index),
-
-        // hooks
-        __onClose: (callback) => callback(),
-        __onOpen: (callback) => callback(),
-        __onChange: (callback) => callback(),
-
         init() {
             this.$el.dataset.slot = SLOT_NAME;
 

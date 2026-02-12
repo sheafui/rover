@@ -345,9 +345,6 @@
       __activateLast: () => collection.activateLast(),
       __searchUsingQuery: (query) => collection.search(query),
       __getKeyByIndex: (index) => collection.getKeyByIndex(index),
-      __onClose: (callback) => callback(),
-      __onOpen: (callback) => callback(),
-      __onChange: (callback) => callback(),
       init() {
         this.$el.dataset.slot = SLOT_NAME3;
         effect(() => {
@@ -721,13 +718,6 @@
   var roverOptions = (dataStack) => ({
     isOpen() {
       return dataStack.__isOpen;
-    },
-    onOpen(callback) {
-      console.log(dataStack);
-      dataStack.__onOpen(callback);
-    },
-    onClose(callback) {
-      dataStack.__onClose(callback);
     },
     open() {
       dataStack.__open();
