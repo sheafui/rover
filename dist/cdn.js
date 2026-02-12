@@ -417,12 +417,6 @@
             });
           });
         });
-        if (this.__isMultiple) {
-          this.__selectedKeys = [];
-        } else {
-          this.__selectedKeys = null;
-        }
-        this.__isMultiple = Alpine.extractProp(el, "multiple", false);
         this.__isDisabled = Alpine.extractProp(el, "disabled", false);
         this.__compareBy = Alpine.extractProp(el, "by", "");
         const initialValueFallback = this.__isMultiple ? [] : "";
@@ -784,12 +778,6 @@
     });
     function handleRoot(Alpine3, el, effect) {
       Alpine3.bind(el, {
-        "x-on:keydown.escape"(e) {
-          if (this.__isOpen) {
-            e.preventDefault();
-            this.__close();
-          }
-        },
         "x-data"() {
           return CreateRoverRoot({el, effect});
         }

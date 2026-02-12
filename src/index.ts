@@ -62,23 +62,16 @@ export default function rover(Alpine: Alpine): void {
     });
 
 
-
     function handleRoot(
         Alpine: Alpine,
         el: AlpineType.ElementWithXAttributes,
         effect: AlpineType.DirectiveUtilities['effect']
     ) {
         Alpine.bind(el, {
-            'x-on:keydown.escape'(e) {
-                if (this.__isOpen) {
-                    e.preventDefault();
-                    this.__close();
-                }
-            },
             'x-data'() {
-                return CreateRoverRoot({ el, effect })
+                return CreateRoverRoot({ el, effect });
             }
-        })
+        });
     }
 
     function handleInput(
@@ -93,9 +86,9 @@ export default function rover(Alpine: Alpine): void {
             'tabindex': '0',
             'aria-autocomplete': 'list',
             'x-data'() {
-                return CreateRoverInput(Alpine)
+                return CreateRoverInput(Alpine);
             }
-        })
+        });
     }
 
     function handleOptions(el: AlpineType.ElementWithXAttributes) {

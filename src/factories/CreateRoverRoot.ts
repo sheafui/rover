@@ -106,10 +106,11 @@ export default function CreateRoverRoot(
                 effect(() => {
                     const activeKey = this.__activatedKey;
                     const visibleKeys = this.__filteredKeys ? new Set(this.__filteredKeys) : null;
-                    const selectedKeys = new Set(
-                        Array.isArray(this.__selectedKeys)
-                            ? this.__selectedKeys
-                            : this.__selectedKeys ? [this.__selectedKeys] : []
+                    const selectedKeys = new Set(Array.isArray(this.__selectedKeys)
+                        ? this.__selectedKeys
+                        : this.__selectedKeys
+                            ? [this.__selectedKeys]
+                            : []
                     );
 
                     // Batch all DOM updates
@@ -173,15 +174,6 @@ export default function CreateRoverRoot(
                 });
             });
 
-
-            // Initialize multiple/single mode
-            if (this.__isMultiple) {
-                this.__selectedKeys = [];
-            } else {
-                this.__selectedKeys = null;
-            }
-
-            this.__isMultiple = Alpine.extractProp(el, 'multiple', false) as boolean;
             this.__isDisabled = Alpine.extractProp(el, 'disabled', false) as boolean;
             this.__compareBy = Alpine.extractProp(el, 'by', '') as string;
 
