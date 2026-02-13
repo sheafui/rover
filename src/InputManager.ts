@@ -4,6 +4,7 @@ export function createInputManager(root: RoverRootContext): InputManager {
     const cleanup: (() => void)[] = [];
 
     return {
+
         on(eventKey, handler) {
             root.$nextTick(() => {
                 const inputEl = root.$refs.__input as HTMLElement | undefined;
@@ -22,7 +23,21 @@ export function createInputManager(root: RoverRootContext): InputManager {
                 });
             });
         },
-        
+
+        set value(val: string) {
+            root.$nextTick(() => {
+                const inputEl = root.$refs.__input as HTMLInputElement | undefined;
+                if (inputEl) {
+                    inputEl.value = val;
+                }
+            });
+        },
+
+        get value() {
+            const inputEl = root.$refs.__input as HTMLInputElement | undefined;
+            return inputEl ? inputEl.value : '';
+        },
+
         destroy() {
             cleanup.forEach(fn => fn());
         }

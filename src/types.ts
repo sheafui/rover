@@ -106,6 +106,8 @@ export type UIItem = {
 
 export type InputManager = {
     on<K extends keyof HTMLElementEventMap>(eventKey: K, handler: (event: HTMLElementEventMap[K], key: string | null) => void): void;
-    destroy: () => void
+    destroy: () => void;
+    set value(val: string);
+    get value(): string;
 }
 

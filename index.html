@@ -63,6 +63,7 @@
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('selectComponent', () => ({
+            state: null,
             items: ['tenjarine', 'apple', 'banana', 'cherry', 'orange', 'mango', 'grape'],
             selectedKeys: null,
 
@@ -71,18 +72,13 @@
 
                 // interact with input events using rover
                 this.$rover.input.on('keydown', (event, activeKey) => {
-
-                    console.log(event, activeKey);
-
                     if (event.key === 'Enter') {
-
-                        // this.__selectActive()
-                        //             this.__stopTyping()
-                        //             if (!this.__isMultiple) {
-                        //                 this.__close()
-                        //                 this.__resetInput()
-                        //             }
-                        this.selectedKeys = activeKey;
+                        this.handleSelection(activeKey);
+                        this.__stopTyping()
+                        if (!this.__isMultiple) {
+                            this.__close()
+                            this.__resetInput()
+                        }
                     }
                 });
 
@@ -112,8 +108,10 @@
                     if (!this.__static) {
                         this.__close();
                     }
-                    console.log(this.state);
 
+                    this.$rover.input.value = value;
+
+                    console.log(this.state);
                     return;
                 }
 

@@ -256,6 +256,18 @@
           });
         });
       },
+      set value(val) {
+        root.$nextTick(() => {
+          const inputEl = root.$refs.__input;
+          if (inputEl) {
+            inputEl.value = val;
+          }
+        });
+      },
+      get value() {
+        const inputEl = root.$refs.__input;
+        return inputEl ? inputEl.value : "";
+      },
       destroy() {
         cleanup.forEach((fn) => fn());
       }
@@ -736,9 +748,6 @@
           return this.$id("rover-options");
         },
         role: "listbox",
-        "x-on:click.away"($event) {
-          this.__handleClickAway($event);
-        },
         "x-init"() {
           this.$data.__static = Alpine2.extractProp(this.$el, "static", false);
           if (Alpine2.bound(this.$el, "keepActivated")) {

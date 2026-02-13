@@ -24,6 +24,7 @@ export default function CreateRoverRoot(
         // cache
         __optionsEls: undefined,
         __groupsEls: undefined,
+        
         // states
         __isOpen: false,
         __isTyping: false,
