@@ -1,12 +1,10 @@
-import { Alpine } from "alpinejs";
+import type { Alpine } from "alpinejs";
 import type { default as AlpineType } from "alpinejs";
-import CreateRoverInput from "./factories/CreateRoverInput";
 import CreateRoverOption from "./factories/CreateRoverOption";
 import CreateRoverRoot from "./factories/CreateRoverRoot";
-import CreateRoverOptions from "./factories/CreateRoverOptions";
-import { RoverOptionContext, RoverOptionsContext } from "./types";
-// import { CSS_TEXT } from "./factories/CreatorRoverSeparator";
-import { CSS_TEXT as GROUP_CSS_TEXT } from "./factories/CreateRoverGroup";
+import { RoverOptionContext, RoverRootContext } from "./types";
+import registerMagics from "./magics";
+
 
 type RoverValue =
     | null
@@ -21,7 +19,12 @@ type RoverValue =
 
 export default function rover(Alpine: Alpine): void {
 
-    Alpine.directive('rover', (el: AlpineType.ElementWithXAttributes, { value, modifiers }: AlpineType.DirectiveData, { Alpine, effect }: AlpineType.DirectiveUtilities) => {
+    Alpine.directive('rover', (
+        el: AlpineType.ElementWithXAttributes,
+        { value, modifiers, expression }: AlpineType.DirectiveData,
+        { Alpine, effect, evaluate }: AlpineType.DirectiveUtilities
+    ) => {
+
         switch (value as RoverValue) {
             case null: handleRoot(Alpine, el, effect);
                 break;
@@ -31,7 +34,7 @@ export default function rover(Alpine: Alpine): void {
                 break;
             case 'options': handleOptions(el);
                 break;
-            case 'option': handleOption(Alpine, el);
+            case 'option': handleOption(Alpine, el, expression, evaluate);
                 break;
             case 'group': handleOptionsGroup(Alpine, el);
                 break;
@@ -45,37 +48,29 @@ export default function rover(Alpine: Alpine): void {
                 console.error('invalid x-rover value', value, 'use input, button, option, options, group or leave mepty for root level instead');
                 break;
         }
-    });
+    }).before('data');
 
-    /*--------------------------------------
-    * Root level directive handler
-    * -------------------------------------        
-    */
+    // magics registration
+    registerMagics(Alpine);
+
+
     function handleRoot(
         Alpine: Alpine,
         el: AlpineType.ElementWithXAttributes,
         effect: AlpineType.DirectiveUtilities['effect']
     ) {
-
+        // the only reliable and reactive (I found) way to merge underneath datastack in alpine at this point
+        // we can use the `addScopeToNode` utility, but it won't be reactive, 
+        // and also need the interception features wich is not a public API
         Alpine.bind(el, {
-            'x-on:keydown.escape'(e) {
-                if (this.__isOpen) {
-                    e.preventDefault();
-                    this.__close();
-                }
-            },
-            'x-bind:key'() {
-                return this.__reRenderKey;
-            },
             'x-data'() {
-                return CreateRoverRoot({ el, effect })
+                return {
+                    ...CreateRoverRoot({ effect })
+                }
             }
-        })
+        });
     }
 
-    /*--------------------------------------
-     * input part directive handler
-     */
     function handleInput(
         Alpine: Alpine,
         el: AlpineType.ElementWithXAttributes
@@ -84,104 +79,86 @@ export default function rover(Alpine: Alpine): void {
             'x-ref': '__input',
             'x-model': '__searchQuery',
             'x-bind:id'() { return this.$id('rover-input') },
-
             'role': 'combobox',
             'tabindex': '0',
             'aria-autocomplete': 'list',
-            'x-data'() {
-                return CreateRoverInput(Alpine)
-            }
-        })
+            'x-init'() {
+                this.$el.dataset.slot = 'rover-input';
+            },
+        });
     }
 
-    /*--------------------------------------
-     * options part directive handler
-     * -------------------------------------        
-     */
     function handleOptions(el: AlpineType.ElementWithXAttributes) {
         Alpine.bind(el, {
-
             'x-ref': '__options',
             'x-bind:id'() { return this.$id('rover-options') },
             'role': 'listbox',
-            'x-on:click.away'(this: RoverOptionsContext, $event) {
-                this.__handleClickAway($event)
-            },
-            'x-data'() {
-                return CreateRoverOptions(Alpine);
+            // 'x-on:click.away'(this: RoverOptionsContext, $event) {
+            //     this.__handleClickAway($event)
+            // },
+            'x-init'() {
+                this.$data.__static = Alpine.extractProp(this.$el, 'static', false) as boolean;
+
+                if (Alpine.bound(this.$el, 'keepActivated')) {
+                    this.__keepActivated = true;
+                }
+                this.$el.dataset.slot = 'rover-options';
             },
             'x-show'() { return this.$data.__static ? true : this.$data.__isOpen; },
         })
     }
 
-    /*--------------------------------------
-     * option part directive handler
-     * -------------------------------------        
-     */
-    function handleOption(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
-
+    function handleOption(
+        Alpine: Alpine,
+        el: AlpineType.ElementWithXAttributes,
+        expression: AlpineType.DirectiveData['expression'],
+        evaluate: AlpineType.DirectiveUtilities['evaluate']
+    ) {
         Alpine.bind(el, {
             'x-id'() { return ['rover-option'] },
             'x-bind:id'() { return this.$id('rover-option') },
             'role': 'option',
-            'x-show'(this: RoverOptionContext) {
-                return this.$data.__isVisible;
-            },
             'x-data'(this: RoverOptionContext) {
-                // @todo: move to constructor function here for memory gains
-                return CreateRoverOption(Alpine, this.__nextOptionId());
+                let value: string | null = null;
+
+                if (expression !== '') {
+                    value = evaluate(expression)
+                }
+
+                return CreateRoverOption(Alpine, this.__nextOptionId(), value);
             },
         });
     }
 
-    /*--------------------------------------
-     * options group directive handler
-     * -------------------------------------        
-     */
     function handleOptionsGroup(
         Alpine: Alpine,
         el: AlpineType.ElementWithXAttributes
     ) {
         Alpine.bind(el, {
             'x-id'() { return ['rover-group'] },
-
             'x-bind:id'() {
                 return this.$id('rover-group')
             },
-
             'role': 'group',
-
-            'x-init'() {
+            'x-init'(this: RoverRootContext) {
                 const groupId = this.$id('rover-group')
 
                 this.$el.dataset.slot = 'rover-group'
                 this.$el.setAttribute('aria-labelledby', `${groupId}-label`)
 
-                this.$watch('__searchQuery', () => {
-                    this.$nextTick(() => {
-                        const hasVisibleOptions = this.$el.querySelectorAll(
-                            '[data-slot=rover-option]:not([hidden])'
-                        ).length > 0
-
-                        this.$el.hidden = !hasVisibleOptions
-                    })
-                })
+                const id = String(this.__nextGroupId());
+                this.$el.dataset.key = id;
+                this.__pushGroupToItems(id);
             },
         })
     }
 
-
-    /*--------------------------------------
-     * button part directive handler
-     * -------------------------------------        
-     */
     function handleButton(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
         Alpine.bind(el, {
             'x-ref': '__button',
             'x-bind:id'() { return this.$id('rover-button') },
             'tabindex': '-1',
             'aria-haspopup': 'true',
-            // more missing dynamic features 
             'x-on:click'(e) {
                 if (this.__isDisabled) return
 
@@ -198,30 +175,18 @@ export default function rover(Alpine: Alpine): void {
         })
     }
 
-    /*--------------------------------------
-     * empty state directive handler
-     * -------------------------------------        
-     */
     function handleEmptyState(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
         Alpine.bind(el, {
             'x-bind:id'() { return this.$id('rover-button') },
-
             'tabindex': '-1',
             'aria-haspopup': 'true',
-            // more missing dynamic features 
             'x-show'() {
                 return Array.isArray(this.__filteredKeys) && this.__filteredKeys.length === 0 && this.__searchQuery.length > 0;
             }
         });
     }
 
-    /*--------------------------------------
-     * loading state directive handler
-     * -------------------------------------        
-     */
     function handleIsLoading(Alpine: Alpine, el: AlpineType.ElementWithXAttributes, modifiers: AlpineType.DirectiveData['modifiers']) {
-
-        // get the current alpine scope of the el.
         let data = Alpine.$data(el);
 
         if (modifiers.filter((item: string) => item === 'hide')) {
@@ -231,28 +196,21 @@ export default function rover(Alpine: Alpine): void {
         if (data) {
             // @todo
         }
-
     }
 
-    /*-------------------------------------
-    * separator directive handler
-    * -------------------------------------        
-    */
     function handleSeparator(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
         Alpine.bind(el, {
-            'x-init'() {
+            'x-init'(this: RoverRootContext) {
                 this.$el.dataset.slot = 'rover-separator';
 
-                if (!document.querySelector('#rover-separator-styles')) {
+                const id = String(this.__nextSeparatorId());
 
-                    const style = document.createElement('style');
+                this.$el.dataset.key = id;
 
-                    style.id = 'rover-separator-styles';
+                this.__pushSeparatorToItems(id);
 
-                    // style.textContent = CSS_TEXT;
-
-                    // document.head.appendChild(style);
-                }
+                this.$el.setAttribute('role', 'separator');
+                this.$el.setAttribute('aria-orientation', 'horizontal');
             }
         });
     }

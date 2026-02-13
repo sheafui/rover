@@ -1,4 +1,5 @@
 import { Magics, XDataContext } from "alpinejs";
+import RoverCollection from "./core/RoverCollection";
 
 export interface Options {
     searchThreshold?: number
@@ -16,13 +17,13 @@ export type ActiveIndex = { value: undefined | number };
 
 export type SearchIndex = Omit<Item, 'disabled'>;
 
-export interface RoverRootData extends XDataContext {
-    __state: string | string[] | null;
+export interface RoverRootData extends XDataContext, Record<string, unknown> {
+    collection: RoverCollection;
+    __optionsEls: NodeListOf<HTMLElement> | undefined;
+    __groupsEls: NodeListOf<HTMLElement> | undefined;
     __isOpen: boolean;
-    __isMultiple: boolean;
     __isTyping: boolean;
     __isLoading: boolean;
-    __isDisabled: boolean;
     __o_id: number;
     __g_id: number;
     __s_id: number;
@@ -30,12 +31,14 @@ export interface RoverRootData extends XDataContext {
     __keepActivated: boolean;
     __items: UIItem[];
     __optionsEl: HTMLElement | undefined;
-    __compareBy: string | ((a: unknown, b: unknown) => boolean) | undefined;
     __activatedKey: string | null | undefined;
-    __selectedKeys: string | string[] | null | undefined;
     __filteredKeys: string[] | null;
     __filteredKeysSet: Set<string>;
     __searchQuery: string;
+    // input related
+    __inputManager: InputManager | undefined;
+    __optionManager: OptionManager | undefined;
+    __optionsManager: OptionsManager | undefined;
 
     // Methods
     __add: (k: string, v: string, d: boolean) => void;
@@ -51,21 +54,20 @@ export interface RoverRootData extends XDataContext {
     __activateLast: () => void;
     __searchUsingQuery: (query: string) => Item[];
     __getKeyByIndex: (index: number | null | undefined) => string | null;
-    // __isVisible: (key: string) => boolean;
     __open: () => void;
-    __activateSelectedOrFirst: (activateSelected?: boolean) => void;
-    __registerEventsDelector: () => void;
     __close: () => void;
-    __handleSelection: (key: string) => void;
-    __selectActive: () => void;
     __startTyping: () => void;
     __stopTyping: () => void;
-    __resetInput: () => void;
-    __getCurrentValue: () => string;
-    __compare: (a: unknown, b: unknown) => boolean;
+    __pushGroupToItems: (key: string) => void;
+    __pushOptionToItems: (key: string) => void;
+    __pushSeparatorToItems: (key: string) => void;
     __nextOptionId: () => number;
     __nextGroupId: () => number;
     __nextSeparatorId: () => number;
+    __onOpenCallback: () => void;
+    __onOpen: (callback: () => void) => void;
+    __onCloseCallback: () => void;
+    __onClose: (callback: () => void) => void;
 }
 
 export type RoverRootContext = RoverRootData & Magics<RoverRootData>;
@@ -98,3 +100,45 @@ export type UIItem = {
 
     key?: string;
 }
+
+export interface Destroyable {
+    destroy(): void
+}
+
+export interface InputManager extends Destroyable {
+    on<K extends keyof HTMLElementEventMap>(
+        eventKey: K,
+        handler: (
+            event: HTMLElementEventMap[K],
+            activeKey: string | undefined
+        ) => void
+    ): void
+
+    get value(): string
+    set value(val: string)
+
+    enableDefaultInputHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'>): void
+}
+
+export interface OptionsManager extends Destroyable {
+    on<K extends keyof HTMLElementEventMap>(
+        eventKey: K,
+        handler: (
+            event: HTMLElementEventMap[K],
+            optionEl: HTMLElement | undefined,
+            activeKey: string | null
+        ) => void
+    ): void
+
+    open: () => void
+    close: () => void
+    findClosestOption(el: Element | undefined): HTMLElement | undefined
+
+    enableDefaultOptionsHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'>): void
+}
+
+
+export interface OptionManager extends Destroyable, Pick<InputManager, 'on'> {
+}
+
+

@@ -1,62 +1,53 @@
 import RoverCollection from "../core/RoverCollection";
 
 import type { default as AlpineType } from "alpinejs";
-import { Item, RoverRootData, UIItem } from "src/types";
+import { Item, RoverRootData } from "src/types";
 import { SLOT_NAME as OPTION_SLOT_NAME } from "./CreateRoverOption";
+import { createInputManager } from "src/Managers/InputManager";
+import { createOptionManager } from "src/Managers/OptionManager";
+import { createOptionsManager } from "src/Managers/OptionsManager";
 
 export default function CreateRoverRoot(
-    { el,
+    {
+        // el,
         effect
     }: {
-        el: AlpineType.ElementWithXAttributes,
+        // el: AlpineType.ElementWithXAttributes,
         effect: AlpineType.DirectiveUtilities['effect']
     }
 ): RoverRootData {
 
     const collection = new RoverCollection();
 
-    type CompareByFn = (a: unknown, b: unknown) => boolean;
-
     const SLOT_NAME = 'rover-root';
 
-    const defaultUIItem: UIItem = { type: 'o', key: undefined };
-
     return {
-        __state: null,
+        collection,
+        // cache
+        __optionsEls: undefined,
+        __groupsEls: undefined,
+
+        // states
         __isOpen: false,
-        __isMultiple: false,
         __isTyping: false,
         __isLoading: false,
-        // unique id generator for options and groups and separators
-        // we use this for navigation and selection as well use remove separator
-        // or group wrapper around options for consistency 
         __o_id: -1,
         __g_id: -1,
         __s_id: -1,
-
-        // for component like command pallate where the input is on the popover 
-        // we need to ignore the open/close internally
-        // that why this flag exists
         __static: false,
-
-        // this is responsible when the user leave the options area, if this true it
-        //  keeps the old activated element activated and not otherwise 
         __keepActivated: true,
         __optionsEl: undefined,
-        __compareBy: undefined,
         __activatedKey: undefined,
         __selectedKeys: undefined,
-        __isDisabled: false,
-
-        // this is the flat structure of all the options and groups  and separators in the list
-        // to make it easier to navigate and search without needing to do recursion every time
-        // THIS IS NOT THE SOURCE OF TRUTH, THE SOURCE OF TRUTH IS IN THE COLLECTION CLASS.
         __items: [],
-
-        // search 
         __searchQuery: '',
         __filteredKeys: null,
         __filteredKeysSet: new Set<string>(),
+
+        // rover managers 
+        __inputManager: undefined,
+        __optionsManager: undefined,
+        __optionManager: undefined,
 
         __add: (k: string, v: string, d: boolean) => collection.add(k, v, d),
         __forget: (k: string) => collection.forget(k),
@@ -65,8 +56,6 @@ export default function CreateRoverRoot(
         __isActive: (k: string) => collection.isActivated(k),
         __getValueByKey: (k: string) => collection.getValueByKey(k),
         __getActiveItem: () => collection.getActiveItem(),
-
-        // navigation:
         __activateNext: () => collection.activateNext(),
         __activatePrev: () => collection.activatePrev(),
         __activateFirst: () => collection.activateFirst(),
@@ -74,9 +63,19 @@ export default function CreateRoverRoot(
         __searchUsingQuery: (query: string) => collection.search(query),
         __getKeyByIndex: (index: number) => collection.getKeyByIndex(index),
 
+        __onOpenCallback: () => { },
+        __onOpen(callback: () => void) {
+            this.__onOpenCallback = callback;
+        },
+        __onCloseCallback: () => { },
+        __onClose(callback: () => void) {
+            this.__onCloseCallback = callback;
+        },
         init() {
-
             this.$el.dataset.slot = SLOT_NAME;
+
+
+            this.__setupManagers();
 
             // LOADING STUFF
             effect(() => {
@@ -91,7 +90,6 @@ export default function CreateRoverRoot(
             // SEARCH REACTIVITY
             effect(() => {
                 if (String(this.__searchQuery).length > 0) {
-
                     let results = this.__searchUsingQuery(this.__searchQuery).map((result: Item) => result.key);
 
                     if (results.length >= 0) {
@@ -111,26 +109,90 @@ export default function CreateRoverRoot(
             });
 
 
+            this.$nextTick(() => {
+                this.__optionsEls = Array.from(
+                    this.$el.querySelectorAll('[data-slot=rover-option]')
+                ) as HTMLElement[];
 
-            if (this.__isMultiple) {
-                this.__selectedKeys = [];
-            } else {
-                this.__selectedKeys = null;
-            }
+                this.__groupsEls = Array.from(
+                    this.$el.querySelectorAll('[data-slot=rover-group]')
+                ) as HTMLElement[];
 
-            this.__isMultiple = Alpine.extractProp(el, 'multiple', false) as boolean;
+                // HANDLING INDIVIDUAL OPTION VISIBILITY, SELECTION, ACTIVE STATE 
+                effect(() => {
+                    const activeKey = this.__activatedKey;
 
-            this.__isDisabled = Alpine.extractProp(el, 'disabled', false) as boolean;
+                    const visibleKeys = this.__filteredKeys ? new Set(this.__filteredKeys) : null;
 
-            this.__compareBy = Alpine.extractProp(el, 'by', '') as string;
+                    // const selectedKeys = new Set(Array.isArray(this.__selectedKeys)
+                    //     ? this.__selectedKeys
+                    //     : this.__selectedKeys
+                    //         ? [this.__selectedKeys]
+                    //         : []
+                    // );
 
-            const initialValueFallback: Array<string> | string = this.__isMultiple ? [] : '';
+                    // Batch all DOM updates
+                    requestAnimationFrame(() => {
 
-            // @ts-expect-error - Alpine.extractProp types are too restrictive, awaiting fix
-            let initialValue = Alpine.extractProp(el, 'initial-value', initialValueFallback);
+                        const options = this.__optionsEls;
 
-            this.__registerEventsDelector();
+                        options.forEach((opt: Element) => {
+                            const htmlOpt = opt as HTMLElement;
+                            const key = htmlOpt.dataset.key;
 
+                            if (!key) return;
+
+                            if (visibleKeys !== null) {
+                                htmlOpt.hidden = !visibleKeys.has(key);
+                            } else {
+                                htmlOpt.hidden = false;
+                            }
+
+                            if (key === activeKey) {
+                                htmlOpt.setAttribute('data-active', 'true');
+                                htmlOpt.setAttribute('aria-current', 'true');
+
+                                // Scroll into view if needed
+                                htmlOpt.scrollIntoView({ block: 'nearest' });
+
+                            } else {
+                                htmlOpt.removeAttribute('data-active');
+                                htmlOpt.removeAttribute('aria-current');
+                            }
+
+                            // if (selectedKeys.has(key)) {
+                            //     htmlOpt.setAttribute('aria-selected', 'true');
+                            //     htmlOpt.setAttribute('data-selected', 'true');
+                            // } else {
+                            //     htmlOpt.setAttribute('aria-selected', 'false');
+                            //     htmlOpt.removeAttribute('data-selected');
+                            // }
+                        });
+
+                        // handle groups visibility based on visible options
+                        const groups = this.__groupsEls;
+
+                        groups.forEach((group: Element) => {
+                            const htmlGroup = group as HTMLElement;
+                            const options = htmlGroup.querySelectorAll('[data-slot=rover-option]');
+
+                            // Check if group has any visible options
+                            const hasVisibleOption = Array.from(options).some((opt: Element) => {
+
+                                const htmlOpt = opt as HTMLElement;
+
+                                return visibleKeys
+                                    ? visibleKeys.has(htmlOpt.dataset.key || '')
+                                    : true;
+                            });
+
+                            htmlGroup.hidden = !hasVisibleOption;
+                        });
+                    });
+                });
+            });
+
+            // this.__registerEventsDelector();
 
             // if there is not input tied with this rover, keep always open true
             this.$nextTick(() => {
@@ -140,40 +202,44 @@ export default function CreateRoverRoot(
             });
         },
 
+        __setupManagers() {
+            this.__inputManager = createInputManager(this);
+
+            this.__optionManager = createOptionManager(this);
+
+            this.__optionsManager = createOptionsManager(this);
+        },
         __open() {
             if (this.__isOpen) return
 
             this.__isOpen = true;
 
-            let input = this.$refs.__input;
-
             requestAnimationFrame(() => {
-                input?.focus({ preventScroll: true });
-                this.__activateSelectedOrFirst();
+                this.$refs?.__input?.focus({ preventScroll: true });
             })
+
+            this.__onOpenCallback();
         },
 
-        __activateSelectedOrFirst(activateSelected = true) {
-            if (!this.__isOpen) return;
+        __pushSeparatorToItems(key: string) {
+            this.__items.push({
+                type: 's',
+                key,
+            });
+        },
 
-            // If something is already active from keyboard, don't override
-            let activeItem = this.__getActiveItem();
+        __pushGroupToItems(key: string) {
+            this.__items.push({
+                type: 'g',
+                key,
+            });
+        },
 
-            if (activeItem) return;
-
-            // Try to activate the first selected item
-            if (activateSelected && this.__selectedKeys) {
-                const keyToActivate = this.__isMultiple
-                    ? this.__selectedKeys[0]
-                    : this.__selectedKeys;
-
-                if (keyToActivate) {
-                    this.__activate(keyToActivate);
-                    return;
-                }
-            }
-
-            this.__activateFirst();
+        __pushOptionToItems(key: string) {
+            this.__items.push({
+                type: 'o',
+                key,
+            });
         },
 
         __close() {
@@ -181,214 +247,27 @@ export default function CreateRoverRoot(
             this.__deactivate();
         },
 
-        __handleSelection(key: string) {
-            let value = this.__getValueByKey(key);
-
-            if (!this.__isMultiple) {
-                this.__selectedKeys = key;
-
-                if (this.__state === value) {
-                    this.__state = null;
-                    this.__selectedKeys = null;
-                } else {
-                    this.__state = value;
-                }
-
-                if (!this.__static) {
-                    this.__close();
-                }
-
-                return;
-            }
-
-            if (!Array.isArray(this.__selectedKeys)) {
-                this.__selectedKeys = [];
-            }
-
-            if (!Array.isArray(this.__state)) {
-                this.__state = [];
-            }
-
-            let index = this.__state.findIndex((j: unknown) => this.__compare(j, value));
-
-            let keyIndex = this.__selectedKeys.indexOf(key);
-
-            if (index === -1) {
-                this.__state.push(value);
-                this.__selectedKeys.push(key);
-            } else {
-                this.__state.splice(index, 1);
-                this.__selectedKeys.splice(keyIndex, 1);
-            }
-        },
-
-        __selectActive() {
-            if (!this.__activatedKey) return;
-
-            this.__handleSelection(this.__activatedKey);
-        },
         __startTyping() {
             this.__isTyping = true
         },
+
         __stopTyping() {
             this.__isTyping = false
         },
-        __resetInput() {
-            let input = this.$refs.__input;
-
-            if (!input) return;
-
-            let value = this.__getCurrentValue();
-
-            input.value = value;
-        },
-        __getCurrentValue() {
-
-            if (!this.$refs.__input) return '';
-
-            if (!this.__state) return '';
-
-            // if (this.__displayValue) return this.__displayValue(this.__state);
-
-            if (typeof this.__state === 'string') return this.__state;
-
-            return ''
-        },
-
-        __compare(a: unknown, b: unknown): boolean {
-            let by: CompareByFn = this.__compareBy as CompareByFn;
-
-            if (!this.__compareBy) {
-                by = (a: unknown, b: unknown) => Alpine.raw(a) === Alpine.raw(b);
-            }
-
-            else if (typeof this.__compareBy === 'string') {
-                const property = this.__compareBy;
-                by = (a: unknown, b: unknown) => {
-
-                    if ((!a || typeof a !== 'object') || (!b || typeof b !== 'object')) {
-                        return Alpine.raw(a) === Alpine.raw(b);
-                    }
-
-                    const objA = a as Record<string, unknown>;
-                    const objB = b as Record<string, unknown>;
-
-                    return objA[property] === objB[property];
-                };
-            }
-
-            return by(a, b);
-        },
-
         __nextOptionId() {
             return ++this.__o_id;
         },
+
         __nextGroupId() {
             return ++this.__g_id;
         },
+
         __nextSeparatorId() {
             return ++this.__s_id;
         },
-        __registerEventsDelector() {
 
-            const findClosestOption = (el: Element) => Alpine.findClosest(el, node => node.dataset.slot === OPTION_SLOT_NAME);
-
-            const delegate = (handler: (optionEl: HTMLElement) => void) => {
-                return function (e: Event) {
-                    e.stopPropagation();
-
-                    if (!(e.target instanceof Element)) return;
-
-                    const optionEl = findClosestOption(e.target);
-
-                    if (!optionEl) return;
-
-                    handler(optionEl as HTMLElement);
-                };
-            };
-
-            this.$nextTick(() => {
-
-                this.__optionsEl = this.$refs.__options;
-
-                if (!this.__optionsEl) return;
-
-                this.__optionsEl.addEventListener('click',
-                    delegate((optionEl) => {
-                        if (!optionEl.dataset.key) return;  // Add safety check
-
-                        this.__handleSelection(optionEl.dataset.key);
-
-                        if (!this.__isMultiple && !this.__static) {
-                            this.__close()
-                            this.__resetInput()
-                        }
-
-                        this.$nextTick(() => this.$refs?.__input?.focus({ preventScroll: true }))
-                    })
-                );
-
-                this.__optionsEl.addEventListener('mouseover',
-                    delegate((optionEl) => {
-                        if (!optionEl.dataset.key) return;
-                        //    this activate didn't get autocomplete why ? 
-                        this.__activate(optionEl.dataset.key);
-                    })
-                );
-
-                this.__optionsEl.addEventListener('mousemove',
-                    delegate((optionEl) => {
-                        if (this.__isActive(optionEl.dataset.key || '')) return;
-                        if (!optionEl.dataset.key) return;
-                        this.__activate(optionEl.dataset.key);
-                    })
-                );
-
-                this.__optionsEl.addEventListener('mouseout',
-                    delegate(() => {
-                        if (this.__keepActivated) return;
-                        this.__deactivate();
-                    })
-                );
-
-                // listen on the root level
-
-                this.$root.addEventListener('keydown', (e: KeyboardEvent) => {
-
-                    switch (e.key) {
-                        case 'ArrowDown':
-                            e.preventDefault(); e.stopPropagation();
-                            this.__activateNext();
-                            break;
-
-                        case 'ArrowUp':
-                            e.preventDefault(); e.stopPropagation();
-                            this.__activatePrev();
-                            break;
-
-                        case 'Enter':
-                            e.preventDefault(); e.stopPropagation();
-                            this.__selectActive()
-                            if (!this.__isMultiple) {
-                                this.__close()
-                                this.__resetInput()
-                            }
-                            break;
-                        case 'Escape':
-                            e.preventDefault(); e.stopPropagation();
-                            this.__close();
-                            this.$nextTick(() => this.$refs?.__input?.focus({ preventScroll: true }))
-                            break;
-                        default:
-                            if (this.__static) return;
-
-                            this.__open();
-
-                            break;
-
-                    }
-                });
-            });
-        },
+        destroy() {
+            this.__inputManager?.destroy();
+        }
     }
 }
