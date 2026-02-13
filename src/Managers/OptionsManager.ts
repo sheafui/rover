@@ -1,6 +1,6 @@
-import { InputManager, RoverRootContext } from "../types";
+import { OptionsManager, RoverRootContext } from "../types";
 
-export function createInputManager(root: RoverRootContext): InputManager {
+export function createOptionsManager(root: RoverRootContext): OptionsManager {
     const cleanup: (() => void)[] = [];
 
     return {
@@ -22,20 +22,6 @@ export function createInputManager(root: RoverRootContext): InputManager {
                     inputEl.removeEventListener(eventKey, listener);
                 });
             });
-        },
-
-        set value(val: string) {
-            root.$nextTick(() => {
-                const inputEl = root.$refs.__options as HTMLInputElement | undefined;
-                if (inputEl) {
-                    inputEl.value = val;
-                }
-            });
-        },
-
-        get value() {
-            const inputEl = root.$refs.__input as HTMLInputElement | undefined;
-            return inputEl ? inputEl.value : '';
         },
 
         destroy() {

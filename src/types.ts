@@ -104,10 +104,16 @@ export type UIItem = {
     key?: string;
 }
 
-export type InputManager = {
+type Manager = {
     on<K extends keyof HTMLElementEventMap>(eventKey: K, handler: (event: HTMLElementEventMap[K], key: string | null) => void): void;
     destroy: () => void;
+}
+export interface InputManager extends Manager {
     set value(val: string);
     get value(): string;
 }
+
+export interface OptionManager extends Manager { }
+
+export interface OptionsManager extends Manager { }
 

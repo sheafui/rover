@@ -299,6 +299,8 @@ function CreateRoverRoot({
     __filteredKeys: null,
     __filteredKeysSet: new Set(),
     __inputManager: null,
+    __optionsManager: null,
+    __optionManager: null,
     __add: (k, v, d) => collection.add(k, v, d),
     __forget: (k) => collection.forget(k),
     __activate: (k) => collection.activate(k),
