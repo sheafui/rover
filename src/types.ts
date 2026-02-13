@@ -109,13 +109,14 @@ export type UIItem = {
 type Manager = {
     on<K extends keyof HTMLElementEventMap>(eventKey: K, handler: (event: HTMLElementEventMap[K], key: string | null) => void): void;
     destroy: () => void;
+    registerSharedEventListerns: () => void
 }
 export interface InputManager extends Manager {
     set value(val: string);
     get value(): string;
 }
 
-export interface OptionManager extends Manager { }
+export interface OptionManager extends Omit<Manager, 'registerSharedEventListerns'> { }
 
 export interface OptionsManager extends Manager { }
 

@@ -268,6 +268,8 @@
         const inputEl = root.$refs.__input;
         return inputEl ? inputEl.value : "";
       },
+      registerSharedEventListerns() {
+      },
       destroy() {
         cleanup.forEach((fn) => fn());
       }
@@ -317,6 +319,9 @@
             inputEl.removeEventListener(eventKey, listener);
           });
         });
+      },
+      registerSharedEventListerns() {
+        this.on("");
       },
       destroy() {
         cleanup.forEach((fn) => fn());
@@ -441,7 +446,6 @@
             });
           });
         });
-        this.__registerEventsDelector();
         this.$nextTick(() => {
           if (!this.$refs.__input) {
             this.__isOpen = true;

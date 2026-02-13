@@ -24,6 +24,10 @@ export function createOptionsManager(root: RoverRootContext): OptionsManager {
             });
         },
 
+        registerSharedEventListerns() {
+            this.on('')
+        },
+
         destroy() {
             cleanup.forEach(fn => fn());
         }

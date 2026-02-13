@@ -38,6 +38,9 @@ export function createInputManager(root: RoverRootContext): InputManager {
             return inputEl ? inputEl.value : '';
         },
 
+        registerSharedEventListerns(){
+
+        },
         destroy() {
             cleanup.forEach(fn => fn());
         }

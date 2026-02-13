@@ -286,6 +286,8 @@ function createInputManager(root) {
       const inputEl = root.$refs.__input;
       return inputEl ? inputEl.value : "";
     },
+    registerSharedEventListerns() {
+    },
     destroy() {
       cleanup.forEach((fn) => fn());
     }
@@ -337,6 +339,9 @@ function createOptionsManager(root) {
           inputEl.removeEventListener(eventKey, listener);
         });
       });
+    },
+    registerSharedEventListerns() {
+      this.on("");
     },
     destroy() {
       cleanup.forEach((fn) => fn());
@@ -461,7 +466,6 @@ function CreateRoverRoot({
           });
         });
       });
-      this.__registerEventsDelector();
       this.$nextTick(() => {
         if (!this.$refs.__input) {
           this.__isOpen = true;

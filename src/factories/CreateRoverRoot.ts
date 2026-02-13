@@ -194,7 +194,7 @@ export default function CreateRoverRoot(
                 });
             });
 
-            this.__registerEventsDelector();
+            // this.__registerEventsDelector();
 
             // if there is not input tied with this rover, keep always open true
             this.$nextTick(() => {
