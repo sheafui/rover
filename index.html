@@ -102,32 +102,33 @@
                     }
                 });
 
-                // this.$nextTick(() => {
-                    Alpine.effect(() => {
-                        const selectedKeysSet = new Set(
-                            Array.isArray(this.selectedKeys)
-                                ? this.selectedKeys
-                                : this.selectedKeys
-                                    ? [this.selectedKeys]
-                                    : []
-                        );
+                Alpine.effect(() => {
+                    const selectedKeysSet = new Set(
+                        Array.isArray(this.selectedKeys)
+                            ? this.selectedKeys
+                            : this.selectedKeys
+                                ? [this.selectedKeys]
+                                : []
+                    );
 
-                        // batch dom writes 
-                        this.$rover.options.all.forEach((optionEl) => {
-                            const key = optionEl.dataset.key;
-                            if (!key) return;
+                    // batch dom writes 
+                    this.$rover.options.all.forEach((optionEl) => {
+                        const key = optionEl.dataset.key;
+                        if (!key) return;
 
-                            if (selectedKeysSet.has(key)) {
-                                optionEl.setAttribute('data-selected', 'true');
-                                optionEl.setAttribute('aria-selected', 'true');
-                            } else {
-                                optionEl.removeAttribute('data-selected');
-                                optionEl.setAttribute('aria-selected', 'false');
-                            }
-                        });
+                        if (selectedKeysSet.has(key)) {
+                            optionEl.setAttribute('data-selected', 'true');
+                            optionEl.setAttribute('aria-selected', 'true');
+                        } else {
+                            optionEl.removeAttribute('data-selected');
+                            optionEl.setAttribute('aria-selected', 'false');
+                        }
+                    });
 
-                        // this.state = this.$rover.fromKeys(this.selectedKeys)
-                    // });
+                    this.$nextTick(() => {
+                        // this.state = this.isMultiple ? this.$rover.fromKeys(this.selectedKeys) : this.$rover.fromKey();
+                    })
+
                 })
 
 
