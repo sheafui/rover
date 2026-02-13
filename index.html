@@ -71,25 +71,22 @@
             init() {
                 this.$rover.onOpen(() => this.activateSelectedOrFirst());
 
-                this.$rover.input.on('keydown', (event, activeKey) => {
-                    if (event.key === 'Enter') {
+                let inputManager = this.$rover.input;
+
+                inputManager.on('keydown', (event, activeKey) => {
+                    if (event.key === 'Enter' && activeKey != null) {
+                        console.log(activeKey)
                         this.handleSelection(activeKey);
-
                         this.__stopTyping()
-
-                        if (!this.isMultiple) {
-                            this.__close()
-                            this.__resetInput()
-                        }
                     }
                 });
 
-                // brainstorming public APIs to work with
-                this.$rover.options.on('click', (event, closestOption, activeKey) => {
-                    if (closestOption !== undefined) {
-                        this.handleSelection(closestOption.dataset.key);
-                    }é
-                });
+                // // brainstorming public APIs to work with
+                // this.$rover.options.on('click', (event, closestOption, activeKey) => {
+                //     if (closestOption !== undefined) {
+                //         this.handleSelection(closestOption.dataset.key);
+                //     } é
+                // });
 
                 // this is nice to have but highly discourage to use due the fact it fuck the memory for large lists
                 this.$rover.option.on('click', (event, activeKey) => {
@@ -123,9 +120,8 @@
                         this.__close();
                     }
 
-                    this.$rover.input.value = value;
+                    this.$refs.__input.value = String(value).toUpperCase();
 
-                    console.log(this.state);
                     return;
                 }
 

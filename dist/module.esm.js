@@ -266,6 +266,7 @@ function createInputManager(root) {
     },
     set value(val) {
       if (inputEl) {
+        console.log("value:", val);
         inputEl.value = val;
       }
     },
@@ -501,22 +502,6 @@ function CreateRoverRoot({
     },
     __stopTyping() {
       this.__isTyping = false;
-    },
-    __resetInput() {
-      let input = this.$refs.__input;
-      if (!input)
-        return;
-      let value = this.__getCurrentValue();
-      input.value = value;
-    },
-    __getCurrentValue() {
-      if (!this.$refs.__input)
-        return "";
-      if (!this.__state)
-        return "";
-      if (typeof this.__state === "string")
-        return this.__state;
-      return "";
     },
     __nextOptionId() {
       return ++this.__o_id;

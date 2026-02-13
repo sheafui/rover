@@ -36,7 +36,11 @@ export function createInputManager(
         },
 
         set value(val: string) {
+
+            
             if (inputEl) {
+                console.log('value:',val);
+                
                 inputEl.value = val
             }
         },
