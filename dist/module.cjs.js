@@ -265,31 +265,28 @@ function bindListener(el, eventKey, listener, cleanup) {
 // src/Managers/InputManager.ts
 function createInputManager(root) {
   const cleanup = [];
+  const inputEl = root.$el.querySelector("[x-rover\\:input]");
+  if (!inputEl) {
+    console.warn("Input element not found");
+  }
   return {
     on(eventKey, handler) {
-      root.$nextTick(() => {
-        const inputEl = root.$refs.__input;
-        if (!inputEl)
-          return;
-        const listener = (event) => {
-          var _a;
-          const activeKey = (_a = root.__activatedKey) != null ? _a : null;
-          handler(event, activeKey);
-        };
-        bindListener(inputEl, eventKey, listener, cleanup);
-      });
+      if (!inputEl)
+        return;
+      const listener = (event) => {
+        var _a;
+        const activeKey = (_a = root.__activatedKey) != null ? _a : null;
+        handler(event, activeKey);
+      };
+      bindListener(inputEl, eventKey, listener, cleanup);
     },
     get value() {
-      const inputEl = root.$refs.__input;
       return inputEl ? inputEl.value : "";
     },
     set value(val) {
-      root.$nextTick(() => {
-        const inputEl = root.$refs.__input;
-        if (inputEl) {
-          inputEl.value = val;
-        }
-      });
+      if (inputEl) {
+        inputEl.value = val;
+      }
     },
     registerSharedEventListerns() {
     },
