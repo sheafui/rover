@@ -45,6 +45,9 @@
       this.activeIndex = Alpine.reactive({value: void 0});
       this.searchThreshold = options.searchThreshold ?? 500;
     }
+    getMap() {
+      return this.itemsMap;
+    }
     add(key, value, disabled = false) {
       if (this.itemsMap.has(key))
         return;
@@ -237,21 +240,20 @@
   var RoverCollection_default = RoverCollection;
 
   // src/Managers/utils.ts
-  function bindListener(el, eventKey, listener, cleanup) {
-    el.addEventListener(eventKey, listener);
-    cleanup.push(() => {
-      el.removeEventListener(eventKey, listener);
+  function bindListener(el, eventKey, listener, controller) {
+    el.addEventListener(eventKey, listener, {
+      signal: controller.signal
     });
   }
 
   // src/Managers/InputManager.ts
   function createInputManager(rootDataStack) {
-    const cleanup = [];
     const inputEl = rootDataStack.$el.querySelector("[x-rover\\:input]");
     if (!inputEl) {
       console.warn(`Input element with [x-rover\\:input] not found`);
     }
     return {
+      controller: new AbortController(),
       on(eventKey, handler) {
         if (!inputEl)
           return;
@@ -259,7 +261,7 @@
           const activeKey = rootDataStack.__activatedKey ?? void 0;
           handler(event, activeKey);
         };
-        bindListener(inputEl, eventKey, listener, cleanup);
+        bindListener(inputEl, eventKey, listener, this.controller);
       },
       get value() {
         return inputEl ? inputEl.value : "";
@@ -300,32 +302,31 @@
         }
       },
       destroy() {
-        cleanup.forEach((fn) => fn());
+        this.controller.abort();
       }
     };
   }
 
   // src/Managers/OptionManager.ts
   function createOptionManager(root) {
-    const cleanup = [];
+    const optionsEls = Array.from(root.$el.querySelectorAll("[x-rover\\:option]"));
+    if (!optionsEls)
+      console.warn("no individual option element has been found");
     return {
+      controller: new AbortController(),
       on(eventKey, handler) {
-        root.$nextTick(() => {
-          const inputEl = root.$refs.__input;
-          if (!inputEl)
-            return;
-          const listener = (event) => {
-            const activeKey = root.__activatedKey ?? void 0;
-            handler(event, activeKey);
-          };
-          inputEl.addEventListener(eventKey, listener);
-          cleanup.push(() => {
-            inputEl.removeEventListener(eventKey, listener);
-          });
+        if (!optionsEls)
+          return;
+        const listener = (event) => {
+          const activeKey = root.__activatedKey ?? void 0;
+          handler(event, activeKey);
+        };
+        optionsEls.forEach((option) => {
+          bindListener(option, eventKey, listener, this.controller);
         });
       },
       destroy() {
-        cleanup.forEach((fn) => fn());
+        this.controller.abort();
       }
     };
   }
@@ -335,16 +336,16 @@
 
   // src/Managers/OptionsManager.ts
   function createOptionsManager(root) {
-    const cleanup = [];
     const optionsEl = root.$el.querySelector("[x-rover\\:options]");
     if (!optionsEl)
       console.warn("Options container not found");
     const findClosestOption = (el) => {
-      if (!el)
-        return void 0;
+      if (!el || !(el instanceof HTMLElement))
+        return;
       return Alpine.findClosest(el, (node) => node.dataset.slot === OPTION_SLOT_NAME && node.hasAttribute("x-rover:option"));
     };
     return {
+      controller: new AbortController(),
       on(eventKey, handler) {
         if (!optionsEl)
           return;
@@ -353,7 +354,7 @@
           const activeKey = root.__activatedKey ?? null;
           handler(event, optionEl, activeKey);
         };
-        bindListener(optionsEl, eventKey, listener, cleanup);
+        bindListener(optionsEl, eventKey, listener, this.controller);
       },
       findClosestOption,
       enableDefaultOptionsHandlers(disabledEvents = []) {
@@ -381,17 +382,12 @@
         };
         Object.entries(events).forEach(([key, handler]) => {
           if (!disabledEvents.includes(key)) {
-            const delegate = (e) => {
-              e.stopPropagation();
-              if (!(e.target instanceof Element))
-                return;
-              const optionEl = findClosestOption(e.target);
+            this.on(key, (event, optionEl) => {
+              event.stopPropagation();
               if (!optionEl)
                 return;
               handler(optionEl);
-            };
-            optionsEl?.addEventListener(key, delegate);
-            cleanup.push(() => optionsEl?.removeEventListener(key, delegate));
+            });
           }
         });
       },
@@ -399,10 +395,10 @@
         let allOptions = root.__optionsEls;
         if (!allOptions)
           return [];
-        return allOptions;
+        return Array.from(allOptions);
       },
       destroy() {
-        cleanup.forEach((fn) => fn());
+        this.controller.abort();
       }
     };
   }

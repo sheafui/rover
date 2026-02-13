@@ -102,11 +102,11 @@ export default function CreateRoverRoot(
             this.$nextTick(() => {
                 this.__optionsEls = Array.from(
                     this.$el.querySelectorAll('[data-slot=rover-option]')
-                ) as HTMLElement[];
+                ) as Array<HTMLElement>;
 
                 this.__groupsEls = Array.from(
                     this.$el.querySelectorAll('[data-slot=rover-group]')
-                ) as HTMLElement[];
+                ) as Array<HTMLElement>;
 
                 // HANDLING INDIVIDUAL OPTION VISIBILITY, SELECTION, ACTIVE STATE 
                 effect(() => {

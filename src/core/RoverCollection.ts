@@ -33,6 +33,10 @@ export default class RoverCollection {
      * Collection Management
      * ------------------------------------- */
 
+    public getMap() {
+        return this.itemsMap;
+    }
+
     public add(key: string, value: string, disabled = false): void {
         if (this.itemsMap.has(key)) return;
 

@@ -2,31 +2,39 @@ import { OPTION_SLOT_NAME } from "src/constants";
 import { OptionsManager, RoverRootContext } from "src/types";
 import { bindListener } from "./utils";
 
-export function createOptionsManager(root: RoverRootContext): OptionsManager {
-    const cleanup: (() => void)[] = [];
 
-    const optionsEl = root.$el.querySelector('[x-rover\\:options]') as HTMLElement | undefined;
+export function createOptionsManager(root: RoverRootContext): OptionsManager {
+
+    const optionsEl = root.$el.querySelector('[x-rover\\:options]') as HTMLElement;
+
     if (!optionsEl) console.warn("Options container not found");
 
-    const findClosestOption = (el?: Element): HTMLElement | undefined => {
-        if (!el) return undefined;
+    const findClosestOption = (el: EventTarget | null): HTMLElement | undefined => {
+
+        if (!el || !(el instanceof HTMLElement)) return
+
         return Alpine.findClosest(el, node => node.dataset.slot === OPTION_SLOT_NAME && node.hasAttribute("x-rover:option")) as HTMLElement | undefined;
     };
 
     return {
+        controller: new AbortController(),
+
         on<K extends keyof HTMLElementEventMap>(
             eventKey: K,
-            handler: (event: HTMLElementEventMap[K], optionEl: HTMLElement | undefined, activeKey: string | null) => void
+            handler: (event: HTMLElementEventMap[K],
+                optionEl: HTMLElement | undefined,
+                activeKey: string | null
+            ) => void
         ) {
             if (!optionsEl) return;
 
             const listener = (event: HTMLElementEventMap[K]) => {
-                const optionEl = findClosestOption(event.target as Element | undefined);
+                const optionEl = findClosestOption(event.target);
                 const activeKey = root.__activatedKey ?? null;
                 handler(event, optionEl, activeKey);
             };
 
-            bindListener(optionsEl, eventKey, listener, cleanup);
+            bindListener(optionsEl, eventKey, listener, this.controller);
         },
 
         findClosestOption,
@@ -53,29 +61,28 @@ export function createOptionsManager(root: RoverRootContext): OptionsManager {
 
             Object.entries(events).forEach(([key, handler]) => {
                 if (!disabledEvents.includes(key)) {
-                    const delegate = (e: Event) => {
-                        e.stopPropagation();
-                        if (!(e.target instanceof Element)) return;
-                        const optionEl = findClosestOption(e.target);
+                    this.on(key, (event: Event, optionEl: HTMLElement) => {
+                        event.stopPropagation();
+
                         if (!optionEl) return;
-                        handler(optionEl as HTMLElement);
-                    };
-                    optionsEl?.addEventListener(key, delegate);
-                    cleanup.push(() => optionsEl?.removeEventListener(key, delegate));
+
+                        handler(optionEl);
+                    }
+                    );
                 }
             });
+
         },
 
-        // @ts-ignore
         get all() {
             let allOptions = root.__optionsEls;
-            
+
             if (!allOptions) return []
 
-            return allOptions;
+            return Array.from(allOptions);
         },
         destroy() {
-            cleanup.forEach(fn => fn());
+            this.controller.abort();
         }
     };
 }

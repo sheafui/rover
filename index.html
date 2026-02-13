@@ -40,7 +40,7 @@
 
                 <template x-for="(item, index) in items" x-bind:key="index">
                     <li x-rover:option="item" x-text="item"
-                        class="px-4 data-selected:bg-red-500 data-active:bg-white/5 py-2">
+                        class="px-4 data-selected:bg-red-500/10 data-active:!bg-white/10 py-2">
                     </li>
                 </template>
             </ul>
@@ -55,17 +55,26 @@
             isOpen: false,
             isMultiple: true,
             items: ['tenjarine', 'apple', 'banana', 'cherry', 'orange', 'mango', 'grape'],
-            selectedKeys: ['option'],
+            itemsToKeyMap: new Map(),
+            selectedKeys: ['option-1'],
 
             init() {
                 let inputManager = this.$rover.input;
 
+                // this.$rover.deopt();
+
                 inputManager.enableDefaultInputHandlers();
+
+
 
                 let optionsManager = this.$rover.options;
 
                 this.$watch('selectedKeys', (val) => {
                     console.log(val)
+                })
+
+                queueMicrotask(() => {
+                    console.log(this.$rover.collection.getMap())
                 })
 
                 optionsManager.enableDefaultOptionsHandlers();
@@ -122,9 +131,12 @@
 
             },
 
+            handleButtonClick() {
+                this.isOpen
+            },
+
             open() {
                 this.isOpen = true;
-                // this.activateSelectedOrFirst();
             },
 
             close() {

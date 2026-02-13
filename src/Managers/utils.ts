@@ -4,11 +4,9 @@ export function bindListener<
     el: HTMLElement,
     eventKey: K,
     listener: (event: HTMLElementEventMap[K]) => void,
-    cleanup: (() => void)[]
+    controller: AbortController
 ) {
-    el.addEventListener(eventKey, listener)
-
-    cleanup.push(() => {
-        el.removeEventListener(eventKey, listener)
+    el.addEventListener(eventKey, listener, {
+        signal: controller.signal
     })
 }

@@ -97,8 +97,11 @@ export type UIItem = {
 export interface Destroyable {
     destroy(): void
 }
+export interface Abortable {
+    controller: AbortController
+}
 
-export interface InputManager extends Destroyable {
+export interface InputManager extends Destroyable, Abortable {
     on<K extends keyof HTMLElementEventMap>(
         eventKey: K,
         handler: (
@@ -113,7 +116,7 @@ export interface InputManager extends Destroyable {
     enableDefaultInputHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'>): void
 }
 
-export interface OptionsManager extends Destroyable {
+export interface OptionsManager extends Destroyable, Abortable {
     on<K extends keyof HTMLElementEventMap>(
         eventKey: K,
         handler: (
@@ -122,14 +125,14 @@ export interface OptionsManager extends Destroyable {
             activeKey: string | null
         ) => void
     ): void
-
-    findClosestOption(el: Element | undefined): HTMLElement | undefined
+    get all(): Array<HTMLElement>
+    findClosestOption(el: HTMLElement | null): HTMLElement | undefined
 
     enableDefaultOptionsHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'>): void
 }
 
 
-export interface OptionManager extends Destroyable, Pick<InputManager, 'on'> {
+export interface OptionManager extends Destroyable, Pick<InputManager, 'on'>, Abortable {
 }
 
 

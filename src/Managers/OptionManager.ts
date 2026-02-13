@@ -1,38 +1,38 @@
-import { OptionManager, RoverRootContext } from "../types";
+import { OPTION_SLOT_NAME } from "src/constants";
+import { OptionManager, RoverRootContext } from "src/types";
+import { bindListener } from "./utils";
+
 
 export function createOptionManager(root: RoverRootContext): OptionManager {
-    const cleanup: (() => void)[] = [];
+
+    const optionsEls = Array.from(root.$el.querySelectorAll('[x-rover\\:option]')) as HTMLElement[];
+
+    if (!optionsEls) console.warn("no individual option element has been found");
+
 
     return {
+        controller: new AbortController(),
 
         on<K extends keyof HTMLElementEventMap>(
             eventKey: K,
-            handler: (
-                event: HTMLElementEventMap[K],
-                activeKey: string | undefined
-            ) => void
+            handler: (event: HTMLElementEventMap[K], activeKey: string | undefined) => void
         ) {
-            root.$nextTick(() => {
-                const inputEl = root.$refs.__input as HTMLElement | undefined;
+            if (!optionsEls) return;
 
-                if (!inputEl) return;
+            const listener = (event: HTMLElementEventMap[K]) => {
+                const activeKey = root.__activatedKey ?? undefined;
 
-                const listener = (event: HTMLElementEventMap[typeof eventKey]) => {
-                    const activeKey = root.__activatedKey ?? undefined;
-                    handler(event, activeKey);
-                };
+                handler(event, activeKey);
+            };
 
-                inputEl.addEventListener(eventKey, listener);
+            optionsEls.forEach((option) => {
+                bindListener(option, eventKey, listener, this.controller);
 
-                cleanup.push(() => {
-                    inputEl.removeEventListener(eventKey, listener);
-                });
-            });
+            })
         },
 
-
         destroy() {
-            cleanup.forEach(fn => fn());
+            this.controller.abort();
         }
     };
 }

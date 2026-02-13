@@ -4,7 +4,6 @@ import { bindListener } from "./utils"
 export function createInputManager(
     rootDataStack: RoverRootContext
 ): InputManager {
-    const cleanup: (() => void)[] = [];
     const inputEl = rootDataStack.$el.querySelector('[x-rover\\:input]') as HTMLInputElement | undefined;
 
     if (!inputEl) {
@@ -12,6 +11,8 @@ export function createInputManager(
     }
 
     return {
+        controller: new AbortController,
+
         on<K extends keyof HTMLElementEventMap>(
             eventKey: K,
             handler: (event: HTMLElementEventMap[K], activeKey: string | undefined) => void
@@ -23,7 +24,7 @@ export function createInputManager(
                 handler(event, activeKey);
             };
 
-            bindListener(inputEl, eventKey, listener, cleanup);
+            bindListener(inputEl, eventKey, listener, this.controller);
         },
 
         get value(): string {
@@ -44,12 +45,6 @@ export function createInputManager(
             if (!disabledEvents.includes('focus')) {
                 this.on('focus', () => rootDataStack.__startTyping());
             }
-
-            // if (!disabledEvents.includes('input')) {
-            //     this.on('input', () => {
-            //         if (rootDataStack.__isTyping) rootDataStack.__open();
-            //     });
-            // }
 
             if (!disabledEvents.includes('blur')) {
                 this.on('blur', () => rootDataStack.__stopTyping());
@@ -78,7 +73,7 @@ export function createInputManager(
         },
 
         destroy() {
-            cleanup.forEach(fn => fn());
+            this.controller.abort();
         }
     };
 }
