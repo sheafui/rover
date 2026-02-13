@@ -45,9 +45,9 @@ export default function CreateRoverRoot(
         __filteredKeysSet: new Set<string>(),
 
         // rover managers 
-        __inputManager: null,
-        __optionsManager: null,
-        __optionManager: null,
+        __inputManager: undefined,
+        __optionsManager: undefined,
+        __optionManager: undefined,
 
         __add: (k: string, v: string, d: boolean) => collection.add(k, v, d),
         __forget: (k: string) => collection.forget(k),

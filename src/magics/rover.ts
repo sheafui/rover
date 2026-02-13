@@ -14,15 +14,15 @@ export const rover = (el: ElementWithXAttributes) => {
             data.__onOpen(callback);
         },
 
-        get input(): InputManager | null {
+        get input(): InputManager | undefined {
             return data.__inputManager;
         },
 
-        get option(): OptionManager | null {
+        get option(): OptionManager | undefined {
             return data.__optionManager;
         },
 
-        get options(): OptionsManager | null {
+        get options(): OptionsManager | undefined {
             return data.__optionsManager;
         },
 

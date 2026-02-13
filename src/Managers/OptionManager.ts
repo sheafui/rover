@@ -5,7 +5,13 @@ export function createOptionManager(root: RoverRootContext): OptionManager {
 
     return {
 
-        on(eventKey, handler) {
+        on<K extends keyof HTMLElementEventMap>(
+            eventKey: K,
+            handler: (
+                event: HTMLElementEventMap[K],
+                activeKey: string | null
+            ) => void
+        ) {
             root.$nextTick(() => {
                 const inputEl = root.$refs.__input as HTMLElement | undefined;
 
@@ -23,6 +29,7 @@ export function createOptionManager(root: RoverRootContext): OptionManager {
                 });
             });
         },
+
 
         destroy() {
             cleanup.forEach(fn => fn());

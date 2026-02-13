@@ -236,6 +236,14 @@ var RoverCollection = class {
 };
 var RoverCollection_default = RoverCollection;
 
+// src/Managers/utils.ts
+function bindListener(el, eventKey, listener, cleanup) {
+  el.addEventListener(eventKey, listener);
+  cleanup.push(() => {
+    el.removeEventListener(eventKey, listener);
+  });
+}
+
 // src/Managers/InputManager.ts
 function createInputManager(root) {
   const cleanup = [];
@@ -249,11 +257,12 @@ function createInputManager(root) {
           const activeKey = root.__activatedKey ?? null;
           handler(event, activeKey);
         };
-        inputEl.addEventListener(eventKey, listener);
-        cleanup.push(() => {
-          inputEl.removeEventListener(eventKey, listener);
-        });
+        bindListener(inputEl, eventKey, listener, cleanup);
       });
+    },
+    get value() {
+      const inputEl = root.$refs.__input;
+      return inputEl ? inputEl.value : "";
     },
     set value(val) {
       root.$nextTick(() => {
@@ -262,10 +271,6 @@ function createInputManager(root) {
           inputEl.value = val;
         }
       });
-    },
-    get value() {
-      const inputEl = root.$refs.__input;
-      return inputEl ? inputEl.value : "";
     },
     registerSharedEventListerns() {
     },
@@ -306,6 +311,11 @@ var OPTION_SLOT_NAME = "rover-option";
 // src/Managers/OptionsManager.ts
 function createOptionsManager(root) {
   const cleanup = [];
+  const findClosestOption = (el) => {
+    if (!el)
+      return void 0;
+    return Alpine.findClosest(el, (node) => node.dataset.slot === OPTION_SLOT_NAME && node.hasAttribute("x-rover:option"));
+  };
   return {
     on(eventKey, handler) {
       root.$nextTick(() => {
@@ -314,19 +324,14 @@ function createOptionsManager(root) {
           return;
         const listener = (event) => {
           const target = event.target;
-          const optionEl = this.findClosestOption(target);
+          const optionEl = findClosestOption(target);
           const activeKey = root.__activatedKey ?? null;
           handler(event, optionEl, activeKey);
         };
-        container.addEventListener(eventKey, listener);
-        cleanup.push(() => {
-          container.removeEventListener(eventKey, listener);
-        });
+        bindListener(container, eventKey, listener, cleanup);
       });
     },
-    findClosestOption(el) {
-      return Alpine.findClosest(el, (node) => node.dataset.slot === OPTION_SLOT_NAME && node.hasAttribute("x-rover:option"));
-    },
+    findClosestOption,
     registerSharedEventListerns() {
     },
     destroy() {
@@ -360,9 +365,9 @@ function CreateRoverRoot({
     __searchQuery: "",
     __filteredKeys: null,
     __filteredKeysSet: new Set(),
-    __inputManager: null,
-    __optionsManager: null,
-    __optionManager: null,
+    __inputManager: void 0,
+    __optionsManager: void 0,
+    __optionManager: void 0,
     __add: (k, v, d) => collection.add(k, v, d),
     __forget: (k) => collection.forget(k),
     __activate: (k) => collection.activate(k),

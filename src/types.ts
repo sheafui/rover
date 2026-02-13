@@ -36,9 +36,9 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __filteredKeysSet: Set<string>;
     __searchQuery: string;
     // input related
-    __inputManager: InputManager | null;
-    __optionManager: InputManager | null;
-    __optionsManager: InputManager | null;
+    __inputManager: InputManager | undefined;
+    __optionManager: OptionManager | undefined;
+    __optionsManager: OptionsManager | undefined;
 
     // Methods
     __add: (k: string, v: string, d: boolean) => void;
@@ -130,17 +130,18 @@ export interface OptionsManager extends Destroyable {
         eventKey: K,
         handler: (
             event: HTMLElementEventMap[K],
-            optionEl: HTMLElement | null,
+            optionEl: HTMLElement | undefined,
             activeKey: string | null
         ) => void
     ): void
 
-    findClosestOption(el: Element | null): HTMLElement | null
+    findClosestOption(el: Element | undefined): HTMLElement | undefined
 
     registerSharedEventListerns(): void
 }
 
 
-export interface OptionManager extends Destroyable { }
+export interface OptionManager extends Destroyable, Pick<InputManager, 'on'> {
+}
 
 

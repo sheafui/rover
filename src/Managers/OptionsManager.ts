@@ -1,59 +1,55 @@
-import { OPTION_SLOT_NAME } from "src/constants";
-import { OptionsManager, RoverRootContext } from "src/types";
+import { OPTION_SLOT_NAME } from "src/constants"
+import { OptionsManager, RoverRootContext } from "src/types"
+import { bindListener } from "./utils"
 
-export function createOptionsManager(root: RoverRootContext): OptionsManager {
-    const cleanup: (() => void)[] = [];
+export function createOptionsManager(
+    root: RoverRootContext
+): OptionsManager {
+    const cleanup: (() => void)[] = []
+
+    const findClosestOption = (el: Element | undefined): HTMLElement | undefined => {
+        if (!el) return undefined
+
+        return Alpine.findClosest(el, node => node.dataset.slot === OPTION_SLOT_NAME && node.hasAttribute("x-rover:option")) as HTMLElement | undefined
+    }
 
     return {
         on<K extends keyof HTMLElementEventMap>(
             eventKey: K,
             handler: (
                 event: HTMLElementEventMap[K],
-                optionEl: HTMLElement | null,
+                optionEl: HTMLElement | undefined,
                 activeKey: string | null
             ) => void
         ) {
             root.$nextTick(() => {
-                const container = root.$refs.__options as HTMLElement | undefined;
-                if (!container) return;
+                const container = root.$refs.__options as HTMLElement | undefined
+                if (!container) return
 
                 const listener = (event: HTMLElementEventMap[K]) => {
-                    const target = event.target as Element | null;
 
-                    const optionEl = this.findClosestOption(target)
+                    const target = event.target as Element | undefined
 
-                    const activeKey = root.__activatedKey ?? null;
+                    const optionEl = findClosestOption(target);
 
-                    handler(event, optionEl, activeKey);
-                };
+                    const activeKey = root.__activatedKey ?? null
 
-                container.addEventListener(eventKey, listener);
+                    handler(event, optionEl, activeKey)
+                }
 
-                cleanup.push(() => {
-                    container.removeEventListener(eventKey, listener);
-                });
-            });
+                bindListener(container, eventKey, listener, cleanup)
+            })
         },
 
-        findClosestOption(el: Element) {
-            return Alpine.findClosest(el, node => node.dataset.slot === OPTION_SLOT_NAME && node.hasAttribute('x-rover:option'))
-        },
+        findClosestOption,
 
         registerSharedEventListerns() {
-            // this.on('mouseover', (event, optionEl) => {
-            //     if (!optionEl?.dataset.key) return;
-            //     root.collection.activate(optionEl.dataset.key);
-            // });
-
-            // this.on('mouseout', () => {
-            //     if (!root.__keepActivated) {
-            //         root.collection.deactivate();
-            //     }
-            // });
+            // example
+            // this.on("mouseover", (event, optionEl) => { ... })
         },
 
         destroy() {
-            cleanup.forEach(fn => fn());
+            cleanup.forEach(fn => fn())
         }
-    };
+    }
 }
