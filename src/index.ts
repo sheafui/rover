@@ -82,9 +82,6 @@ export default function rover(Alpine: Alpine): void {
             'role': 'combobox',
             'tabindex': '0',
             'aria-autocomplete': 'list',
-            'x-init'() {
-                this.$el.dataset.slot = 'rover-input';
-            },
         });
     }
 
@@ -97,7 +94,6 @@ export default function rover(Alpine: Alpine): void {
                 if (Alpine.bound(this.$el, 'keepActivated')) {
                     this.__keepActivated = true;
                 }
-                this.$el.dataset.slot = 'rover-options';
             }
         })
     }
@@ -137,7 +133,6 @@ export default function rover(Alpine: Alpine): void {
             'x-init'(this: RoverRootContext) {
                 const groupId = this.$id('rover-group')
 
-                this.$el.dataset.slot = 'rover-group'
                 this.$el.setAttribute('aria-labelledby', `${groupId}-label`)
 
                 const id = String(this.__nextGroupId());
@@ -182,7 +177,6 @@ export default function rover(Alpine: Alpine): void {
     function handleSeparator(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
         Alpine.bind(el, {
             'x-init'(this: RoverRootContext) {
-                this.$el.dataset.slot = 'rover-separator';
 
                 const id = String(this.__nextSeparatorId());
 

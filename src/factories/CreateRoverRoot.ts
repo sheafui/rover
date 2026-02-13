@@ -101,11 +101,11 @@ export default function CreateRoverRoot(
 
             this.$nextTick(() => {
                 this.__optionsEls = Array.from(
-                    this.$el.querySelectorAll('[data-slot=rover-option]')
+                    this.$el.querySelectorAll('[x-rover\\:option]')
                 ) as Array<HTMLElement>;
 
                 this.__groupsEls = Array.from(
-                    this.$el.querySelectorAll('[data-slot=rover-group]')
+                    this.$el.querySelectorAll('[x-rover\\:group]')
                 ) as Array<HTMLElement>;
 
                 // HANDLING INDIVIDUAL OPTION VISIBILITY, SELECTION, ACTIVE STATE 
@@ -164,7 +164,7 @@ export default function CreateRoverRoot(
 
                         groups.forEach((group: Element) => {
                             const htmlGroup = group as HTMLElement;
-                            const options = htmlGroup.querySelectorAll('[data-slot=rover-option]');
+                            const options = htmlGroup.querySelectorAll('[x-rover\\:option]');
 
                             // Check if group has any visible options
                             const hasVisibleOption = Array.from(options).some((opt: Element) => {

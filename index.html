@@ -53,7 +53,7 @@
         Alpine.data('selectComponent', () => ({
             state: null,
             isOpen: false,
-            isMultiple: true,
+            isMultiple: false,
             items: ['tenjarine', 'apple', 'banana', 'cherry', 'orange', 'mango', 'grape'],
             itemsToKeyMap: new Map(),
             selectedKeys: ['option-1'],
@@ -104,11 +104,6 @@
                         this.isMultiple || this.close();
                     }
                 });
-
-                this.$rover.option.on('click', (event, _) => {
-                    console.log('hiiiiiiiiiiiiba')
-                })
-
 
                 Alpine.effect(() => {
                     const selectedKeysSet = new Set(

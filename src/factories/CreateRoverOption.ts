@@ -1,15 +1,11 @@
 import type { Alpine as AlpineType } from 'alpinejs';
 import { RoverOptionData, RoverOptionContext } from 'src/types';
 
-export const SLOT_NAME = 'rover-option';
-
 export default function CreateRoverOption(Alpine: AlpineType, id: number, dirValue: string | null): RoverOptionData {
     return {
         __uniqueKey: 'option-' + id,
         init(this: RoverOptionContext) {
             // Setup
-            this.$el.dataset.slot = SLOT_NAME;
-
             this.$el.dataset.key = this.__uniqueKey;
 
             let value;

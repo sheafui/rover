@@ -1,4 +1,3 @@
-import { OPTION_SLOT_NAME } from "src/constants";
 import { OptionManager, RoverRootContext } from "src/types";
 import { bindListener } from "./utils";
 

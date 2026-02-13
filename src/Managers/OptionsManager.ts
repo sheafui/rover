@@ -1,4 +1,3 @@
-import { OPTION_SLOT_NAME } from "src/constants";
 import { OptionsManager, RoverRootContext } from "src/types";
 import { bindListener } from "./utils";
 
@@ -13,7 +12,7 @@ export function createOptionsManager(root: RoverRootContext): OptionsManager {
 
         if (!el || !(el instanceof HTMLElement)) return
 
-        return Alpine.findClosest(el, node => node.dataset.slot === OPTION_SLOT_NAME && node.hasAttribute("x-rover:option")) as HTMLElement | undefined;
+        return Alpine.findClosest(el, node => node.hasAttribute("x-rover:option")) as HTMLElement | undefined;
     };
 
     return {

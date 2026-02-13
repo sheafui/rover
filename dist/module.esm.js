@@ -1,10 +1,8 @@
 // src/factories/CreateRoverOption.ts
-var SLOT_NAME = "rover-option";
 function CreateRoverOption(Alpine2, id, dirValue) {
   return {
     __uniqueKey: "option-" + id,
     init() {
-      this.$el.dataset.slot = SLOT_NAME;
       this.$el.dataset.key = this.__uniqueKey;
       let value;
       if (dirValue !== null) {
@@ -331,9 +329,6 @@ function createOptionManager(root) {
   };
 }
 
-// src/constants.ts
-var OPTION_SLOT_NAME = "rover-option";
-
 // src/Managers/OptionsManager.ts
 function createOptionsManager(root) {
   const optionsEl = root.$el.querySelector("[x-rover\\:options]");
@@ -342,7 +337,7 @@ function createOptionsManager(root) {
   const findClosestOption = (el) => {
     if (!el || !(el instanceof HTMLElement))
       return;
-    return Alpine.findClosest(el, (node) => node.dataset.slot === OPTION_SLOT_NAME && node.hasAttribute("x-rover:option"));
+    return Alpine.findClosest(el, (node) => node.hasAttribute("x-rover:option"));
   };
   return {
     controller: new AbortController(),
@@ -408,7 +403,7 @@ function CreateRoverRoot({
   effect
 }) {
   const collection = new RoverCollection_default();
-  const SLOT_NAME2 = "rover-root";
+  const SLOT_NAME = "rover-root";
   return {
     collection,
     __optionsEls: void 0,
@@ -445,7 +440,7 @@ function CreateRoverRoot({
     __searchUsingQuery: (query) => collection.search(query),
     __getKeyByIndex: (index) => collection.getKeyByIndex(index),
     init() {
-      this.$el.dataset.slot = SLOT_NAME2;
+      this.$el.dataset.slot = SLOT_NAME;
       this.__setupManagers();
       effect(() => {
         this.__isLoading = collection.pending.state;
@@ -470,8 +465,8 @@ function CreateRoverRoot({
         }
       });
       this.$nextTick(() => {
-        this.__optionsEls = Array.from(this.$el.querySelectorAll("[data-slot=rover-option]"));
-        this.__groupsEls = Array.from(this.$el.querySelectorAll("[data-slot=rover-group]"));
+        this.__optionsEls = Array.from(this.$el.querySelectorAll("[x-rover\\:option]"));
+        this.__groupsEls = Array.from(this.$el.querySelectorAll("[x-rover\\:group]"));
         effect(() => {
           const activeKey = this.__activatedKey;
           const visibleKeys = this.__filteredKeys ? new Set(this.__filteredKeys) : null;
@@ -499,7 +494,7 @@ function CreateRoverRoot({
             const groups = this.__groupsEls;
             groups.forEach((group) => {
               const htmlGroup = group;
-              const options2 = htmlGroup.querySelectorAll("[data-slot=rover-option]");
+              const options2 = htmlGroup.querySelectorAll("[x-rover\\:option]");
               const hasVisibleOption = Array.from(options2).some((opt) => {
                 const htmlOpt = opt;
                 return visibleKeys ? visibleKeys.has(htmlOpt.dataset.key || "") : true;
@@ -741,10 +736,7 @@ function rover2(Alpine2) {
       },
       role: "combobox",
       tabindex: "0",
-      "aria-autocomplete": "list",
-      "x-init"() {
-        this.$el.dataset.slot = "rover-input";
-      }
+      "aria-autocomplete": "list"
     });
   }
   function handleOptions(el) {
@@ -758,7 +750,6 @@ function rover2(Alpine2) {
         if (Alpine2.bound(this.$el, "keepActivated")) {
           this.__keepActivated = true;
         }
-        this.$el.dataset.slot = "rover-options";
       }
     });
   }
@@ -791,7 +782,6 @@ function rover2(Alpine2) {
       role: "group",
       "x-init"() {
         const groupId = this.$id("rover-group");
-        this.$el.dataset.slot = "rover-group";
         this.$el.setAttribute("aria-labelledby", `${groupId}-label`);
         const id = String(this.__nextGroupId());
         this.$el.dataset.key = id;
@@ -831,7 +821,6 @@ function rover2(Alpine2) {
   function handleSeparator(Alpine3, el) {
     Alpine3.bind(el, {
       "x-init"() {
-        this.$el.dataset.slot = "rover-separator";
         const id = String(this.__nextSeparatorId());
         this.$el.dataset.key = id;
         this.__pushSeparatorToItems(id);
