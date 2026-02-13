@@ -3,7 +3,7 @@ import { OptionsManager, RoverRootContext } from "src/types"
 import { bindListener } from "./utils"
 
 export function createOptionsManager(
-    root: RoverRootContext
+    rootDataStack: RoverRootContext
 ): OptionsManager {
     const cleanup: (() => void)[] = []
 
@@ -14,7 +14,7 @@ export function createOptionsManager(
     }
 
 
-    const optionsEl = root.$el.querySelector('[x-rover\\:options]') as HTMLInputElement | undefined
+    const optionsEl = rootDataStack.$el.querySelector('[x-rover\\:options]') as HTMLInputElement | undefined
 
     if (!optionsEl) {
         console.warn(String.raw`Input element with [x-rover\\:options] not found`)
@@ -37,7 +37,7 @@ export function createOptionsManager(
 
                 const optionEl = findClosestOption(target);
 
-                const activeKey = root.__activatedKey ?? null
+                const activeKey = rootDataStack.__activatedKey ?? null
 
                 handler(event, optionEl, activeKey)
             }
@@ -47,11 +47,73 @@ export function createOptionsManager(
 
         findClosestOption,
 
-        registerSharedEventListerns() {
+        enableDefaultInputHandlers(disabledEvents) {
             // example
             // this.on("mouseover", (event, optionEl) => { ... })
         },
 
+        // @ts-ignore
+        __registerEventsDelector() {
+            const findClosestOption = (el: Element) => Alpine.findClosest(el, node => node.dataset.slot === OPTION_SLOT_NAME);
+
+            const delegate = (handler: (optionEl: HTMLElement) => void) => {
+                return function (e: Event) {
+                    e.stopPropagation();
+
+                    if (!(e.target instanceof Element)) return;
+
+                    const optionEl = findClosestOption(e.target);
+
+                    if (!optionEl) return;
+
+                    handler(optionEl as HTMLElement);
+                };
+            };
+
+            this.$nextTick(() => {
+                this.__optionsEl = this.$refs.__options;
+
+                if (!this.__optionsEl) return;
+
+                this.__optionsEl.addEventListener('click',
+                    delegate((optionEl) => {
+                        if (!optionEl.dataset.key) return;
+
+                        this.$nextTick(() => this.$refs?.__input?.focus({ preventScroll: true }))
+                    })
+                );
+
+                this.__optionsEl.addEventListener('mouseover',
+                    delegate((optionEl) => {
+                        if (!optionEl.dataset.key) return;
+                        this.__activate(optionEl.dataset.key);
+                    })
+                );
+
+                this.__optionsEl.addEventListener('mousemove',
+                    delegate((optionEl) => {
+                        if (this.__isActive(optionEl.dataset.key || '')) return;
+                        if (!optionEl.dataset.key) return;
+                        this.__activate(optionEl.dataset.key);
+                    })
+                );
+
+                this.__optionsEl.addEventListener('mouseout',
+                    delegate(() => {
+                        if (this.__keepActivated) return;
+                        this.__deactivate();
+                    })
+                );
+            });
+        },
+
+
+        close() {
+
+        },
+        open() {
+
+        },
         destroy() {
             cleanup.forEach(fn => fn())
         }

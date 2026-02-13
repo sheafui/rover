@@ -246,9 +246,9 @@
   }
 
   // src/Managers/InputManager.ts
-  function createInputManager(rootContext) {
+  function createInputManager(rootDataStack) {
     const cleanup = [];
-    const inputEl = rootContext.$el.querySelector("[x-rover\\:input]");
+    const inputEl = rootDataStack.$el.querySelector("[x-rover\\:input]");
     if (!inputEl) {
       console.warn(`Input element with [x-rover\\:input] not found`);
     }
@@ -257,7 +257,7 @@
         if (!inputEl)
           return;
         const listener = (event) => {
-          const activeKey = rootContext.__activatedKey ?? void 0;
+          const activeKey = rootDataStack.__activatedKey ?? void 0;
           handler(event, activeKey);
         };
         bindListener(inputEl, eventKey, listener, cleanup);
@@ -273,16 +273,16 @@
         if (!inputEl)
           return;
         if (!disabledEvents.includes("focus")) {
-          this.on("focus", () => rootContext.__startTyping());
+          this.on("focus", () => rootDataStack.__startTyping());
         }
         if (!disabledEvents.includes("input")) {
           this.on("input", () => {
-            if (rootContext.__isTyping)
-              rootContext.__open();
+            if (rootDataStack.__isTyping)
+              rootDataStack.__open();
           });
         }
         if (!disabledEvents.includes("blur")) {
-          this.on("blur", () => rootContext.__stopTyping());
+          this.on("blur", () => rootDataStack.__stopTyping());
         }
         if (!disabledEvents.includes("keydown")) {
           this.on("keydown", (e) => {
@@ -290,25 +290,25 @@
               case "ArrowDown":
                 e.preventDefault();
                 e.stopPropagation();
-                if (!rootContext.__isOpen) {
-                  rootContext.__open();
+                if (!rootDataStack.__isOpen) {
+                  rootDataStack.__open();
                   break;
                 }
-                rootContext.__activateNext();
+                rootDataStack.__activateNext();
                 break;
               case "ArrowUp":
                 e.preventDefault();
                 e.stopPropagation();
-                if (!rootContext.__isOpen) {
-                  rootContext.__open();
+                if (!rootDataStack.__isOpen) {
+                  rootDataStack.__open();
                   break;
                 }
-                rootContext.__activatePrev();
+                rootDataStack.__activatePrev();
                 break;
               case "Escape":
                 e.preventDefault();
                 e.stopPropagation();
-                rootContext.__close();
+                rootDataStack.__close();
                 requestAnimationFrame(() => inputEl?.focus({preventScroll: true}));
                 break;
             }
@@ -350,14 +350,14 @@
   var OPTION_SLOT_NAME = "rover-option";
 
   // src/Managers/OptionsManager.ts
-  function createOptionsManager(root) {
+  function createOptionsManager(rootDataStack) {
     const cleanup = [];
     const findClosestOption = (el) => {
       if (!el)
         return void 0;
       return Alpine.findClosest(el, (node) => node.dataset.slot === OPTION_SLOT_NAME && node.hasAttribute("x-rover:option"));
     };
-    const optionsEl = root.$el.querySelector("[x-rover\\:options]");
+    const optionsEl = rootDataStack.$el.querySelector("[x-rover\\:options]");
     if (!optionsEl) {
       console.warn(String.raw`Input element with [x-rover\\:options] not found`);
     }
@@ -368,13 +368,58 @@
         const listener = (event) => {
           const target = event.target;
           const optionEl = findClosestOption(target);
-          const activeKey = root.__activatedKey ?? null;
+          const activeKey = rootDataStack.__activatedKey ?? null;
           handler(event, optionEl, activeKey);
         };
         bindListener(optionsEl, eventKey, listener, cleanup);
       },
       findClosestOption,
-      registerSharedEventListerns() {
+      enableDefaultInputHandlers(disabledEvents) {
+      },
+      __registerEventsDelector() {
+        const findClosestOption2 = (el) => Alpine.findClosest(el, (node) => node.dataset.slot === OPTION_SLOT_NAME);
+        const delegate = (handler) => {
+          return function(e) {
+            e.stopPropagation();
+            if (!(e.target instanceof Element))
+              return;
+            const optionEl = findClosestOption2(e.target);
+            if (!optionEl)
+              return;
+            handler(optionEl);
+          };
+        };
+        this.$nextTick(() => {
+          this.__optionsEl = this.$refs.__options;
+          if (!this.__optionsEl)
+            return;
+          this.__optionsEl.addEventListener("click", delegate((optionEl) => {
+            if (!optionEl.dataset.key)
+              return;
+            this.$nextTick(() => this.$refs?.__input?.focus({preventScroll: true}));
+          }));
+          this.__optionsEl.addEventListener("mouseover", delegate((optionEl) => {
+            if (!optionEl.dataset.key)
+              return;
+            this.__activate(optionEl.dataset.key);
+          }));
+          this.__optionsEl.addEventListener("mousemove", delegate((optionEl) => {
+            if (this.__isActive(optionEl.dataset.key || ""))
+              return;
+            if (!optionEl.dataset.key)
+              return;
+            this.__activate(optionEl.dataset.key);
+          }));
+          this.__optionsEl.addEventListener("mouseout", delegate(() => {
+            if (this.__keepActivated)
+              return;
+            this.__deactivate();
+          }));
+        });
+      },
+      close() {
+      },
+      open() {
       },
       destroy() {
         cleanup.forEach((fn) => fn());
@@ -436,7 +481,6 @@
       init() {
         this.$el.dataset.slot = SLOT_NAME2;
         this.__setupManagers();
-        this.__handleSharedInputEvents();
         effect(() => {
           this.__isLoading = collection.pending.state;
         });
@@ -555,90 +599,6 @@
       },
       __nextSeparatorId() {
         return ++this.__s_id;
-      },
-      __registerEventsDelector() {
-        const findClosestOption = (el) => Alpine.findClosest(el, (node) => node.dataset.slot === SLOT_NAME);
-        const delegate = (handler) => {
-          return function(e) {
-            e.stopPropagation();
-            if (!(e.target instanceof Element))
-              return;
-            const optionEl = findClosestOption(e.target);
-            if (!optionEl)
-              return;
-            handler(optionEl);
-          };
-        };
-        this.$nextTick(() => {
-          this.__optionsEl = this.$refs.__options;
-          if (!this.__optionsEl)
-            return;
-          this.__optionsEl.addEventListener("click", delegate((optionEl) => {
-            if (!optionEl.dataset.key)
-              return;
-            this.$nextTick(() => this.$refs?.__input?.focus({preventScroll: true}));
-          }));
-          this.__optionsEl.addEventListener("mouseover", delegate((optionEl) => {
-            if (!optionEl.dataset.key)
-              return;
-            this.__activate(optionEl.dataset.key);
-          }));
-          this.__optionsEl.addEventListener("mousemove", delegate((optionEl) => {
-            if (this.__isActive(optionEl.dataset.key || ""))
-              return;
-            if (!optionEl.dataset.key)
-              return;
-            this.__activate(optionEl.dataset.key);
-          }));
-          this.__optionsEl.addEventListener("mouseout", delegate(() => {
-            if (this.__keepActivated)
-              return;
-            this.__deactivate();
-          }));
-        });
-      },
-      __handleSharedInputEvents() {
-        this.__inputManager.on("focus", () => {
-          this.__startTyping();
-        });
-        this.__inputManager.on("input", () => {
-          if (this.__isTyping) {
-            this.__open();
-          }
-        });
-        this.__inputManager.on("blur", () => {
-          this.__stopTyping();
-        });
-        this.__inputManager.on("keydown", (e) => {
-          switch (e.key) {
-            case "ArrowDown":
-              e.preventDefault();
-              e.stopPropagation();
-              if (!this.__isOpen) {
-                this.__open();
-                break;
-              }
-              this.__activateNext();
-              break;
-            case "ArrowUp":
-              e.preventDefault();
-              e.stopPropagation();
-              if (!this.__isOpen) {
-                this.__open();
-                break;
-              }
-              this.__activatePrev();
-              break;
-            case "Escape":
-              e.preventDefault();
-              e.stopPropagation();
-              this.__close();
-              this.$nextTick(() => this.$refs?.__input?.focus({preventScroll: true}));
-              break;
-            default:
-              break;
-          }
-        });
       },
       destroy() {
         this.__inputManager?.destroy();

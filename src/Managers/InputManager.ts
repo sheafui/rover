@@ -2,10 +2,10 @@ import { InputManager, RoverRootContext } from "../types"
 import { bindListener } from "./utils"
 
 export function createInputManager(
-    rootContext: RoverRootContext
+    rootDataStack: RoverRootContext
 ): InputManager {
     const cleanup: (() => void)[] = [];
-    const inputEl = rootContext.$el.querySelector('[x-rover\\:input]') as HTMLInputElement | undefined;
+    const inputEl = rootDataStack.$el.querySelector('[x-rover\\:input]') as HTMLInputElement | undefined;
 
     if (!inputEl) {
         console.warn(`Input element with [x-rover\\:input] not found`);
@@ -19,7 +19,7 @@ export function createInputManager(
             if (!inputEl) return;
 
             const listener = (event: HTMLElementEventMap[K]) => {
-                const activeKey = rootContext.__activatedKey ?? undefined;
+                const activeKey = rootDataStack.__activatedKey ?? undefined;
                 handler(event, activeKey);
             };
 
@@ -42,17 +42,17 @@ export function createInputManager(
             if (!inputEl) return;
 
             if (!disabledEvents.includes('focus')) {
-                this.on('focus', () => rootContext.__startTyping());
+                this.on('focus', () => rootDataStack.__startTyping());
             }
 
             if (!disabledEvents.includes('input')) {
                 this.on('input', () => {
-                    if (rootContext.__isTyping) rootContext.__open();
+                    if (rootDataStack.__isTyping) rootDataStack.__open();
                 });
             }
 
             if (!disabledEvents.includes('blur')) {
-                this.on('blur', () => rootContext.__stopTyping());
+                this.on('blur', () => rootDataStack.__stopTyping());
             }
 
             if (!disabledEvents.includes('keydown')) {
@@ -60,19 +60,19 @@ export function createInputManager(
                     switch (e.key) {
                         case 'ArrowDown':
                             e.preventDefault(); e.stopPropagation();
-                            if (!rootContext.__isOpen) { rootContext.__open(); break; }
-                            rootContext.__activateNext();
+                            if (!rootDataStack.__isOpen) { rootDataStack.__open(); break; }
+                            rootDataStack.__activateNext();
                             break;
 
                         case 'ArrowUp':
                             e.preventDefault(); e.stopPropagation();
-                            if (!rootContext.__isOpen) { rootContext.__open(); break; }
-                            rootContext.__activatePrev();
+                            if (!rootDataStack.__isOpen) { rootDataStack.__open(); break; }
+                            rootDataStack.__activatePrev();
                             break;
 
                         case 'Escape':
                             e.preventDefault(); e.stopPropagation();
-                            rootContext.__close();
+                            rootDataStack.__close();
                             requestAnimationFrame(() => inputEl?.focus({ preventScroll: true }));
                             break;
                     }
