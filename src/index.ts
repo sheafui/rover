@@ -2,7 +2,7 @@ import type { Alpine } from "alpinejs";
 import type { default as AlpineType } from "alpinejs";
 import CreateRoverOption from "./factories/CreateRoverOption";
 import CreateRoverRoot from "./factories/CreateRoverRoot";
-import { RoverOptionContext, RoverOptionsContext, RoverRootContext } from "./types";
+import { RoverOptionContext, RoverRootContext } from "./types";
 import registerMagics from "./magics";
 
 
