@@ -273,6 +273,56 @@ function createInputManager(root) {
   };
 }
 
+// src/Managers/OptionManager.ts
+function createOptionManager(root) {
+  const cleanup = [];
+  return {
+    on(eventKey, handler) {
+      root.$nextTick(() => {
+        const inputEl = root.$refs.__input;
+        if (!inputEl)
+          return;
+        const listener = (event) => {
+          const activeKey = root.__activatedKey ?? null;
+          handler(event, activeKey);
+        };
+        inputEl.addEventListener(eventKey, listener);
+        cleanup.push(() => {
+          inputEl.removeEventListener(eventKey, listener);
+        });
+      });
+    },
+    destroy() {
+      cleanup.forEach((fn) => fn());
+    }
+  };
+}
+
+// src/Managers/OptionsManager.ts
+function createOptionsManager(root) {
+  const cleanup = [];
+  return {
+    on(eventKey, handler) {
+      root.$nextTick(() => {
+        const inputEl = root.$refs.__options;
+        if (!inputEl)
+          return;
+        const listener = (event) => {
+          const activeKey = root.__activatedKey ?? null;
+          handler(event, activeKey);
+        };
+        inputEl.addEventListener(eventKey, listener);
+        cleanup.push(() => {
+          inputEl.removeEventListener(eventKey, listener);
+        });
+      });
+    },
+    destroy() {
+      cleanup.forEach((fn) => fn());
+    }
+  };
+}
+
 // src/factories/CreateRoverRoot.ts
 function CreateRoverRoot({
   effect
@@ -326,7 +376,7 @@ function CreateRoverRoot({
     },
     init() {
       this.$el.dataset.slot = SLOT_NAME2;
-      this.__inputManager = createInputManager(this);
+      this.__setupManagers();
       this.__handleSharedInputEvents();
       effect(() => {
         this.__isLoading = collection.pending.state;
@@ -396,6 +446,11 @@ function CreateRoverRoot({
           this.__isOpen = true;
         }
       });
+    },
+    __setupManagers() {
+      this.__inputManager = createInputManager(this);
+      this.__optionManager = createOptionManager(this);
+      this.__optionsManager = createOptionsManager(this);
     },
     __open() {
       if (this.__isOpen)
@@ -564,6 +619,12 @@ var rover = (el) => {
     },
     get input() {
       return data.__inputManager;
+    },
+    get option() {
+      return data.__optionManager;
+    },
+    get options() {
+      return data.__optionsManager;
     },
     onClose(callback) {
       data.__onClose(callback);

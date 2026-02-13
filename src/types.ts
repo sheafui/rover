@@ -37,6 +37,8 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __searchQuery: string;
     // input related
     __inputManager: InputManager | null;
+    __optionManager: InputManager | null;
+    __optionsManager: InputManager | null;
 
     // Methods
     __add: (k: string, v: string, d: boolean) => void;

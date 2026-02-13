@@ -1,5 +1,5 @@
 import { ElementWithXAttributes } from "alpinejs";
-import { InputManager, Item, RoverRootContext } from "src/types";
+import { InputManager, Item, OptionManager, OptionsManager, RoverRootContext } from "src/types";
 
 export const rover = (el: ElementWithXAttributes) => {
     let data = Alpine.$data(el) as RoverRootContext;
@@ -17,6 +17,15 @@ export const rover = (el: ElementWithXAttributes) => {
         get input(): InputManager | null {
             return data.__inputManager;
         },
+
+        get option(): OptionManager | null {
+            return data.__optionManager;
+        },
+
+        get options(): OptionsManager | null {
+            return data.__optionsManager;
+        },
+
         onClose(callback: () => void) {
             data.__onClose(callback);
         },

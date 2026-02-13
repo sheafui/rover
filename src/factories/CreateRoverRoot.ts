@@ -4,6 +4,8 @@ import type { default as AlpineType } from "alpinejs";
 import { Item, RoverRootData } from "src/types";
 import { SLOT_NAME as OPTION_SLOT_NAME } from "./CreateRoverOption";
 import { createInputManager } from "src/Managers/InputManager";
+import { createOptionManager } from "src/Managers/OptionManager";
+import { createOptionsManager } from "src/Managers/OptionsManager";
 
 export default function CreateRoverRoot(
     {
@@ -72,12 +74,10 @@ export default function CreateRoverRoot(
         init() {
             this.$el.dataset.slot = SLOT_NAME;
 
-            // START INPUT MANAGEMENTS
-            this.__inputManager = createInputManager(this);
+
+            this.__setupManagers();
 
             this.__handleSharedInputEvents();
-            //  END INPUT MANAGEMENTS
-
 
             // LOADING STUFF
             effect(() => {
@@ -202,6 +202,14 @@ export default function CreateRoverRoot(
                     this.__isOpen = true;
                 }
             });
+        },
+
+        __setupManagers() {
+            this.__inputManager = createInputManager(this);
+
+            this.__optionManager = createOptionManager(this);
+
+            this.__optionsManager = createOptionsManager(this);
         },
         __open() {
             if (this.__isOpen) return
@@ -406,7 +414,7 @@ export default function CreateRoverRoot(
                         break;
                     case 'Escape':
                         e.preventDefault(); e.stopPropagation();
-                        
+
                         this.__close();
 
                         this.$nextTick(() => this.$refs?.__input?.focus({ preventScroll: true }))
