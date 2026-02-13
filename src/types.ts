@@ -134,7 +134,7 @@ export interface OptionsManager extends Destroyable {
     close: () => void
     findClosestOption(el: Element | undefined): HTMLElement | undefined
 
-    enableDefaultInputHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'>): void
+    enableDefaultOptionsHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'>): void
 }
 
 

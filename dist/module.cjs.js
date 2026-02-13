@@ -369,80 +369,76 @@ function createOptionManager(root) {
 var OPTION_SLOT_NAME = "rover-option";
 
 // src/Managers/OptionsManager.ts
-function createOptionsManager(rootDataStack) {
+function createOptionsManager(root) {
   const cleanup = [];
+  const optionsEl = root.$el.querySelector("[x-rover\\:options]");
+  if (!optionsEl)
+    console.warn("Options container not found");
   const findClosestOption = (el) => {
     if (!el)
       return void 0;
     return Alpine.findClosest(el, (node) => node.dataset.slot === OPTION_SLOT_NAME && node.hasAttribute("x-rover:option"));
   };
-  const optionsEl = rootDataStack.$el.querySelector("[x-rover\\:options]");
-  if (!optionsEl) {
-    console.warn(String.raw`Input element with [x-rover\\:options] not found`);
-  }
   return {
     on(eventKey, handler) {
       if (!optionsEl)
         return;
       const listener = (event) => {
         var _a;
-        const target = event.target;
-        const optionEl = findClosestOption(target);
-        const activeKey = (_a = rootDataStack.__activatedKey) != null ? _a : null;
+        const optionEl = findClosestOption(event.target);
+        const activeKey = (_a = root.__activatedKey) != null ? _a : null;
         handler(event, optionEl, activeKey);
       };
       bindListener(optionsEl, eventKey, listener, cleanup);
     },
     findClosestOption,
-    enableDefaultInputHandlers(disabledEvents) {
-    },
-    __registerEventsDelector() {
-      const findClosestOption2 = (el) => Alpine.findClosest(el, (node) => node.dataset.slot === OPTION_SLOT_NAME);
-      const delegate = (handler) => {
-        return function(e) {
-          e.stopPropagation();
-          if (!(e.target instanceof Element))
-            return;
-          const optionEl = findClosestOption2(e.target);
-          if (!optionEl)
-            return;
-          handler(optionEl);
-        };
-      };
-      this.$nextTick(() => {
-        this.__optionsEl = this.$refs.__options;
-        if (!this.__optionsEl)
-          return;
-        this.__optionsEl.addEventListener("click", delegate((optionEl) => {
+    enableDefaultOptionsHandlers(disabledEvents = []) {
+      const events = {
+        click: (optionEl) => {
           if (!optionEl.dataset.key)
             return;
-          this.$nextTick(() => {
-            var _a, _b;
-            return (_b = (_a = this.$refs) == null ? void 0 : _a.__input) == null ? void 0 : _b.focus({preventScroll: true});
+          root.$nextTick(() => {
+            var _a;
+            return (_a = root.$refs.__input) == null ? void 0 : _a.focus({preventScroll: true});
           });
-        }));
-        this.__optionsEl.addEventListener("mouseover", delegate((optionEl) => {
+        },
+        mouseover: (optionEl) => {
           if (!optionEl.dataset.key)
             return;
-          this.__activate(optionEl.dataset.key);
-        }));
-        this.__optionsEl.addEventListener("mousemove", delegate((optionEl) => {
-          if (this.__isActive(optionEl.dataset.key || ""))
+          root.__activate(optionEl.dataset.key);
+        },
+        mousemove: (optionEl) => {
+          if (!optionEl.dataset.key || root.__isActive(optionEl.dataset.key))
             return;
-          if (!optionEl.dataset.key)
+          root.__activate(optionEl.dataset.key);
+        },
+        mouseout: () => {
+          if (root.__keepActivated)
             return;
-          this.__activate(optionEl.dataset.key);
-        }));
-        this.__optionsEl.addEventListener("mouseout", delegate(() => {
-          if (this.__keepActivated)
-            return;
-          this.__deactivate();
-        }));
+          root.__deactivate();
+        }
+      };
+      Object.entries(events).forEach(([key, handler]) => {
+        if (!disabledEvents.includes(key)) {
+          const delegate = (e) => {
+            e.stopPropagation();
+            if (!(e.target instanceof Element))
+              return;
+            const optionEl = findClosestOption(e.target);
+            if (!optionEl)
+              return;
+            handler(optionEl);
+          };
+          optionsEl == null ? void 0 : optionsEl.addEventListener(key, delegate);
+          cleanup.push(() => optionsEl == null ? void 0 : optionsEl.removeEventListener(key, delegate));
+        }
       });
     },
-    close() {
-    },
     open() {
+      root.__open();
+    },
+    close() {
+      root.__close();
     },
     destroy() {
       cleanup.forEach((fn) => fn());
