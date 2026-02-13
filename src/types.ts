@@ -120,7 +120,7 @@ export interface InputManager extends Destroyable {
     get value(): string
     set value(val: string)
 
-    registerSharedEventListerns(): void
+    enableDefaultInputHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'>): void
 }
 
 export interface OptionsManager extends Destroyable {

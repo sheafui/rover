@@ -263,11 +263,11 @@ function bindListener(el, eventKey, listener, cleanup) {
 }
 
 // src/Managers/InputManager.ts
-function createInputManager(root) {
+function createInputManager(rootContext) {
   const cleanup = [];
-  const inputEl = root.$el.querySelector("[x-rover\\:input]");
+  const inputEl = rootContext.$el.querySelector("[x-rover\\:input]");
   if (!inputEl) {
-    console.warn(String.raw`Input element with [x-rover\\:input] not found`);
+    console.warn(`Input element with [x-rover\\:input] not found`);
   }
   return {
     on(eventKey, handler) {
@@ -275,7 +275,7 @@ function createInputManager(root) {
         return;
       const listener = (event) => {
         var _a;
-        const activeKey = (_a = root.__activatedKey) != null ? _a : void 0;
+        const activeKey = (_a = rootContext.__activatedKey) != null ? _a : void 0;
         handler(event, activeKey);
       };
       bindListener(inputEl, eventKey, listener, cleanup);
@@ -284,11 +284,54 @@ function createInputManager(root) {
       return inputEl ? inputEl.value : "";
     },
     set value(val) {
-      if (inputEl) {
+      if (inputEl)
         inputEl.value = val;
-      }
     },
-    registerSharedEventListerns() {
+    enableDefaultInputHandlers(disabledEvents = []) {
+      if (!inputEl)
+        return;
+      if (!disabledEvents.includes("focus")) {
+        this.on("focus", () => rootContext.__startTyping());
+      }
+      if (!disabledEvents.includes("input")) {
+        this.on("input", () => {
+          if (rootContext.__isTyping)
+            rootContext.__open();
+        });
+      }
+      if (!disabledEvents.includes("blur")) {
+        this.on("blur", () => rootContext.__stopTyping());
+      }
+      if (!disabledEvents.includes("keydown")) {
+        this.on("keydown", (e) => {
+          switch (e.key) {
+            case "ArrowDown":
+              e.preventDefault();
+              e.stopPropagation();
+              if (!rootContext.__isOpen) {
+                rootContext.__open();
+                break;
+              }
+              rootContext.__activateNext();
+              break;
+            case "ArrowUp":
+              e.preventDefault();
+              e.stopPropagation();
+              if (!rootContext.__isOpen) {
+                rootContext.__open();
+                break;
+              }
+              rootContext.__activatePrev();
+              break;
+            case "Escape":
+              e.preventDefault();
+              e.stopPropagation();
+              rootContext.__close();
+              requestAnimationFrame(() => inputEl == null ? void 0 : inputEl.focus({preventScroll: true}));
+              break;
+          }
+        });
+      }
     },
     destroy() {
       cleanup.forEach((fn) => fn());
