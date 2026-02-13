@@ -9,7 +9,7 @@ export function createOptionManager(root: RoverRootContext): OptionManager {
             eventKey: K,
             handler: (
                 event: HTMLElementEventMap[K],
-                activeKey: string | null
+                activeKey: string | undefined
             ) => void
         ) {
             root.$nextTick(() => {
@@ -18,7 +18,7 @@ export function createOptionManager(root: RoverRootContext): OptionManager {
                 if (!inputEl) return;
 
                 const listener = (event: HTMLElementEventMap[typeof eventKey]) => {
-                    const activeKey = root.__activatedKey ?? null;
+                    const activeKey = root.__activatedKey ?? undefined;
                     handler(event, activeKey);
                 };
 

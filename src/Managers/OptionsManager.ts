@@ -13,6 +13,13 @@ export function createOptionsManager(
         return Alpine.findClosest(el, node => node.dataset.slot === OPTION_SLOT_NAME && node.hasAttribute("x-rover:option")) as HTMLElement | undefined
     }
 
+
+    const optionsEl = root.$el.querySelector('[x-rover\\:options]') as HTMLInputElement | undefined
+
+    if (!optionsEl) {
+        console.warn(String.raw`Input element with [x-rover\\:options] not found`)
+    }
+
     return {
         on<K extends keyof HTMLElementEventMap>(
             eventKey: K,
@@ -22,23 +29,20 @@ export function createOptionsManager(
                 activeKey: string | null
             ) => void
         ) {
-            root.$nextTick(() => {
-                const container = root.$refs.__options as HTMLElement | undefined
-                if (!container) return
+            if (!optionsEl) return
 
-                const listener = (event: HTMLElementEventMap[K]) => {
+            const listener = (event: HTMLElementEventMap[K]) => {
 
-                    const target = event.target as Element | undefined
+                const target = event.target as Element | undefined
 
-                    const optionEl = findClosestOption(target);
+                const optionEl = findClosestOption(target);
 
-                    const activeKey = root.__activatedKey ?? null
+                const activeKey = root.__activatedKey ?? null
 
-                    handler(event, optionEl, activeKey)
-                }
+                handler(event, optionEl, activeKey)
+            }
 
-                bindListener(container, eventKey, listener, cleanup)
-            })
+            bindListener(optionsEl, eventKey, listener, cleanup)
         },
 
         findClosestOption,

@@ -7,10 +7,10 @@ export function createInputManager(
 
     const cleanup: (() => void)[] = [];
 
-    const inputEl = root.$el.querySelector('[x-rover\\:input]') as HTMLInputElement | null
+    const inputEl = root.$el.querySelector('[x-rover\\:input]') as HTMLInputElement | undefined
 
     if (!inputEl) {
-        console.warn("Input element not found")
+        console.warn(String.raw`Input element with [x-rover\\:input] not found`)
     }
 
     return {
@@ -18,13 +18,13 @@ export function createInputManager(
             eventKey: K,
             handler: (
                 event: HTMLElementEventMap[K],
-                activeKey: string | null
+                activeKey: string | undefined
             ) => void
         ) {
             if (!inputEl) return
 
             const listener = (event: HTMLElementEventMap[K]) => {
-                const activeKey = root.__activatedKey ?? null
+                const activeKey = root.__activatedKey ?? undefined
                 handler(event, activeKey)
             }
 
@@ -37,10 +37,9 @@ export function createInputManager(
 
         set value(val: string) {
 
-            
+
             if (inputEl) {
-                console.log('value:',val);
-                
+
                 inputEl.value = val
             }
         },

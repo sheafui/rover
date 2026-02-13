@@ -294,8 +294,6 @@ export default function CreateRoverRoot(
                     delegate((optionEl) => {
                         if (!optionEl.dataset.key) return;
 
-                        // this.__handleSelection(optionEl.dataset.key);
-
                         this.$nextTick(() => this.$refs?.__input?.focus({ preventScroll: true }))
                     })
                 );

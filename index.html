@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Rover Plugin</title>
 
 
     <script src="./dist/cdn.js"></script>
@@ -14,18 +14,6 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-
-    <style>
-        /* Rule 3: Hide separator if PREVIOUS sibling is a `hidden` option */
-        /* :is([data-slot=rover-option],[data-slot=rover-group])[hidden]+[data-slot=rover-separator] { */
-        /* display: none; */
-        /* } */
-
-        /* Rule 4: Hide separator if NEXT sibling is a `hidden` option */
-        /* [data-slot=rover-separator]:has(+ :is([data-slot=rover-option],[data-slot=rover-group])[hidden]) {
-            display: none;
-        } */
-    </style>
 </head>
 
 <body class="flex mt-20 justify-center bg-neutral-950">
@@ -51,8 +39,7 @@
                 </li>
 
                 <template x-for="(item, index) in items" x-bind:key="index">
-                    <li x-on:click="handleSelection($el.dataset.key)" x-rover:option="item" x-text="item"
-                        class="px-4 data-active:bg-white/5 py-2">
+                    <li x-rover:option="item" x-text="item" class="px-4 data-active:bg-white/5 py-2">
                     </li>
                 </template>
             </ul>
@@ -74,33 +61,23 @@
                 let inputManager = this.$rover.input;
 
                 inputManager.on('keydown', (event, activeKey) => {
-                    if (event.key === 'Enter' && activeKey != null) {
-                        console.log(activeKey)
+                    if (event.key === 'Enter' && activeKey !== undefined) {
                         this.handleSelection(activeKey);
-                        this.__stopTyping()
                     }
                 });
 
                 // // brainstorming public APIs to work with
-                // this.$rover.options.on('click', (event, closestOption, activeKey) => {
-                //     if (closestOption !== undefined) {
-                //         this.handleSelection(closestOption.dataset.key);
-                //     } é
-                // });
-
-                // this is nice to have but highly discourage to use due the fact it fuck the memory for large lists
-                this.$rover.option.on('click', (event, activeKey) => {
-
+                this.$rover.options.on('click', (event, closestOption, activeKey) => {
+                    if (closestOption !== undefined) {
+                        this.handleSelection(closestOption.dataset.key);
+                    }
                 });
 
-                // this.$rover.options.on('click', (event, activeKey) => {
+                // this is nice to have but highly discourage to use due the fact it fuck the memory for large lists
+                // this.$rover.option.on('click', (event, activeKey) => {
 
-                //     console.log(event, activeKey);
-
-                //     this.selectedKeys = activeKey;
                 // });
             },
-
 
             handleSelection(key) {
 
@@ -114,10 +91,6 @@
                         this.selectedKeys = null;
                     } else {
                         this.state = value;
-                    }
-
-                    if (!this.__static) {
-                        this.__close();
                     }
 
                     this.$refs.__input.value = String(value).toUpperCase();

@@ -113,7 +113,7 @@ export interface InputManager extends Destroyable {
         eventKey: K,
         handler: (
             event: HTMLElementEventMap[K],
-            activeKey: string | null
+            activeKey: string | undefined
         ) => void
     ): void
 

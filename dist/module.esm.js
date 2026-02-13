@@ -249,14 +249,14 @@ function createInputManager(root) {
   const cleanup = [];
   const inputEl = root.$el.querySelector("[x-rover\\:input]");
   if (!inputEl) {
-    console.warn("Input element not found");
+    console.warn(String.raw`Input element with [x-rover\\:input] not found`);
   }
   return {
     on(eventKey, handler) {
       if (!inputEl)
         return;
       const listener = (event) => {
-        const activeKey = root.__activatedKey ?? null;
+        const activeKey = root.__activatedKey ?? void 0;
         handler(event, activeKey);
       };
       bindListener(inputEl, eventKey, listener, cleanup);
@@ -266,7 +266,6 @@ function createInputManager(root) {
     },
     set value(val) {
       if (inputEl) {
-        console.log("value:", val);
         inputEl.value = val;
       }
     },
@@ -288,7 +287,7 @@ function createOptionManager(root) {
         if (!inputEl)
           return;
         const listener = (event) => {
-          const activeKey = root.__activatedKey ?? null;
+          const activeKey = root.__activatedKey ?? void 0;
           handler(event, activeKey);
         };
         inputEl.addEventListener(eventKey, listener);
@@ -314,20 +313,21 @@ function createOptionsManager(root) {
       return void 0;
     return Alpine.findClosest(el, (node) => node.dataset.slot === OPTION_SLOT_NAME && node.hasAttribute("x-rover:option"));
   };
+  const optionsEl = root.$el.querySelector("[x-rover\\:options]");
+  if (!optionsEl) {
+    console.warn(String.raw`Input element with [x-rover\\:options] not found`);
+  }
   return {
     on(eventKey, handler) {
-      root.$nextTick(() => {
-        const container = root.$refs.__options;
-        if (!container)
-          return;
-        const listener = (event) => {
-          const target = event.target;
-          const optionEl = findClosestOption(target);
-          const activeKey = root.__activatedKey ?? null;
-          handler(event, optionEl, activeKey);
-        };
-        bindListener(container, eventKey, listener, cleanup);
-      });
+      if (!optionsEl)
+        return;
+      const listener = (event) => {
+        const target = event.target;
+        const optionEl = findClosestOption(target);
+        const activeKey = root.__activatedKey ?? null;
+        handler(event, optionEl, activeKey);
+      };
+      bindListener(optionsEl, eventKey, listener, cleanup);
     },
     findClosestOption,
     registerSharedEventListerns() {
