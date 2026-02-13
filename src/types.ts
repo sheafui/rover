@@ -106,17 +106,41 @@ export type UIItem = {
     key?: string;
 }
 
-type Manager = {
-    on<K extends keyof HTMLElementEventMap>(eventKey: K, handler: (event: HTMLElementEventMap[K], key: string | null) => void): void;
-    destroy: () => void;
-    registerSharedEventListerns: () => void
-}
-export interface InputManager extends Manager {
-    set value(val: string);
-    get value(): string;
+export interface Destroyable {
+    destroy(): void
 }
 
-export interface OptionManager extends Omit<Manager, 'registerSharedEventListerns'> { }
+export interface InputManager extends Destroyable {
+    on<K extends keyof HTMLElementEventMap>(
+        eventKey: K,
+        handler: (
+            event: HTMLElementEventMap[K],
+            activeKey: string | null
+        ) => void
+    ): void
 
-export interface OptionsManager extends Manager { }
+    get value(): string
+    set value(val: string)
+
+    registerSharedEventListerns(): void
+}
+
+export interface OptionsManager extends Destroyable {
+    on<K extends keyof HTMLElementEventMap>(
+        eventKey: K,
+        handler: (
+            event: HTMLElementEventMap[K],
+            optionEl: HTMLElement | null,
+            activeKey: string | null
+        ) => void
+    ): void
+
+    findClosestOption(el: Element | null): HTMLElement | null
+
+    registerSharedEventListerns(): void
+}
+
+
+export interface OptionManager extends Destroyable { }
+
 
