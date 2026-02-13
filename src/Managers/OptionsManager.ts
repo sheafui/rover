@@ -1,4 +1,4 @@
-import { InputManager, RoverRootContext } from "./types";
+import { InputManager, RoverRootContext } from "../types";
 
 export function createInputManager(root: RoverRootContext): InputManager {
     const cleanup: (() => void)[] = [];
@@ -7,7 +7,7 @@ export function createInputManager(root: RoverRootContext): InputManager {
 
         on(eventKey, handler) {
             root.$nextTick(() => {
-                const inputEl = root.$refs.__input as HTMLElement | undefined;
+                const inputEl = root.$refs.__options as HTMLElement | undefined;
 
                 if (!inputEl) return;
 
@@ -26,7 +26,7 @@ export function createInputManager(root: RoverRootContext): InputManager {
 
         set value(val: string) {
             root.$nextTick(() => {
-                const inputEl = root.$refs.__input as HTMLInputElement | undefined;
+                const inputEl = root.$refs.__options as HTMLInputElement | undefined;
                 if (inputEl) {
                     inputEl.value = val;
                 }

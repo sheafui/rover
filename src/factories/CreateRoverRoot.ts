@@ -3,7 +3,7 @@ import RoverCollection from "../core/RoverCollection";
 import type { default as AlpineType } from "alpinejs";
 import { Item, RoverRootData } from "src/types";
 import { SLOT_NAME as OPTION_SLOT_NAME } from "./CreateRoverOption";
-import { createInputManager } from "src/InputManager";
+import { createInputManager } from "src/Managers/InputManager";
 
 export default function CreateRoverRoot(
     {

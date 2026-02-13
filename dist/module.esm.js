@@ -236,7 +236,7 @@ var RoverCollection = class {
 };
 var RoverCollection_default = RoverCollection;
 
-// src/InputManager.ts
+// src/Managers/InputManager.ts
 function createInputManager(root) {
   const cleanup = [];
   return {
