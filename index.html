@@ -32,11 +32,7 @@
                 </button>
             </div>
 
-            <ul 
-                x-rover:options 
-                x-cloak 
-                style="display: none;"
-                x-show="isOpen"
+            <ul x-rover:options x-cloak style="display: none;" x-show="isOpen"
                 class="mt-1 max-h-60  w-full rounded-md border border-neutral-700 bg-white/5 text-white overflow-auto shadow-lg focus:outline-none">
                 <li class="py-4 text-center" x-rover:empty>
                     No result found
@@ -59,7 +55,7 @@
             isOpen: false,
             isMultiple: false,
             items: ['tenjarine', 'apple', 'banana', 'cherry', 'orange', 'mango', 'grape'],
-            selectedKeys: ['option-1'],
+            selectedKeys: 'option-1',
 
             init() {
                 let inputManager = this.$rover.input;
@@ -75,10 +71,6 @@
                 this.$watch('selectedKeys', (val) => {
                     console.log(val)
                 });
-
-                queueMicrotask(() => {
-                    console.log(this.$rover.collection.getMap())
-                })
 
                 optionsManager.enableDefaultOptionsHandlers();
 
@@ -110,37 +102,43 @@
                     }
                 });
 
-                Alpine.effect(() => {
-                    const selectedKeysSet = new Set(
-                        Array.isArray(this.selectedKeys)
-                            ? this.selectedKeys
-                            : this.selectedKeys
-                                ? [this.selectedKeys]
-                                : []
-                    );
+                // this.$nextTick(() => {
+                    Alpine.effect(() => {
+                        const selectedKeysSet = new Set(
+                            Array.isArray(this.selectedKeys)
+                                ? this.selectedKeys
+                                : this.selectedKeys
+                                    ? [this.selectedKeys]
+                                    : []
+                        );
 
-                    this.$rover.options.all.forEach((optionEl) => {
-                        const key = optionEl.dataset.key;
-                        if (!key) return;
+                        // batch dom writes 
+                        this.$rover.options.all.forEach((optionEl) => {
+                            const key = optionEl.dataset.key;
+                            if (!key) return;
 
-                        if (selectedKeysSet.has(key)) {
-                            optionEl.setAttribute('data-selected', 'true');
-                            optionEl.setAttribute('aria-selected', 'true');
-                        } else {
-                            optionEl.removeAttribute('data-selected');
-                            optionEl.setAttribute('aria-selected', 'false');
-                        }
-                    });
+                            if (selectedKeysSet.has(key)) {
+                                optionEl.setAttribute('data-selected', 'true');
+                                optionEl.setAttribute('aria-selected', 'true');
+                            } else {
+                                optionEl.removeAttribute('data-selected');
+                                optionEl.setAttribute('aria-selected', 'false');
+                            }
+                        });
 
-                    // this.state = this.$rover.fromKeys(this.selectedKeys)
-                });
+                        // this.state = this.$rover.fromKeys(this.selectedKeys)
+                    // });
+                })
+
 
             },
 
             handleButtonClick() {
-                this.isOpen != this.isOpen;
+                this.isOpen = !this.isOpen;
 
                 if (this.isOpen) this.activateSelectedOrFirst();
+
+                this.$refs.__input.focus({})
             },
 
             open() {
