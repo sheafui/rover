@@ -293,12 +293,6 @@ function createInputManager(rootDataStack) {
       if (!disabledEvents.includes("focus")) {
         this.on("focus", () => rootDataStack.__startTyping());
       }
-      if (!disabledEvents.includes("input")) {
-        this.on("input", () => {
-          if (rootDataStack.__isTyping)
-            rootDataStack.__open();
-        });
-      }
       if (!disabledEvents.includes("blur")) {
         this.on("blur", () => rootDataStack.__stopTyping());
       }
@@ -308,25 +302,16 @@ function createInputManager(rootDataStack) {
             case "ArrowDown":
               e.preventDefault();
               e.stopPropagation();
-              if (!rootDataStack.__isOpen) {
-                rootDataStack.__open();
-                break;
-              }
               rootDataStack.__activateNext();
               break;
             case "ArrowUp":
               e.preventDefault();
               e.stopPropagation();
-              if (!rootDataStack.__isOpen) {
-                rootDataStack.__open();
-                break;
-              }
               rootDataStack.__activatePrev();
               break;
             case "Escape":
               e.preventDefault();
               e.stopPropagation();
-              rootDataStack.__close();
               requestAnimationFrame(() => inputEl == null ? void 0 : inputEl.focus({preventScroll: true}));
               break;
           }
@@ -433,12 +418,6 @@ function createOptionsManager(root) {
           cleanup.push(() => optionsEl == null ? void 0 : optionsEl.removeEventListener(key, delegate));
         }
       });
-    },
-    open() {
-      root.__open();
-    },
-    close() {
-      root.__close();
     },
     destroy() {
       cleanup.forEach((fn) => fn());
@@ -562,11 +541,6 @@ function CreateRoverRoot({
           });
         });
       });
-      this.$nextTick(() => {
-        if (!this.$refs.__input) {
-          this.__isOpen = true;
-        }
-      });
     },
     __setupManagers() {
       this.__inputManager = createInputManager(this);
@@ -601,10 +575,6 @@ function CreateRoverRoot({
         key
       });
     },
-    __close() {
-      this.__isOpen = false;
-      this.__deactivate();
-    },
     __startTyping() {
       this.__isTyping = true;
     },
@@ -631,14 +601,8 @@ function CreateRoverRoot({
 var rover = (el) => {
   let data = Alpine.$data(el);
   return {
-    get isOpen() {
-      return data.__isOpen;
-    },
     get collection() {
       return data.collection;
-    },
-    onOpen(callback) {
-      data.__onOpen(callback);
     },
     get input() {
       return data.__inputManager;
@@ -723,12 +687,6 @@ var roverOption = (dataStack) => ({
 var roverOptions = (dataStack) => ({
   isOpen() {
     return dataStack.__isOpen;
-  },
-  open() {
-    dataStack.__open();
-  },
-  close() {
-    dataStack.__close();
   },
   isStatic() {
     return dataStack.__static;
@@ -839,9 +797,6 @@ function rover2(Alpine2) {
           this.__keepActivated = true;
         }
         this.$el.dataset.slot = "rover-options";
-      },
-      "x-show"() {
-        return this.$data.__static ? true : this.$data.__isOpen;
       }
     });
   }

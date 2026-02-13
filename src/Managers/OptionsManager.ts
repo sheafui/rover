@@ -65,12 +65,6 @@ export function createOptionsManager(root: RoverRootContext): OptionsManager {
                 }
             });
         },
-        open() {
-            root.__open();
-        },
-        close() {
-            root.__close();
-        },
         destroy() {
             cleanup.forEach(fn => fn());
         }

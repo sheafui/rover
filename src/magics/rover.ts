@@ -4,14 +4,8 @@ import { InputManager, Item, OptionManager, OptionsManager, RoverRootContext } f
 export const rover = (el: ElementWithXAttributes) => {
     let data = Alpine.$data(el) as RoverRootContext;
     return {
-        get isOpen() {
-            return data.__isOpen;
-        },
         get collection() {
             return data.collection;
-        },
-        onOpen(callback: () => void) {
-            data.__onOpen(callback);
         },
 
         get input(): InputManager | undefined {

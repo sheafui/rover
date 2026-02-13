@@ -192,14 +192,6 @@ export default function CreateRoverRoot(
                 });
             });
 
-            // this.__registerEventsDelector();
-
-            // if there is not input tied with this rover, keep always open true
-            this.$nextTick(() => {
-                if (!this.$refs.__input) {
-                    this.__isOpen = true;
-                }
-            });
         },
 
         __setupManagers() {
@@ -242,11 +234,6 @@ export default function CreateRoverRoot(
             });
         },
 
-        __close() {
-            this.__isOpen = false;
-            this.__deactivate();
-        },
-
         __startTyping() {
             this.__isTyping = true
         },
@@ -254,6 +241,7 @@ export default function CreateRoverRoot(
         __stopTyping() {
             this.__isTyping = false
         },
+
         __nextOptionId() {
             return ++this.__o_id;
         },

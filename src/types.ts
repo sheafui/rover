@@ -54,8 +54,6 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __activateLast: () => void;
     __searchUsingQuery: (query: string) => Item[];
     __getKeyByIndex: (index: number | null | undefined) => string | null;
-    __open: () => void;
-    __close: () => void;
     __startTyping: () => void;
     __stopTyping: () => void;
     __pushGroupToItems: (key: string) => void;
@@ -130,8 +128,6 @@ export interface OptionsManager extends Destroyable {
         ) => void
     ): void
 
-    open: () => void
-    close: () => void
     findClosestOption(el: Element | undefined): HTMLElement | undefined
 
     enableDefaultOptionsHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'>): void

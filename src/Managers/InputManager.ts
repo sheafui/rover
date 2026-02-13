@@ -45,11 +45,11 @@ export function createInputManager(
                 this.on('focus', () => rootDataStack.__startTyping());
             }
 
-            if (!disabledEvents.includes('input')) {
-                this.on('input', () => {
-                    if (rootDataStack.__isTyping) rootDataStack.__open();
-                });
-            }
+            // if (!disabledEvents.includes('input')) {
+            //     this.on('input', () => {
+            //         if (rootDataStack.__isTyping) rootDataStack.__open();
+            //     });
+            // }
 
             if (!disabledEvents.includes('blur')) {
                 this.on('blur', () => rootDataStack.__stopTyping());
@@ -60,19 +60,16 @@ export function createInputManager(
                     switch (e.key) {
                         case 'ArrowDown':
                             e.preventDefault(); e.stopPropagation();
-                            if (!rootDataStack.__isOpen) { rootDataStack.__open(); break; }
                             rootDataStack.__activateNext();
                             break;
 
                         case 'ArrowUp':
                             e.preventDefault(); e.stopPropagation();
-                            if (!rootDataStack.__isOpen) { rootDataStack.__open(); break; }
                             rootDataStack.__activatePrev();
                             break;
 
                         case 'Escape':
                             e.preventDefault(); e.stopPropagation();
-                            rootDataStack.__close();
                             requestAnimationFrame(() => inputEl?.focus({ preventScroll: true }));
                             break;
                     }

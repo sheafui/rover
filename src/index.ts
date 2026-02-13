@@ -103,8 +103,7 @@ export default function rover(Alpine: Alpine): void {
                     this.__keepActivated = true;
                 }
                 this.$el.dataset.slot = 'rover-options';
-            },
-            'x-show'() { return this.$data.__static ? true : this.$data.__isOpen; },
+            }
         })
     }
 

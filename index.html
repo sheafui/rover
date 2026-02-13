@@ -51,13 +51,12 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('selectComponent', () => ({
             state: null,
+            isOpen: false,
             isMultiple: false,
             items: ['tenjarine', 'apple', 'banana', 'cherry', 'orange', 'mango', 'grape'],
             selectedKeys: null,
 
             init() {
-                this.$rover.onOpen(() => this.activateSelectedOrFirst());
-
                 let inputManager = this.$rover.input;
 
                 inputManager.enableDefaultInputHandlers();
@@ -69,7 +68,10 @@
                 inputManager.on('keydown', (event, activeKey) => {
                     if (event.key === 'Enter' && activeKey !== undefined) {
                         this.handleSelection(activeKey);
-                        optionsManager.close();
+                    }
+
+                    if (event.key === "ArrowUp" | event.key === "ArrowUp") {
+                        this.open();
                     }
                 });
 
@@ -77,10 +79,16 @@
                 optionsManager.on('click', (event, closestOption, activeKey) => {
                     if (closestOption !== undefined) {
                         this.handleSelection(closestOption.dataset.key);
-                        optionsManager.close();
-
                     }
                 });
+            },
+
+            open() {
+                this.isOpen = true;
+            },
+            
+            close() {
+                this.isOpen = false;
             },
 
             handleSelection(key) {
