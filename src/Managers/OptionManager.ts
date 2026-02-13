@@ -5,9 +5,8 @@ import { bindListener } from "./utils";
 
 export function createOptionManager(root: RoverRootContext): OptionManager {
 
-    const optionsEls = Array.from(root.$el.querySelectorAll('[x-rover\\:option]')) as HTMLElement[];
-
-    if (!optionsEls) console.warn("no individual option element has been found");
+    // this is lazy to make sure even options constucted by `x-for` get collected
+    const getAllOptions = () => Array.from(root.$el.querySelectorAll('[x-rover\\:option]')) as HTMLElement[];
 
 
     return {
@@ -17,17 +16,21 @@ export function createOptionManager(root: RoverRootContext): OptionManager {
             eventKey: K,
             handler: (event: HTMLElementEventMap[K], activeKey: string | undefined) => void
         ) {
-            if (!optionsEls) return;
 
-            const listener = (event: HTMLElementEventMap[K]) => {
-                const activeKey = root.__activatedKey ?? undefined;
+            root.$nextTick(() => {
+                const optionsEls = getAllOptions();
 
-                handler(event, activeKey);
-            };
+                if (!optionsEls) return;
 
-            optionsEls.forEach((option) => {
-                bindListener(option, eventKey, listener, this.controller);
+                const listener = (event: HTMLElementEventMap[K]) => {
+                    const activeKey = root.__activatedKey ?? undefined;
 
+                    handler(event, activeKey);
+                };
+
+                optionsEls.forEach((option) => {
+                    bindListener(option, eventKey, listener, this.controller);
+                })
             })
         },
 

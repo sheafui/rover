@@ -327,21 +327,22 @@ function createInputManager(rootDataStack) {
 
 // src/Managers/OptionManager.ts
 function createOptionManager(root) {
-  const optionsEls = Array.from(root.$el.querySelectorAll("[x-rover\\:option]"));
-  if (!optionsEls)
-    console.warn("no individual option element has been found");
+  const getAllOptions = () => Array.from(root.$el.querySelectorAll("[x-rover\\:option]"));
   return {
     controller: new AbortController(),
     on(eventKey, handler) {
-      if (!optionsEls)
-        return;
-      const listener = (event) => {
-        var _a;
-        const activeKey = (_a = root.__activatedKey) != null ? _a : void 0;
-        handler(event, activeKey);
-      };
-      optionsEls.forEach((option) => {
-        bindListener(option, eventKey, listener, this.controller);
+      root.$nextTick(() => {
+        const optionsEls = getAllOptions();
+        if (!optionsEls)
+          return;
+        const listener = (event) => {
+          var _a;
+          const activeKey = (_a = root.__activatedKey) != null ? _a : void 0;
+          handler(event, activeKey);
+        };
+        optionsEls.forEach((option) => {
+          bindListener(option, eventKey, listener, this.controller);
+        });
       });
     },
     destroy() {
