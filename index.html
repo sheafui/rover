@@ -55,23 +55,21 @@
             isOpen: false,
             isMultiple: false,
             items: ['tenjarine', 'apple', 'banana', 'cherry', 'orange', 'mango', 'grape'],
-            itemsToKeyMap: new Map(),
             selectedKeys: ['option-1'],
 
             init() {
                 let inputManager = this.$rover.input;
 
-                // this.$rover.deopt();
+
+                this.state = this.$rover.fromKeys(this.selectedKeys);
 
                 inputManager.enableDefaultInputHandlers();
-
-
 
                 let optionsManager = this.$rover.options;
 
                 this.$watch('selectedKeys', (val) => {
                     console.log(val)
-                })
+                });
 
                 queueMicrotask(() => {
                     console.log(this.$rover.collection.getMap())
@@ -95,7 +93,9 @@
                     }
                 });
 
-                inputManager.on('input', (_event, _activeKey) => this.open())
+                inputManager.on('input', (_event, _activeKey) => this.open());
+
+                this.$rover.button.on('click', (event) => this.handleButtonClick());
 
                 // brainstorming the public APIs to work with
                 optionsManager.on('click', (event, closestOption, activeKey) => {
@@ -126,12 +126,16 @@
                             optionEl.setAttribute('aria-selected', 'false');
                         }
                     });
+
+                    this.state = this.$rover.fromKeys(this.selectedKeys)
                 });
 
             },
 
             handleButtonClick() {
-                this.isOpen
+                this.isOpen != this.isOpen;
+
+                if (this.isOpen) this.activateSelectedOrFirst();
             },
 
             open() {

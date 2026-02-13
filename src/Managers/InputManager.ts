@@ -35,10 +35,7 @@ export function createInputManager(
             if (inputEl) inputEl.value = val;
         },
 
-        /**
-         * Attach the default shared input events (focus, blur, input, keydown)
-         * @param disabledEvents Array of event names to exclude
-         */
+
         enableDefaultInputHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'> = []) {
             if (!inputEl) return;
 
