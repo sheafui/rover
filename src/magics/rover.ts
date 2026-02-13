@@ -20,9 +20,10 @@ export const rover = (el: ElementWithXAttributes) => {
             return data.__optionsManager;
         },
 
-        onClose(callback: () => void) {
-            data.__onClose(callback);
+        get all() {
+            return data.__optionsEls;
         },
+
         activate(key: string) {
             data.collection.activate(key)
         },

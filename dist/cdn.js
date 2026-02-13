@@ -587,8 +587,8 @@
       get options() {
         return data.__optionsManager;
       },
-      onClose(callback) {
-        data.__onClose(callback);
+      get all() {
+        return data.__optionsEls;
       },
       activate(key) {
         data.collection.activate(key);
@@ -766,7 +766,6 @@
         },
         role: "listbox",
         "x-init"() {
-          this.$data.__static = Alpine2.extractProp(this.$el, "static", false);
           if (Alpine2.bound(this.$el, "keepActivated")) {
             this.__keepActivated = true;
           }
@@ -818,19 +817,7 @@
           return this.$id("rover-button");
         },
         tabindex: "-1",
-        "aria-haspopup": "true",
-        "x-on:click"(e) {
-          if (this.__isDisabled)
-            return;
-          if (this.__isOpen) {
-            this.__close();
-            this.__resetInput();
-          } else {
-            e.preventDefault();
-            this.__open();
-          }
-          requestAnimationFrame(() => this.$refs.__input.focus({preventScroll: true}));
-        }
+        "aria-haspopup": "true"
       });
     }
     function handleEmptyState(Alpine3, el) {

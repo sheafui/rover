@@ -93,12 +93,7 @@ export default function rover(Alpine: Alpine): void {
             'x-ref': '__options',
             'x-bind:id'() { return this.$id('rover-options') },
             'role': 'listbox',
-            // 'x-on:click.away'(this: RoverOptionsContext, $event) {
-            //     this.__handleClickAway($event)
-            // },
             'x-init'() {
-                this.$data.__static = Alpine.extractProp(this.$el, 'static', false) as boolean;
-
                 if (Alpine.bound(this.$el, 'keepActivated')) {
                     this.__keepActivated = true;
                 }
@@ -158,19 +153,6 @@ export default function rover(Alpine: Alpine): void {
             'x-bind:id'() { return this.$id('rover-button') },
             'tabindex': '-1',
             'aria-haspopup': 'true',
-            'x-on:click'(e) {
-                if (this.__isDisabled) return
-
-                if (this.__isOpen) {
-                    this.__close()
-                    this.__resetInput()
-                } else {
-                    e.preventDefault()
-                    this.__open()
-                }
-
-                requestAnimationFrame(() => this.$refs.__input.focus({ preventScroll: true }))
-            },
         })
     }
 
