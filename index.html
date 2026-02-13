@@ -32,7 +32,7 @@
                 </button>
             </div>
 
-            <ul x-rover:options x-cloak
+            <ul x-rover:options x-cloak x-show="isOpen"
                 class="mt-1 max-h-60  w-full rounded-md border border-neutral-700 bg-white/5 text-white overflow-auto shadow-lg focus:outline-none">
                 <li class="py-4 text-center" x-rover:empty>
                     No result found
@@ -70,10 +70,16 @@
                         this.handleSelection(activeKey);
                     }
 
-                    if (event.key === "ArrowUp" | event.key === "ArrowUp") {
+                    if (event.key === "ArrowUp" || event.key === "ArrowDown") {
                         this.open();
                     }
+
+                    if (event.key === "Escape") {
+                        this.close();
+                    }
                 });
+
+                inputManager.on('input', (_event, _activeKey) => this.open())
 
                 // brainstorming the public APIs to work with
                 optionsManager.on('click', (event, closestOption, activeKey) => {
@@ -86,7 +92,7 @@
             open() {
                 this.isOpen = true;
             },
-            
+
             close() {
                 this.isOpen = false;
             },
