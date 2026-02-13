@@ -5,6 +5,7 @@ import { Item, RoverRootData } from "src/types";
 import { createInputManager } from "src/Managers/InputManager";
 import { createOptionManager } from "src/Managers/OptionManager";
 import { createOptionsManager } from "src/Managers/OptionsManager";
+import { createButtonManager } from "src/Managers/ButtonManager";
 
 export default function CreateRoverRoot(
     {
@@ -47,6 +48,7 @@ export default function CreateRoverRoot(
         __inputManager: undefined,
         __optionsManager: undefined,
         __optionManager: undefined,
+        __buttonManager: undefined,
 
         __add: (k: string, v: string, d: boolean) => collection.add(k, v, d),
         __forget: (k: string) => collection.forget(k),
@@ -190,6 +192,8 @@ export default function CreateRoverRoot(
             this.__optionManager = createOptionManager(this);
 
             this.__optionsManager = createOptionsManager(this);
+
+            this.__buttonManager = createButtonManager(this);
         },
         __open() {
             if (this.__isOpen) return

@@ -39,6 +39,7 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __inputManager: InputManager | undefined;
     __optionManager: OptionManager | undefined;
     __optionsManager: OptionsManager | undefined;
+    __buttonManager: ButtonManager | undefined;
 
     // Methods
     __add: (k: string, v: string, d: boolean) => void;
@@ -133,6 +134,8 @@ export interface OptionsManager extends Destroyable, Abortable {
 
 
 export interface OptionManager extends Destroyable, Pick<InputManager, 'on'>, Abortable {
+}
+export interface ButtonManager extends Destroyable, Pick<InputManager, 'on'>, Abortable {
 }
 
 

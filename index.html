@@ -32,7 +32,11 @@
                 </button>
             </div>
 
-            <ul x-rover:options x-cloak style="display: none;" x-show="isOpen"
+            <ul 
+                x-rover:options 
+                x-cloak 
+                style="display: none;"
+                x-show="isOpen"
                 class="mt-1 max-h-60  w-full rounded-md border border-neutral-700 bg-white/5 text-white overflow-auto shadow-lg focus:outline-none">
                 <li class="py-4 text-center" x-rover:empty>
                     No result found
@@ -61,7 +65,8 @@
                 let inputManager = this.$rover.input;
 
 
-                this.state = this.$rover.fromKeys(this.selectedKeys);
+                // this.$rover.opt();
+                // this.state = this.$rover.fromKeys(this.selectedKeys);
 
                 inputManager.enableDefaultInputHandlers();
 
@@ -127,7 +132,7 @@
                         }
                     });
 
-                    this.state = this.$rover.fromKeys(this.selectedKeys)
+                    // this.state = this.$rover.fromKeys(this.selectedKeys)
                 });
 
             },

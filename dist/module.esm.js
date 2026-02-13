@@ -398,6 +398,26 @@ function createOptionsManager(root) {
   };
 }
 
+// src/Managers/ButtonManager.ts
+function createButtonManager(root) {
+  const buttonEl = root.$el.querySelector("[x-rover\\:button]");
+  return {
+    controller: new AbortController(),
+    on(eventKey, handler) {
+      if (!buttonEl)
+        return;
+      const listener = (event) => {
+        const activeKey = root.__activatedKey ?? void 0;
+        handler(event, activeKey);
+      };
+      bindListener(buttonEl, eventKey, listener, this.controller);
+    },
+    destroy() {
+      this.controller.abort();
+    }
+  };
+}
+
 // src/factories/CreateRoverRoot.ts
 function CreateRoverRoot({
   effect
@@ -426,6 +446,7 @@ function CreateRoverRoot({
     __inputManager: void 0,
     __optionsManager: void 0,
     __optionManager: void 0,
+    __buttonManager: void 0,
     __add: (k, v, d) => collection.add(k, v, d),
     __forget: (k) => collection.forget(k),
     __activate: (k) => collection.activate(k),
@@ -509,6 +530,7 @@ function CreateRoverRoot({
       this.__inputManager = createInputManager(this);
       this.__optionManager = createOptionManager(this);
       this.__optionsManager = createOptionsManager(this);
+      this.__buttonManager = createButtonManager(this);
     },
     __open() {
       if (this.__isOpen)
@@ -573,6 +595,9 @@ var rover = (el) => {
     },
     get options() {
       return data.__optionsManager;
+    },
+    get button() {
+      return data.__buttonManager;
     },
     activate(key) {
       data.collection.activate(key);
