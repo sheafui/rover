@@ -2,7 +2,6 @@ import RoverCollection from "../core/RoverCollection";
 
 import type { default as AlpineType } from "alpinejs";
 import { Item, RoverRootData } from "src/types";
-import { SLOT_NAME as OPTION_SLOT_NAME } from "./CreateRoverOption";
 import { createInputManager } from "src/Managers/InputManager";
 import { createOptionManager } from "src/Managers/OptionManager";
 import { createOptionsManager } from "src/Managers/OptionsManager";
@@ -62,15 +61,6 @@ export default function CreateRoverRoot(
         __activateLast: () => collection.activateLast(),
         __searchUsingQuery: (query: string) => collection.search(query),
         __getKeyByIndex: (index: number) => collection.getKeyByIndex(index),
-
-        __onOpenCallback: () => { },
-        __onOpen(callback: () => void) {
-            this.__onOpenCallback = callback;
-        },
-        __onCloseCallback: () => { },
-        __onClose(callback: () => void) {
-            this.__onCloseCallback = callback;
-        },
         init() {
             this.$el.dataset.slot = SLOT_NAME;
 

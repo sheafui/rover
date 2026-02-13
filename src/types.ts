@@ -62,10 +62,6 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __nextOptionId: () => number;
     __nextGroupId: () => number;
     __nextSeparatorId: () => number;
-    __onOpenCallback: () => void;
-    __onOpen: (callback: () => void) => void;
-    __onCloseCallback: () => void;
-    __onClose: (callback: () => void) => void;
 }
 
 export type RoverRootContext = RoverRootData & Magics<RoverRootData>;
@@ -79,7 +75,6 @@ export type RoverInputContext = RoverRootData & RoverInputData & Magics<RoverInp
 
 export interface RoverOptionData extends XDataContext {
     __uniqueKey: string;
-    __isVisible: boolean;
 }
 
 export type RoverOptionContext = RoverRootData & RoverOptionData & Magics<RoverOptionData>;

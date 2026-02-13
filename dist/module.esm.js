@@ -394,6 +394,12 @@ function createOptionsManager(root) {
         }
       });
     },
+    get all() {
+      let allOptions = root.__optionsEls;
+      if (!allOptions)
+        return [];
+      return allOptions;
+    },
     destroy() {
       cleanup.forEach((fn) => fn());
     }
@@ -441,16 +447,6 @@ function CreateRoverRoot({
     __activateLast: () => collection.activateLast(),
     __searchUsingQuery: (query) => collection.search(query),
     __getKeyByIndex: (index) => collection.getKeyByIndex(index),
-    __onOpenCallback: () => {
-    },
-    __onOpen(callback) {
-      this.__onOpenCallback = callback;
-    },
-    __onCloseCallback: () => {
-    },
-    __onClose(callback) {
-      this.__onCloseCallback = callback;
-    },
     init() {
       this.$el.dataset.slot = SLOT_NAME2;
       this.__setupManagers();
@@ -585,9 +581,6 @@ var rover = (el) => {
     },
     get options() {
       return data.__optionsManager;
-    },
-    get all() {
-      return data.__optionsEls;
     },
     activate(key) {
       data.collection.activate(key);

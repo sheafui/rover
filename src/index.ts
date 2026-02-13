@@ -61,7 +61,7 @@ export default function rover(Alpine: Alpine): void {
     ) {
         // the only reliable and reactive (I found) way to merge underneath datastack in alpine at this point
         // we can use the `addScopeToNode` utility, but it won't be reactive, 
-        // and also need the interception features wich is not a public API
+        // and also need the interception features wich is not a public API yet
         Alpine.bind(el, {
             'x-data'() {
                 return {

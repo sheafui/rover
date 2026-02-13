@@ -65,6 +65,15 @@ export function createOptionsManager(root: RoverRootContext): OptionsManager {
                 }
             });
         },
+
+        // @ts-ignore
+        get all() {
+            let allOptions = root.__optionsEls;
+            
+            if (!allOptions) return []
+
+            return allOptions;
+        },
         destroy() {
             cleanup.forEach(fn => fn());
         }
