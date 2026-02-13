@@ -341,12 +341,6 @@ function CreateRoverRoot({
     __onClose(callback) {
       this.__onCloseCallback = callback;
     },
-    onkeydown: (handler) => {
-      this.$root.addEventListener("keydown", (event) => {
-        const activeKey = this.__activatedKey || null;
-        handler(event, activeKey);
-      });
-    },
     init() {
       this.$el.dataset.slot = SLOT_NAME2;
       this.__inputManager = createInputManager(this);
@@ -558,6 +552,15 @@ function CreateRoverRoot({
               break;
             }
             this.__activatePrev();
+            break;
+          case "Escape":
+            e.preventDefault();
+            e.stopPropagation();
+            this.__close();
+            this.$nextTick(() => {
+              var _a, _b;
+              return (_b = (_a = this.$refs) == null ? void 0 : _a.__input) == null ? void 0 : _b.focus({preventScroll: true});
+            });
             break;
           default:
             break;

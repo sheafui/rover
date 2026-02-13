@@ -6,7 +6,7 @@ import { SLOT_NAME as OPTION_SLOT_NAME } from "./CreateRoverOption";
 import { createInputManager } from "src/InputManager";
 
 export default function CreateRoverRoot(
-    { 
+    {
         // el,
         effect
     }: {
@@ -24,7 +24,7 @@ export default function CreateRoverRoot(
         // cache
         __optionsEls: undefined,
         __groupsEls: undefined,
-        
+
         // states
         __isOpen: false,
         __isTyping: false,
@@ -66,12 +66,6 @@ export default function CreateRoverRoot(
         __onCloseCallback: () => { },
         __onClose(callback: () => void) {
             this.__onCloseCallback = callback;
-        },
-        onkeydown: (handler: (event: KeyboardEvent, key: string | null) => void) => {
-            this.$root.addEventListener('keydown', (event: KeyboardEvent) => {
-                const activeKey = this.__activatedKey || null;
-                handler(event, activeKey);
-            });
         },
         init() {
             this.$el.dataset.slot = SLOT_NAME;
@@ -407,6 +401,13 @@ export default function CreateRoverRoot(
                         }
 
                         this.__activatePrev();
+                        break;
+                    case 'Escape':
+                        e.preventDefault(); e.stopPropagation();
+                        
+                        this.__close();
+
+                        this.$nextTick(() => this.$refs?.__input?.focus({ preventScroll: true }))
                         break;
                     default:
                         break;

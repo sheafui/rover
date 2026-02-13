@@ -44,14 +44,16 @@
                 </button>
             </div>
 
-            <ul x-rover:options x-cloak
+            <ul 
+                x-rover:options 
+                x-cloak
                 class="mt-1 max-h-60  w-full rounded-md border border-neutral-700 bg-white/5 text-white overflow-auto shadow-lg focus:outline-none">
                 <li class="py-4 text-center" x-rover:empty>
                     No result found
                 </li>
 
                 <template x-for="(item, index) in items" x-bind:key="index">
-                    <li x-on:click="console.log('clicked', $rover.isOpen)" x-rover:option="item" x-text="item"
+                    <li x-on:click="handleSelection($el.dataset.key)" x-rover:option="item" x-text="item"
                         class="px-4 data-active:bg-white/5 py-2">
                     </li>
                 </template>
@@ -64,18 +66,20 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('selectComponent', () => ({
             state: null,
+            isMultiple: false,
             items: ['tenjarine', 'apple', 'banana', 'cherry', 'orange', 'mango', 'grape'],
             selectedKeys: null,
 
             init() {
                 this.$rover.onOpen(() => this.activateSelectedOrFirst());
 
-                // interact with input events using rover
                 this.$rover.input.on('keydown', (event, activeKey) => {
                     if (event.key === 'Enter') {
                         this.handleSelection(activeKey);
+                        
                         this.__stopTyping()
-                        if (!this.__isMultiple) {
+                        
+                        if (!this.isMultiple) {
                             this.__close()
                             this.__resetInput()
                         }
@@ -95,7 +99,7 @@
 
                 let value = this.__getValueByKey(key);
 
-                if (!this.__isMultiple) {
+                if (!this.isMultiple) {
                     this.selectedKeys = key;
 
                     if (this.state === value) {
@@ -144,7 +148,7 @@
                 if (activeItem) return;
 
                 if (activateSelected && this.selectedKeys) {
-                    const keyToActivate = this.__isMultiple
+                    const keyToActivate = this.isMultiple
                         ? this.selectedKeys[0]
                         : this.selectedKeys;
 
@@ -154,7 +158,6 @@
                     }
                 }
 
-                console.log(this.$rover.input.value);
                 this.$rover.activateFirst();
             },
         }))

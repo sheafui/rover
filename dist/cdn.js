@@ -323,12 +323,6 @@
       __onClose(callback) {
         this.__onCloseCallback = callback;
       },
-      onkeydown: (handler) => {
-        this.$root.addEventListener("keydown", (event) => {
-          const activeKey = this.__activatedKey || null;
-          handler(event, activeKey);
-        });
-      },
       init() {
         this.$el.dataset.slot = SLOT_NAME2;
         this.__inputManager = createInputManager(this);
@@ -536,6 +530,12 @@
                 break;
               }
               this.__activatePrev();
+              break;
+            case "Escape":
+              e.preventDefault();
+              e.stopPropagation();
+              this.__close();
+              this.$nextTick(() => this.$refs?.__input?.focus({preventScroll: true}));
               break;
             default:
               break;
