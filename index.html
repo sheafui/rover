@@ -68,6 +68,8 @@
                 inputManager.on('keydown', (event, activeKey) => {
                     if (event.key === 'Enter' && activeKey !== undefined) {
                         this.handleSelection(activeKey);
+                        
+                       this.isMultiple || this.close();
                     }
 
                     if (event.key === "ArrowUp" || event.key === "ArrowDown") {
@@ -85,12 +87,14 @@
                 optionsManager.on('click', (event, closestOption, activeKey) => {
                     if (closestOption !== undefined) {
                         this.handleSelection(closestOption.dataset.key);
+                        this.close();
                     }
                 });
             },
 
             open() {
                 this.isOpen = true;
+                // this.activateSelectedOrFirst();
             },
 
             close() {

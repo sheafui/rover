@@ -6,8 +6,6 @@ export const SLOT_NAME = 'rover-option';
 export default function CreateRoverOption(Alpine: AlpineType, id: number, dirValue: string | null): RoverOptionData {
     return {
         __uniqueKey: 'option-' + id,
-        __isVisible: true,
-
         init(this: RoverOptionContext) {
             // Setup
             this.$el.dataset.slot = SLOT_NAME;

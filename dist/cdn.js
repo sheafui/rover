@@ -4,7 +4,6 @@
   function CreateRoverOption(Alpine2, id, dirValue) {
     return {
       __uniqueKey: "option-" + id,
-      __isVisible: true,
       init() {
         this.$el.dataset.slot = SLOT_NAME;
         this.$el.dataset.key = this.__uniqueKey;
