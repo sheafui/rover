@@ -8,7 +8,6 @@ export default function CreateRoverOption(Alpine: AlpineType, id: number, dirVal
             // Setup
             this.$el.dataset.key = this.__uniqueKey;
 
-
             let value;
 
             if (dirValue !== null) {
