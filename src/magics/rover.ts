@@ -24,8 +24,6 @@ export const rover = (el: ElementWithXAttributes) => {
             return data.__buttonManager;
         },
 
-
-
         activate(key: string) {
             data.collection.activate(key)
         },
