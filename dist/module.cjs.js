@@ -23,6 +23,9 @@ function CreateRoverOption(Alpine2, id, dirValue) {
       } else {
         value = Alpine2.extractProp(this.$el, "value", "");
       }
+      if (Object.hasOwn(this.$el.dataset, "key")) {
+        this.$el.dataset.key = this.__uniqueKey;
+      }
       let disabled = Alpine2.extractProp(this.$el, "disabled", false, false);
       this.$el.dataset.value = value;
       this.__add(this.__uniqueKey, value, disabled);
