@@ -1,6 +1,6 @@
 (() => {
   // src/factories/CreateRoverOption.ts
-  function CreateRoverOption(Alpine2, id, dirValue) {
+  function CreateRoverOption(Alpine2, id) {
     return {
       __uniqueKey: "option-" + id,
       init() {
@@ -424,7 +424,7 @@
     const collection = new RoverCollection_default();
     const SLOT_NAME = "rover-root";
     return {
-      collection,
+      __collection: collection,
       __optionsEls: void 0,
       __groupsEls: void 0,
       __isOpen: false,
@@ -439,7 +439,7 @@
       __activatedKey: void 0,
       __selectedKeys: void 0,
       __items: [],
-      __searchQuery: "",
+      _x__searchQuery: "",
       __filteredKeys: null,
       __filteredKeysSet: new Set(),
       __inputManager: void 0,
@@ -469,8 +469,8 @@
           this.__activatedKey = this.__getKeyByIndex(collection.activeIndex.value);
         });
         effect(() => {
-          if (String(this.__searchQuery).length > 0) {
-            let results = this.__searchUsingQuery(this.__searchQuery).map((result) => result.key);
+          if (String(this._x__searchQuery).length > 0) {
+            let results = this.__searchUsingQuery(this._x__searchQuery).map((result) => result.key);
             if (results.length >= 0) {
               this.__filteredKeys = results;
             }
@@ -584,7 +584,7 @@
     let data = Alpine.$data(el);
     return {
       get collection() {
-        return data.collection;
+        return data.__collection;
       },
       get input() {
         return data.__inputManager;
@@ -599,34 +599,34 @@
         return data.__buttonManager;
       },
       activate(key) {
-        data.collection.activate(key);
+        data.__collection.activate(key);
       },
       deactivate() {
-        data.collection.deactivate();
+        data.__collection.deactivate();
       },
       getValueByKey(key) {
-        return data.collection.getValueByKey(key);
+        return data.__collection.getValueByKey(key);
       },
       getActiveItem() {
-        return data.collection.getActiveItem();
+        return data.__collection.getActiveItem();
       },
       activateNext() {
-        data.collection.activateNext();
+        data.__collection.activateNext();
       },
       activatePrev() {
-        data.collection.activatePrev();
+        data.__collection.activatePrev();
       },
       activateFirst() {
-        data.collection.activateFirst();
+        data.__collection.activateFirst();
       },
       activateLast() {
-        data.collection.activateLast();
+        data.__collection.activateLast();
       },
       searchUsing(query) {
-        return data.collection.search(query);
+        return data.__collection.search(query);
       },
       getKeyByIndex(index) {
-        return data.collection.getKeyByIndex(index);
+        return data.__collection.getKeyByIndex(index);
       }
     };
   };
@@ -634,34 +634,34 @@
   // src/magics/roverOption.ts
   var roverOption = (dataStack) => ({
     activate(key) {
-      dataStack.collection.activate(key);
+      dataStack.__collection.activate(key);
     },
     deactivate() {
-      dataStack.collection.deactivate();
+      dataStack.__collection.deactivate();
     },
     getValueByKey(key) {
-      return dataStack.collection.getValueByKey(key);
+      return dataStack.__collection.getValueByKey(key);
     },
     getActiveItem() {
-      return dataStack.collection.getActiveItem();
+      return dataStack.__collection.getActiveItem();
     },
     activateNext() {
-      dataStack.collection.activateNext();
+      dataStack.__collection.activateNext();
     },
     activatePrev() {
-      dataStack.collection.activatePrev();
+      dataStack.__collection.activatePrev();
     },
     activateFirst() {
-      dataStack.collection.activateFirst();
+      dataStack.__collection.activateFirst();
     },
     activateLast() {
-      dataStack.collection.activateLast();
+      dataStack.__collection.activateLast();
     },
     searchUsing(query) {
-      return dataStack.collection.search(query);
+      return dataStack.__collection.search(query);
     },
     getKeyByIndex(index) {
-      return dataStack.collection.getKeyByIndex(index);
+      return dataStack.__collection.getKeyByIndex(index);
     }
   });
 
@@ -707,7 +707,7 @@
 
   // src/index.ts
   function rover2(Alpine2) {
-    Alpine2.directive("rover", (el, {value, modifiers, expression}, {Alpine: Alpine3, effect, evaluate}) => {
+    Alpine2.directive("rover", (el, {value, modifiers}, {Alpine: Alpine3, effect}) => {
       switch (value) {
         case null:
           handleRoot(Alpine3, el, effect);
@@ -722,7 +722,7 @@
           handleOptions(el);
           break;
         case "option":
-          handleOption(Alpine3, el, expression, evaluate);
+          handleOption(Alpine3, el);
           break;
         case "group":
           handleOptionsGroup(Alpine3, el);
@@ -753,8 +753,8 @@
     }
     function handleInput(Alpine3, el) {
       Alpine3.bind(el, {
-        "x-ref": "__input",
-        "x-model": "__searchQuery",
+        "x-ref": "_x__input",
+        "x-model": "_x__searchQuery",
         "x-bind:id"() {
           return this.$id("rover-input");
         },
@@ -777,7 +777,7 @@
         }
       });
     }
-    function handleOption(Alpine3, el, expression, evaluate) {
+    function handleOption(Alpine3, el) {
       Alpine3.bind(el, {
         "x-id"() {
           return ["rover-option"];
@@ -787,12 +787,7 @@
         },
         role: "option",
         "x-data"() {
-          let value = null;
-          ;
-          if (expression !== "") {
-            value = evaluate(expression);
-          }
-          return CreateRoverOption(Alpine3, this.__nextOptionId(), value);
+          return CreateRoverOption(Alpine3, this.__nextOptionId());
         }
       });
     }

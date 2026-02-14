@@ -21,10 +21,9 @@ export default function rover(Alpine: Alpine): void {
 
     Alpine.directive('rover', (
         el: AlpineType.ElementWithXAttributes,
-        { value, modifiers, expression }: AlpineType.DirectiveData,
-        { Alpine, effect, evaluate }: AlpineType.DirectiveUtilities
+        { value, modifiers }: AlpineType.DirectiveData,
+        { Alpine, effect }: AlpineType.DirectiveUtilities
     ) => {
-
         switch (value as RoverValue) {
             case null: handleRoot(Alpine, el, effect);
                 break;
@@ -34,7 +33,7 @@ export default function rover(Alpine: Alpine): void {
                 break;
             case 'options': handleOptions(el);
                 break;
-            case 'option': handleOption(Alpine, el, expression, evaluate);
+            case 'option': handleOption(Alpine, el);
                 break;
             case 'group': handleOptionsGroup(Alpine, el);
                 break;
@@ -52,7 +51,6 @@ export default function rover(Alpine: Alpine): void {
 
     // magics registration
     registerMagics(Alpine);
-
 
     function handleRoot(
         Alpine: Alpine,
@@ -76,8 +74,8 @@ export default function rover(Alpine: Alpine): void {
         el: AlpineType.ElementWithXAttributes
     ): void {
         Alpine.bind(el, {
-            'x-ref': '__input',
-            'x-model': '__searchQuery',
+            'x-ref': '_x__input',
+            'x-model': '_x__searchQuery',
             'x-bind:id'() { return this.$id('rover-input') },
             'role': 'combobox',
             'tabindex': '0',
@@ -101,23 +99,13 @@ export default function rover(Alpine: Alpine): void {
     function handleOption(
         Alpine: Alpine,
         el: AlpineType.ElementWithXAttributes,
-        expression: AlpineType.DirectiveData['expression'],
-        evaluate: AlpineType.DirectiveUtilities['evaluate']
     ) {
         Alpine.bind(el, {
             'x-id'() { return ['rover-option'] },
             'x-bind:id'() { return this.$id('rover-option') },
             'role': 'option',
             'x-data'(this: RoverOptionContext) {
-                let value: string | null = null;
-
-;
-                
-                if (expression !== '') {
-                    value = evaluate(expression)
-                }
-
-                return CreateRoverOption(Alpine, this.__nextOptionId(), value);
+                return CreateRoverOption(Alpine, this.__nextOptionId());
             },
         });
     }

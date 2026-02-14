@@ -22,7 +22,7 @@ export default function CreateRoverRoot(
     const SLOT_NAME = 'rover-root';
 
     return {
-        collection,
+        __collection: collection,
         // cache
         __optionsEls: undefined,
         __groupsEls: undefined,
@@ -40,7 +40,7 @@ export default function CreateRoverRoot(
         __activatedKey: undefined,
         __selectedKeys: undefined,
         __items: [],
-        __searchQuery: '',
+        _x__searchQuery: '',
         __filteredKeys: null,
         __filteredKeysSet: new Set<string>(),
 
@@ -81,8 +81,8 @@ export default function CreateRoverRoot(
 
             // SEARCH REACTIVITY
             effect(() => {
-                if (String(this.__searchQuery).length > 0) {
-                    let results = this.__searchUsingQuery(this.__searchQuery).map((result: Item) => result.key);
+                if (String(this._x__searchQuery).length > 0) {
+                    let results = this.__searchUsingQuery(this._x__searchQuery).map((result: Item) => result.key);
 
                     if (results.length >= 0) {
                         this.__filteredKeys = results;

@@ -5,7 +5,7 @@ export const rover = (el: ElementWithXAttributes) => {
     let data = Alpine.$data(el) as RoverRootContext;
     return {
         get collection() {
-            return data.collection;
+            return data.__collection;
         },
 
         get input(): InputManager | undefined {
@@ -25,34 +25,34 @@ export const rover = (el: ElementWithXAttributes) => {
         },
 
         activate(key: string) {
-            data.collection.activate(key)
+            data.__collection.activate(key)
         },
         deactivate() {
-            data.collection.deactivate()
+            data.__collection.deactivate()
         },
         getValueByKey(key: string) {
-            return data.collection.getValueByKey(key)
+            return data.__collection.getValueByKey(key)
         },
         getActiveItem() {
-            return data.collection.getActiveItem()
+            return data.__collection.getActiveItem()
         },
         activateNext() {
-            data.collection.activateNext()
+            data.__collection.activateNext()
         },
         activatePrev() {
-            data.collection.activatePrev()
+            data.__collection.activatePrev()
         },
         activateFirst() {
-            data.collection.activateFirst()
+            data.__collection.activateFirst()
         },
         activateLast() {
-            data.collection.activateLast()
+            data.__collection.activateLast()
         },
         searchUsing(query: string): Item[] {
-            return data.collection.search(query)
+            return data.__collection.search(query)
         },
         getKeyByIndex(index: number | null | undefined): string | null {
-            return data.collection.getKeyByIndex(index)
+            return data.__collection.getKeyByIndex(index)
         }
     }
 }
