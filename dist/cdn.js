@@ -6,16 +6,11 @@
       init() {
         this.$el.dataset.key = this.__uniqueKey;
         let value;
-        if (dirValue !== null) {
-          value = dirValue;
-        } else {
-          value = Alpine2.extractProp(this.$el, "value", "");
-        }
+        value = Alpine2.extractProp(this.$el, "value", "");
         if (Object.hasOwn(this.$el.dataset, "key")) {
           this.$el.dataset.key = this.__uniqueKey;
         }
         let disabled = Alpine2.extractProp(this.$el, "disabled", false, false);
-        this.$el.dataset.value = value;
         this.__add(this.__uniqueKey, value, disabled);
         this.__pushOptionToItems(String(id));
         this.$nextTick(() => {
@@ -793,6 +788,7 @@
         role: "option",
         "x-data"() {
           let value = null;
+          ;
           if (expression !== "") {
             value = evaluate(expression);
           }

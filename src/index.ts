@@ -1,4 +1,4 @@
-import { extractProp, type Alpine } from "alpinejs";
+import type { Alpine } from "alpinejs";
 import type { default as AlpineType } from "alpinejs";
 import CreateRoverOption from "./factories/CreateRoverOption";
 import CreateRoverRoot from "./factories/CreateRoverRoot";
@@ -111,7 +111,7 @@ export default function rover(Alpine: Alpine): void {
             'x-data'(this: RoverOptionContext) {
                 let value: string | null = null;
 
-                console.log(Alpine.extractProp(el, 'value', ''));
+;
                 
                 if (expression !== '') {
                     value = evaluate(expression)

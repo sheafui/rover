@@ -10,11 +10,13 @@ export default function CreateRoverOption(Alpine: AlpineType, id: number, dirVal
 
             let value;
 
-            if (dirValue !== null) {
-                value = dirValue;
-            } else {
-                value = Alpine.extractProp(this.$el, 'value', '') as string;
-            }
+            value = Alpine.extractProp(this.$el, 'value', '') as string;
+
+            // if (dirValue !== null) {
+            //     value = dirValue;
+            // } else {
+            //     value = Alpine.extractProp(this.$el, 'value', '') as string;
+            // }
 
             if (Object.hasOwn(this.$el.dataset, 'key')) {
                 this.$el.dataset.key = this.__uniqueKey;
@@ -22,7 +24,7 @@ export default function CreateRoverOption(Alpine: AlpineType, id: number, dirVal
 
             let disabled = Alpine.extractProp(this.$el, 'disabled', false, false) as boolean;
 
-            this.$el.dataset.value = value;
+            // this.$el.dataset.value = value;
 
             // Add to collection
             this.__add(this.__uniqueKey, value, disabled);

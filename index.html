@@ -44,7 +44,7 @@
 
                 <template x-for="(item, index) in items" x-bind:key="index">
                     <li 
-                        x-rover:option="item" 
+                        x-rover:option 
                         data-key=""
                         x-bind:value="item"
                         x-text="item.toUpperCase()"
