@@ -76,10 +76,6 @@
                 inputManager.enableDefaultInputHandlers();
                 optionsManager.enableDefaultOptionsHandlers();
 
-                this.$watch('selected', (val) => {
-                    console.log('Selected:', val);
-                });
-
                 inputManager.on('keydown', (event, activeValue) => {
                     if (event.key === 'Enter' && activeValue !== undefined) {
                         this.handleSelection(activeValue);

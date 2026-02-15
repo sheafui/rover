@@ -424,10 +424,6 @@ function CreateRoverRoot({
         this.__isLoading = collection.pending.state;
       });
       effect(() => {
-        const activeItem = this.__getByIndex(collection.activeIndex.value);
-        this.__activatedValue = activeItem?.value;
-      });
-      effect(() => {
         if (String(this._x__searchQuery).length > 0) {
           let results = this.__searchUsingQuery(this._x__searchQuery).map((result) => result.value);
           if (results.length >= 0) {
@@ -452,7 +448,8 @@ function CreateRoverRoot({
             this.__optionIndex.set(v, el);
         });
         effect(() => {
-          const activeValue = this.__activatedValue;
+          const activeItem = this.__getByIndex(collection.activeIndex.value);
+          const activeValue = this.__activatedValue = activeItem?.value;
           const visibleValues = this.__filteredValues ? new Set(this.__filteredValues) : null;
           requestAnimationFrame(() => {
             const s0 = performance.now();
@@ -476,6 +473,7 @@ function CreateRoverRoot({
               }
             });
             console.log(performance.now() - s0);
+            this.__prevActivatedValue = activeValue;
           });
         });
       });

@@ -69,12 +69,6 @@ export default function CreateRoverRoot(
                 this.__isLoading = collection.pending.state;
             });
 
-            // SYNC ACTIVATED VALUE
-            effect(() => {
-                const activeItem = this.__getByIndex(collection.activeIndex.value);
-                this.__activatedValue = activeItem?.value;
-            });
-
             // SEARCH REACTIVITY
             effect(() => {
                 if (String(this._x__searchQuery).length > 0) {
@@ -103,8 +97,8 @@ export default function CreateRoverRoot(
                 this.__optionsEls = Array.from(
                     this.$el.querySelectorAll('[x-rover\\:option]')
                 ) as Array<HTMLElement>;
-                
-                // opt: will add intial overhead but make long interaction smoother
+
+                // opt: will add intial overhead but make long interaction smoothers
                 this.__optionIndex = new Map();
                 this.__optionsEls.forEach((el: HTMLElement) => {
                     const v = el.dataset.value;
@@ -117,7 +111,10 @@ export default function CreateRoverRoot(
 
                 // HANDLING INDIVIDUAL OPTION VISIBILITY AND ACTIVE STATE 
                 effect(() => {
-                    const activeValue = this.__activatedValue;
+                    const activeItem = this.__getByIndex(collection.activeIndex.value);
+
+                    const activeValue = this.__activatedValue = activeItem?.value;
+
                     const visibleValues = this.__filteredValues ? new Set(this.__filteredValues) : null;
 
                     // Batch all DOM updates
@@ -168,6 +165,7 @@ export default function CreateRoverRoot(
                         //     });
                         //     group.hidden = !hasVisibleOption;
                         // });
+                        this.__prevActivatedValue = activeValue;
                     });
                 });
             });
