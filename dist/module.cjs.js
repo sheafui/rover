@@ -501,6 +501,7 @@ function CreateRoverRoot({
                 const value = htmlOpt.dataset.value;
                 return visibleValues ? visibleValues.has(value || "") : true;
               });
+              edada;
               group.hidden = !hasVisibleOption;
             });
           });
