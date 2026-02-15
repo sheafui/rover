@@ -60,12 +60,13 @@
                 'grape'
             ],
             selected: 'mango',
+            count:1000,
             _previousSelected: undefined,
 
             init() {
-                if (this.count && 1000 > this.items.length) {
+                if (this.count && this.count> this.items.length) {
                     const base = [...this.items]
-                    this.items = Array.from({ length: 1000 }, (_, i) => {
+                    this.items = Array.from({ length: this.count }, (_, i) => {
                         return base[i % base.length] + '-' + i
                     })
                 }

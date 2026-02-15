@@ -34,11 +34,12 @@ export default function CreateRoverRoot(
         __static: false,
         __keepActivated: true,
         __optionsEl: undefined,
+        __prevActivatedValue: undefined, // it's purpose is part of the activation optimizer
         __activatedValue: undefined,
         __items: [],
         _x__searchQuery: '',
-        __filteredValues: null,  
-        __filteredValuesSet: new Set<string>(),  
+        __filteredValues: null,
+        __filteredValuesSet: new Set<string>(),
         // rover managers 
         __inputManager: undefined,
         __optionsManager: undefined,
@@ -56,8 +57,8 @@ export default function CreateRoverRoot(
         __activateFirst: () => collection.activateFirst(),
         __activateLast: () => collection.activateLast(),
         __searchUsingQuery: (query: string) => collection.search(query),
-        __getByIndex: (index: number | null | undefined) => collection.getByIndex(index), 
-        
+        __getByIndex: (index: number | null | undefined) => collection.getByIndex(index),
+
         init() {
             this.$el.dataset.slot = SLOT_NAME;
 
@@ -71,7 +72,7 @@ export default function CreateRoverRoot(
             // SYNC ACTIVATED VALUE
             effect(() => {
                 const activeItem = this.__getByIndex(collection.activeIndex.value);
-                this.__activatedValue = activeItem?.value;  
+                this.__activatedValue = activeItem?.value;
             });
 
             // SEARCH REACTIVITY
@@ -96,14 +97,23 @@ export default function CreateRoverRoot(
                 }
             });
 
+            // has two purpose, wait in case of `x-for`, don't overload the initial process 
+            // and defer processing this bit to the next steps
             this.$nextTick(() => {
                 this.__optionsEls = Array.from(
                     this.$el.querySelectorAll('[x-rover\\:option]')
                 ) as Array<HTMLElement>;
+                
+                // opt: will add intial overhead but make long interaction smoother
+                this.__optionIndex = new Map();
+                this.__optionsEls.forEach((el: HTMLElement) => {
+                    const v = el.dataset.value;
+                    if (v) this.__optionIndex.set(v, el);
+                });
 
-                this.__groupsEls = Array.from(
-                    this.$el.querySelectorAll('[x-rover\\:group]')
-                ) as Array<HTMLElement>;
+                // this.__groupsEls = Array.from(
+                //     this.$el.querySelectorAll('[x-rover\\:group]')
+                // ) as Array<HTMLElement>;
 
                 // HANDLING INDIVIDUAL OPTION VISIBILITY AND ACTIVE STATE 
                 effect(() => {
@@ -112,10 +122,11 @@ export default function CreateRoverRoot(
 
                     // Batch all DOM updates
                     requestAnimationFrame(() => {
+                        const s0 = performance.now();
                         const options = this.__optionsEls;
 
                         options.forEach((opt: HTMLElement) => {
-                            const value = opt.dataset.value;  
+                            const value = opt.dataset.value;
 
                             if (!value) return;
 
@@ -137,6 +148,8 @@ export default function CreateRoverRoot(
                             }
                         });
 
+                        console.log(performance.now() - s0);
+
                         // @TODO 
                         // Handle groups visibility based on visible options
                         // const groups = this.__groupsEls;
@@ -148,7 +161,7 @@ export default function CreateRoverRoot(
                         //     const hasVisibleOption = Array.from(options).some((opt: Element) => {
                         //         const htmlOpt = opt as HTMLElement;
                         //         const value = htmlOpt.dataset.value;
-                                
+
                         //         return visibleValues
                         //             ? visibleValues.has(value || '')
                         //             : true;

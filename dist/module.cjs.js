@@ -419,6 +419,7 @@ function CreateRoverRoot({
     __static: false,
     __keepActivated: true,
     __optionsEl: void 0,
+    __prevActivatedValue: void 0,
     __activatedValue: void 0,
     __items: [],
     _x__searchQuery: "",
@@ -468,11 +469,17 @@ function CreateRoverRoot({
       });
       this.$nextTick(() => {
         this.__optionsEls = Array.from(this.$el.querySelectorAll("[x-rover\\:option]"));
-        this.__groupsEls = Array.from(this.$el.querySelectorAll("[x-rover\\:group]"));
+        this.__optionIndex = new Map();
+        this.__optionsEls.forEach((el) => {
+          const v = el.dataset.value;
+          if (v)
+            this.__optionIndex.set(v, el);
+        });
         effect(() => {
           const activeValue = this.__activatedValue;
           const visibleValues = this.__filteredValues ? new Set(this.__filteredValues) : null;
           requestAnimationFrame(() => {
+            const s0 = performance.now();
             const options = this.__optionsEls;
             options.forEach((opt) => {
               const value = opt.dataset.value;
@@ -492,6 +499,7 @@ function CreateRoverRoot({
                 opt.removeAttribute("aria-current");
               }
             });
+            console.log(performance.now() - s0);
           });
         });
       });
@@ -778,7 +786,7 @@ function rover2(Alpine2) {
       tabindex: "-1",
       "aria-haspopup": "true",
       "x-show"() {
-        return Array.isArray(this.__filteredKeys) && this.__filteredKeys.length === 0 && this._x__searchQuery.length > 0;
+        return Array.isArray(this.__filteredValues) && this.__filteredValues.length === 0 && this._x__searchQuery.length > 0;
       }
     });
   }

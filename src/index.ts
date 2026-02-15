@@ -143,7 +143,7 @@ export default function rover(Alpine: Alpine): void {
             'tabindex': '-1',
             'aria-haspopup': 'true',
             'x-show'() {
-                return Array.isArray(this.__filteredKeys) && this.__filteredKeys.length === 0 && this._x__searchQuery.length > 0;
+                return Array.isArray(this.__filteredValues) && this.__filteredValues.length === 0 && this._x__searchQuery.length > 0;
             }
         });
     }
