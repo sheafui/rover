@@ -17,10 +17,9 @@ export function createButtonManager(root: RoverRootContext): ButtonManager {
             if (!buttonEl) return;
 
             const listener = (event: HTMLElementEventMap[K]) => {
-                const activeKey = root.__activatedKey ?? undefined;
-
-                handler(event, activeKey);
+                handler(event, root.__activatedValue ?? undefined);
             };
+
             bindListener(buttonEl, eventKey, listener, this.controller);
         },
 

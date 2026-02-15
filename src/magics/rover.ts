@@ -30,9 +30,6 @@ export const rover = (el: ElementWithXAttributes) => {
         deactivate() {
             data.__collection.deactivate()
         },
-        getValueByKey(key: string) {
-            return data.__collection.getValueByKey(key)
-        },
         getActiveItem() {
             return data.__collection.getActiveItem()
         },
@@ -51,8 +48,5 @@ export const rover = (el: ElementWithXAttributes) => {
         searchUsing(query: string): Item[] {
             return data.__collection.search(query)
         },
-        getKeyByIndex(index: number | null | undefined): string | null {
-            return data.__collection.getKeyByIndex(index)
-        }
     }
 }

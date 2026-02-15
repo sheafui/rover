@@ -1,30 +1,19 @@
 import type { Alpine as AlpineType } from 'alpinejs';
 import { RoverOptionData, RoverOptionContext } from 'src/types';
 
-export default function CreateRoverOption(Alpine: AlpineType, id: number): RoverOptionData {
+export default function CreateRoverOption(Alpine: AlpineType): RoverOptionData {
     return {
-        __uniqueKey: 'option-' + id,
         init(this: RoverOptionContext) {
-            // Setup
-            this.$el.dataset.key = this.__uniqueKey;
-
-            let value;
-
-            value = Alpine.extractProp(this.$el, 'value', '') as string;
-
-            if (Object.hasOwn(this.$el.dataset, 'key')) {
-                this.$el.dataset.key = this.__uniqueKey;
-            }
 
             let disabled = Alpine.extractProp(this.$el, 'disabled', false, false) as boolean;
 
-            // this.$el.dataset.value = value;
+            let value = Alpine.extractProp(this.$el, 'value', '') as string;
+            
+            this.$el.dataset.value = value;
 
             // Add to collection
-            this.__add(this.__uniqueKey, value, disabled);
-            this.__pushOptionToItems(String(id));
+            this.__add(value, disabled);
 
-            // Set disabled attribute if needed
             this.$nextTick((): void => {
                 if (disabled) {
                     this.$el.setAttribute('tabindex', '-1');

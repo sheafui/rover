@@ -20,21 +20,19 @@ export function createInputManager(
             if (!inputEl) return;
 
             const listener = (event: HTMLElementEventMap[K]) => {
-                const activeKey = rootDataStack.__activatedKey ?? undefined;
-                handler(event, activeKey);
+                handler(event, rootDataStack.__activatedValue ?? undefined);
             };
 
             bindListener(inputEl, eventKey, listener, this.controller);
         },
 
         get value(): string {
-            return inputEl ? inputEl.value : "";
+            return inputEl ? inputEl.value : '';
         },
 
         set value(val: string) {
             if (inputEl) inputEl.value = val;
         },
-
 
         enableDefaultInputHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'> = []) {
             if (!inputEl) return;

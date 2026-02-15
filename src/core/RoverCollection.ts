@@ -1,13 +1,10 @@
-import type { Item, Options, Pending, ActiveIndex, SearchIndex } from "src/types";
-
+import type { Item, Options, Pending, ActiveIndex } from "src/types";
 
 export default class RoverCollection {
 
     private items: Array<Item> = [];
-    private itemsMap = new Map<string, Item>();
 
     // Search state
-    private searchIndex: SearchIndex[] = [];
     private currentQuery = '';
     private currentResults: Array<Item> = [];
 
@@ -33,28 +30,17 @@ export default class RoverCollection {
      * Collection Management
      * ------------------------------------- */
 
-    public getMap() {
-        return this.itemsMap;
-    }
-
-    public add(key: string, value: string, disabled = false): void {
-        if (this.itemsMap.has(key)) return;
-
-        const item = { key, value, disabled };
-
+    public add(value: string, disabled = false): void {
+        const item = { value, disabled };
         this.items.push(item);
-        this.itemsMap.set(key, item);
-
         this.invalidate();
     }
 
-    public forget(key: string): void {
-        const item = this.itemsMap.get(key);
-        if (!item) return;
+    public forget(value: string): void {
+        const index = this.items.findIndex(item => item.value === value);
 
-        const index = this.items.indexOf(item);
+        if (index === -1) return;
 
-        this.itemsMap.delete(key);
         this.items.splice(index, 1);
 
         // Update active index if necessary
@@ -76,33 +62,22 @@ export default class RoverCollection {
         this.needsReindex = true;
         this.currentQuery = '';
         this.currentResults = [];
-        this.scheduleBatch();
+        this.scheduleBatchAsANextMicroTask();
     }
 
-    private scheduleBatch(): void {
+    private scheduleBatchAsANextMicroTask(): void {
         if (this.isProcessing) return;
 
         this.isProcessing = true;
         this.pending.state = true;
 
         queueMicrotask(() => {
-            this.rebuildSearchIndex();
             this.rebuildNavIndex();
             this.isProcessing = false;
             this.pending.state = false;
         });
     }
 
-    private rebuildSearchIndex(): void {
-        if (!this.needsReindex) return;
-
-        this.searchIndex = this.items.map((item) => ({
-            key: item.key,
-            value: String(item.value).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        }));
-
-        this.needsReindex = false;
-    }
 
     private rebuildNavIndex(): void {
         this.navIndex = [];
@@ -126,42 +101,44 @@ export default class RoverCollection {
      * ------------------------------------- */
 
     public search(query: string): Item[] {
-        // Clear search
-        if (!query) {
+        if (query === '') {
             this.currentQuery = '';
             this.currentResults = [];
             this.rebuildNavIndex();
             return this.items;
         }
 
-        const q = query.toLowerCase();
+        const normalized = query
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
 
         // Incremental search optimization
-        if (this.currentQuery && q.startsWith(this.currentQuery) && this.currentResults.length > 0) {
-            const filtered = this.currentResults.filter(item =>
-                String(item.value).toLowerCase().includes(q)
-            );
+        if (this.currentQuery && normalized.startsWith(this.currentQuery) && this.currentResults.length > 0) {
+            const filtered = this.currentResults.filter(item => {
+                const itemNormalized = String(item.value)
+                    .toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '');
+                return itemNormalized.includes(normalized);
+            });
 
-            this.currentQuery = q;
+            this.currentQuery = normalized;
             this.currentResults = filtered;
             this.rebuildNavIndex();
             return filtered;
         }
 
-        // Full search
-        this.rebuildSearchIndex();
+        // Full search - search items directly
+        const results = this.items.filter(item => {
+            const itemNormalized = String(item.value)
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '');
+            return itemNormalized.includes(normalized);
+        });
 
-        const normalized = q.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-        const results: Item[] = [];
-
-        for (const { key, value } of this.searchIndex) {
-            if (value.includes(normalized)) {
-                const item = this.itemsMap.get(key);
-                if (item) results.push(item);
-            }
-        }
-
-        this.currentQuery = q;
+        this.currentQuery = normalized;
         this.currentResults = results;
         this.rebuildNavIndex();
 
@@ -172,17 +149,13 @@ export default class RoverCollection {
      * Queries
      * ------------------------------------- */
 
-    public get(key: string): Item | undefined {
-        return this.itemsMap.get(key);
+    public get(value: string): Item | undefined {
+        return this.items.find(item => item.value === value);
     }
 
-    public getValueByKey(key: string): Item['value'] | undefined {
-        return this.get(key)?.value;
-    }
-
-    public getKeyByIndex(index: number | null | undefined): string | null {
+    public getByIndex(index: number | null | undefined): Item | null {
         if (index == null || index === undefined) return null;
-        return this.items[index]?.key ?? null;
+        return this.items[index] ?? null;
     }
 
     public all(): Item[] {
@@ -197,14 +170,15 @@ export default class RoverCollection {
      * Activation
      * ------------------------------------- */
 
-    public activate(key: string): void {
-        const item = this.get(key);
-        if (!item || item.disabled) return;
+    public activate(value: string): void {
+        const index = this.items.findIndex(item => item.value === value);
+        if (index === -1) return;
 
-        this.rebuildSearchIndex();
+        const item = this.items[index];
+        if (item?.disabled) return;
+
         this.rebuildNavIndex();
 
-        const index = this.items.indexOf(item);
         if (this.activeIndex.value === index) return;
 
         this.activeIndex.value = index;
@@ -216,11 +190,11 @@ export default class RoverCollection {
         this.activeNavPos = -1;
     }
 
-    public isActivated(key: string): boolean {
-        const item = this.get(key);
-        if (!item) return false;
+    public isActivated(value: string): boolean {
+        const index = this.items.findIndex(item => item.value === value);
+        if (index === -1) return false;
 
-        return this.items.indexOf(item) === this.activeIndex.value;
+        return index === this.activeIndex.value;
     }
 
     public getActiveItem(): Item | null {
@@ -233,7 +207,6 @@ export default class RoverCollection {
      * ------------------------------------- */
 
     public activateFirst(): void {
-        this.rebuildSearchIndex();
         this.rebuildNavIndex();
 
         if (!this.navIndex.length) return;
@@ -246,7 +219,6 @@ export default class RoverCollection {
     }
 
     public activateLast(): void {
-        this.rebuildSearchIndex();
         this.rebuildNavIndex();
 
         if (!this.navIndex.length) return;
@@ -260,7 +232,6 @@ export default class RoverCollection {
     }
 
     public activateNext(): void {
-        this.rebuildSearchIndex();
         this.rebuildNavIndex();
 
         if (!this.navIndex.length) return;
@@ -278,7 +249,6 @@ export default class RoverCollection {
     }
 
     public activatePrev(): void {
-        this.rebuildSearchIndex();
         this.rebuildNavIndex();
 
         if (!this.navIndex.length) return;

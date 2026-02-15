@@ -7,9 +7,6 @@ export const roverOption = (dataStack: RoverRootContext) => ({
     deactivate() {
         dataStack.__collection.deactivate()
     },
-    getValueByKey(key: string) {
-        return dataStack.__collection.getValueByKey(key)
-    },
     getActiveItem() {
         return dataStack.__collection.getActiveItem()
     },
@@ -27,8 +24,5 @@ export const roverOption = (dataStack: RoverRootContext) => ({
     },
     searchUsing(query: string): Item[] {
         return dataStack.__collection.search(query)
-    },
-    getKeyByIndex(index: number | null | undefined): string | null {
-        return dataStack.__collection.getKeyByIndex(index)
     }
 })
