@@ -98,8 +98,9 @@ export default function CreateRoverRoot(
                     this.$el.querySelectorAll('[x-rover\\:option]')
                 ) as Array<HTMLElement>;
 
-                // opt: will add intial overhead but make long interaction smoothers
+                // optmizer: will add intial overhead but make long interaction smoothers
                 this.__optionIndex = new Map();
+
                 this.__optionsEls.forEach((el: HTMLElement) => {
                     const v = el.dataset.value;
                     if (v) this.__optionIndex.set(v, el);
@@ -117,8 +118,12 @@ export default function CreateRoverRoot(
 
                     const visibleValues = this.__filteredValues ? new Set(this.__filteredValues) : null;
 
-                    // Batch all DOM updates
+                    // batches all DOM updates to the next repaint.
+                    // This prevents multiple forced reflows when updating thousands of elements.                    
+                    // Removing it causes the browser to recalc styles/layout immediately, massively slowing performance.
+                    // without this, it's 50-100x slower at 1000+ items
                     requestAnimationFrame(() => {
+                        
                         const s0 = performance.now();
                         const options = this.__optionsEls;
 

@@ -60,7 +60,7 @@
                 'grape'
             ],
             selected: 'mango',
-            count:1000,
+            count:2000,
             _previousSelected: undefined,
 
             init() {
@@ -113,6 +113,7 @@
                     );
 
                     const previousSet = this._previousSelected || new Set();
+
                     const toAdd = [...selectedSet].filter(v => !previousSet.has(v));
                     const toRemove = [...previousSet].filter(v => !selectedSet.has(v));
 
@@ -197,8 +198,10 @@
             },
 
             activateSelectedOrFirst(activateSelected = true) {
+                
                 let activeItem = this.$rover.getActiveItem();
-                if (activeItem) return;
+                
+                // if (activeItem) return;
 
                 if (activateSelected && this.selected) {
                     const valueToActivate = this.isMultiple
