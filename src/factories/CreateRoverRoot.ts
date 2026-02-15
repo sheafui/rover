@@ -9,10 +9,8 @@ import { createButtonManager } from "src/Managers/ButtonManager";
 
 export default function CreateRoverRoot(
     {
-        // el,
         effect
     }: {
-        // el: AlpineType.ElementWithXAttributes,
         effect: AlpineType.DirectiveUtilities['effect']
     }
 ): RoverRootData {
@@ -250,6 +248,8 @@ export default function CreateRoverRoot(
 
         destroy() {
             this.__inputManager?.destroy();
+            this.__optionManager?.destroy();
+            this.__optionsManager?.destroy();
         }
     }
 }

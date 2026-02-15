@@ -76,10 +76,10 @@ export default class RoverCollection {
         this.needsReindex = true;
         this.currentQuery = '';
         this.currentResults = [];
-        this.scheduleBatch();
+        this.scheduleBatchAsANextMicroTask();
     }
 
-    private scheduleBatch(): void {
+    private scheduleBatchAsANextMicroTask(): void {
         if (this.isProcessing) return;
 
         this.isProcessing = true;

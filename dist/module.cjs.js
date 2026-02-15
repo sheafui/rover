@@ -84,9 +84,9 @@ var RoverCollection = class {
     this.needsReindex = true;
     this.currentQuery = "";
     this.currentResults = [];
-    this.scheduleBatch();
+    this.scheduleBatchAsANextMicroTask();
   }
-  scheduleBatch() {
+  scheduleBatchAsANextMicroTask() {
     if (this.isProcessing)
       return;
     this.isProcessing = true;
@@ -599,8 +599,10 @@ function CreateRoverRoot({
       return ++this.__s_id;
     },
     destroy() {
-      var _a;
+      var _a, _b, _c;
       (_a = this.__inputManager) == null ? void 0 : _a.destroy();
+      (_b = this.__optionManager) == null ? void 0 : _b.destroy();
+      (_c = this.__optionsManager) == null ? void 0 : _c.destroy();
     }
   };
 }

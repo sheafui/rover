@@ -6,7 +6,6 @@ export interface Options {
 }
 
 export interface Item {
-    key: string,
     value: string,
     disabled: boolean
 }
