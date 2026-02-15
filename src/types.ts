@@ -18,21 +18,20 @@ export type SearchIndex = Omit<Item, 'disabled'>;
 
 export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __collection: RoverCollection;
-    __optionsEls: HTMLElement[] | undefined;  // ✅ Changed from NodeListOf to Array
-    __groupsEls: HTMLElement[] | undefined;   // ✅ Changed from NodeListOf to Array
+    __optionsEls: HTMLElement[] | undefined;  
+    __groupsEls: HTMLElement[] | undefined;   
     __isOpen: boolean;
     __isTyping: boolean;
     __isLoading: boolean;
-    // ✅ Removed __o_id (no option IDs needed)
     __g_id: number;
     __s_id: number;
     __static: boolean;
     __keepActivated: boolean;
     __items: UIItem[];
     __optionsEl: HTMLElement | undefined;
-    __activatedValue: string | null | undefined;  // ✅ Changed from __activatedKey
-    __filteredValues: string[] | null;  // ✅ Changed from __filteredKeys
-    __filteredValuesSet: Set<string>;  // ✅ Changed from __filteredKeysSet
+    __activatedValue: string | null | undefined;  
+    __filteredValues: string[] | null;  
+    __filteredValuesSet: Set<string>; 
     _x__searchQuery: string;
 
     // Managers
@@ -42,13 +41,13 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __buttonManager: ButtonManager | undefined;
 
     // Methods
-    __add: (value: string, disabled: boolean) => void;  // ✅ Simplified (2 params)
-    __forget: (value: string) => void;  // ✅ Uses value
-    __activate: (value: string) => void;  // ✅ Uses value
-    __isActive: (value: string) => boolean;  // ✅ Uses value
+    __add: (value: string, disabled: boolean) => void;  
+    __forget: (value: string) => void;  
+    __activate: (value: string) => void; 
+    __isActive: (value: string) => boolean; 
     __deactivate: () => void;
     __getActiveItem: () => Item | null;
-    __getByIndex: (index: number | null | undefined) => Item | null;  // ✅ New helper
+    __getByIndex: (index: number | null | undefined) => Item | null; 
     __activateNext: () => void;
     __activatePrev: () => void;
     __activateFirst: () => void;
@@ -56,10 +55,8 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __searchUsingQuery: (query: string) => Item[];
     __startTyping: () => void;
     __stopTyping: () => void;
-    __pushGroupToItems: (id: string) => void;  // ✅ Renamed param to 'id'
-    __pushSeparatorToItems: (id: string) => void;  // ✅ Renamed param to 'id'
-    // ✅ Removed __pushOptionToItems (not needed)
-    // ✅ Removed __nextOptionId (not needed)
+    __pushGroupToItems: (id: string) => void;  
+    __pushSeparatorToItems: (id: string) => void; 
     __nextGroupId: () => number;
     __nextSeparatorId: () => number;
 }

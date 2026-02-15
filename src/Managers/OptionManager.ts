@@ -22,9 +22,7 @@ export function createOptionManager(root: RoverRootContext): OptionManager {
                 if (!optionsEls) return;
 
                 const listener = (event: HTMLElementEventMap[K]) => {
-                    const activeKey = root.__activatedKey ?? undefined;
-
-                    handler(event, activeKey);
+                    handler(event, root.__activatedValue ?? undefined);
                 };
 
                 optionsEls.forEach((option) => {

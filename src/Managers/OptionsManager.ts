@@ -29,8 +29,8 @@ export function createOptionsManager(root: RoverRootContext): OptionsManager {
 
             const listener = (event: HTMLElementEventMap[K]) => {
                 const optionEl = findClosestOption(event.target);
-                const activeKey = root.__activatedKey ?? null;
-                handler(event, optionEl, activeKey);
+                
+                handler(event, optionEl, root.__activatedValue ?? null);
             };
 
             bindListener(optionsEl, eventKey, listener, this.controller);

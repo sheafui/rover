@@ -296,8 +296,7 @@ function createOptionManager(root) {
           return;
         const listener = (event) => {
           var _a;
-          const activeKey = (_a = root.__activatedKey) != null ? _a : void 0;
-          handler(event, activeKey);
+          handler(event, (_a = root.__activatedValue) != null ? _a : void 0);
         };
         optionsEls.forEach((option) => {
           bindListener(option, eventKey, listener, this.controller);
@@ -328,8 +327,7 @@ function createOptionsManager(root) {
       const listener = (event) => {
         var _a;
         const optionEl = findClosestOption(event.target);
-        const activeKey = (_a = root.__activatedKey) != null ? _a : null;
-        handler(event, optionEl, activeKey);
+        handler(event, optionEl, (_a = root.__activatedValue) != null ? _a : null);
       };
       bindListener(optionsEl, eventKey, listener, this.controller);
     },
@@ -393,8 +391,7 @@ function createButtonManager(root) {
         return;
       const listener = (event) => {
         var _a;
-        const activeKey = (_a = root.__activatedKey) != null ? _a : void 0;
-        handler(event, activeKey);
+        handler(event, (_a = root.__activatedValue) != null ? _a : void 0);
       };
       bindListener(buttonEl, eventKey, listener, this.controller);
     },

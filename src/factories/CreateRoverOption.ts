@@ -14,7 +14,6 @@ export default function CreateRoverOption(Alpine: AlpineType): RoverOptionData {
             // Add to collection
             this.__add(value, disabled);
 
-            // Set disabled attribute if needed
             this.$nextTick((): void => {
                 if (disabled) {
                     this.$el.setAttribute('tabindex', '-1');

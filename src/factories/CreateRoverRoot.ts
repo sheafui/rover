@@ -72,13 +72,12 @@ export default function CreateRoverRoot(
             effect(() => {
                 const activeItem = this.__getByIndex(collection.activeIndex.value);
                 console.log(activeItem);
-                this.__activatedValue = activeItem?.value;  // ✅ Get value from item
+                this.__activatedValue = activeItem?.value;  
             });
 
             // SEARCH REACTIVITY
             effect(() => {
                 if (String(this._x__searchQuery).length > 0) {
-                    // ✅ Map results to values
                     let results = this.__searchUsingQuery(this._x__searchQuery)
                         .map((result: Item) => result.value);
 
@@ -89,12 +88,10 @@ export default function CreateRoverRoot(
                     this.__filteredValues = null;
                 }
 
-                // ✅ Check if active value is still visible
                 if (this.__activatedValue && this.__filteredValues && !this.__filteredValues.includes(this.__activatedValue)) {
                     this.__deactivate();
                 }
 
-                // ✅ Activate first visible item
                 if (this.__isOpen && !this.__getActiveItem() && this.__filteredValues && this.__filteredValues.length) {
                     this.__activate(this.__filteredValues[0]);
                 }
@@ -119,7 +116,7 @@ export default function CreateRoverRoot(
                         const options = this.__optionsEls;
 
                         options.forEach((opt: HTMLElement) => {
-                            const value = opt.dataset.value;  // ✅ Use value instead of key
+                            const value = opt.dataset.value;  
 
                             if (!value) return;
 
