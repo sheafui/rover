@@ -71,7 +71,6 @@ export default function CreateRoverRoot(
             // SYNC ACTIVATED VALUE
             effect(() => {
                 const activeItem = this.__getByIndex(collection.activeIndex.value);
-                console.log(activeItem);
                 this.__activatedValue = activeItem?.value;  
             });
 

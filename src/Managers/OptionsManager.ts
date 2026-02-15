@@ -41,16 +41,16 @@ export function createOptionsManager(root: RoverRootContext): OptionsManager {
         enableDefaultOptionsHandlers(disabledEvents: string[] = []) {
             const events = {
                 click: (optionEl: HTMLElement) => {
-                    if (!optionEl.dataset.key) return;
+                    if (!optionEl.dataset.value) return;
                     root.$nextTick(() => root.$refs.__input?.focus({ preventScroll: true }));
                 },
                 mouseover: (optionEl: HTMLElement) => {
-                    if (!optionEl.dataset.key) return;
-                    root.__activate(optionEl.dataset.key);
+                    if (!optionEl.dataset.value) return;
+                    root.__activate(optionEl.dataset.value);
                 },
                 mousemove: (optionEl: HTMLElement) => {
-                    if (!optionEl.dataset.key || root.__isActive(optionEl.dataset.key)) return;
-                    root.__activate(optionEl.dataset.key);
+                    if (!optionEl.dataset.value || root.__isActive(optionEl.dataset.value)) return;
+                    root.__activate(optionEl.dataset.value);
                 },
                 mouseout: () => {
                     if (root.__keepActivated) return;

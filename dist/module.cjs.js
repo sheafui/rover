@@ -335,7 +335,7 @@ function createOptionsManager(root) {
     enableDefaultOptionsHandlers(disabledEvents = []) {
       const events = {
         click: (optionEl) => {
-          if (!optionEl.dataset.key)
+          if (!optionEl.dataset.value)
             return;
           root.$nextTick(() => {
             var _a;
@@ -343,14 +343,14 @@ function createOptionsManager(root) {
           });
         },
         mouseover: (optionEl) => {
-          if (!optionEl.dataset.key)
+          if (!optionEl.dataset.value)
             return;
-          root.__activate(optionEl.dataset.key);
+          root.__activate(optionEl.dataset.value);
         },
         mousemove: (optionEl) => {
-          if (!optionEl.dataset.key || root.__isActive(optionEl.dataset.key))
+          if (!optionEl.dataset.value || root.__isActive(optionEl.dataset.value))
             return;
-          root.__activate(optionEl.dataset.key);
+          root.__activate(optionEl.dataset.value);
         },
         mouseout: () => {
           if (root.__keepActivated)
@@ -448,7 +448,6 @@ function CreateRoverRoot({
       });
       effect(() => {
         const activeItem = this.__getByIndex(collection.activeIndex.value);
-        console.log(activeItem);
         this.__activatedValue = activeItem == null ? void 0 : activeItem.value;
       });
       effect(() => {
@@ -492,17 +491,6 @@ function CreateRoverRoot({
                 opt.removeAttribute("data-active");
                 opt.removeAttribute("aria-current");
               }
-            });
-            const groups = this.__groupsEls;
-            groups.forEach((group) => {
-              const options2 = group.querySelectorAll("[x-rover\\:option]");
-              const hasVisibleOption = Array.from(options2).some((opt) => {
-                const htmlOpt = opt;
-                const value = htmlOpt.dataset.value;
-                return visibleValues ? visibleValues.has(value || "") : true;
-              });
-              edada;
-              group.hidden = !hasVisibleOption;
             });
           });
         });
