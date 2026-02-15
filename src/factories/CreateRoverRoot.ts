@@ -17,15 +17,13 @@ export default function CreateRoverRoot(
 
     const collection = new RoverCollection();
 
-    const SLOT_NAME = 'rover-root';
-
     return {
         __collection: collection,
-        // cache
+
         __optionsEls: undefined,
         __groupsEls: undefined,
+        __optionIndex: undefined,
 
-        // states
         __isOpen: false,
         __isTyping: false,
         __isLoading: false,
@@ -34,13 +32,17 @@ export default function CreateRoverRoot(
         __static: false,
         __keepActivated: true,
         __optionsEl: undefined,
-        __prevActivatedValue: undefined, // it's purpose is part of the activation optimizer
+        __prevActivatedValue: undefined,
         __activatedValue: undefined,
         __items: [],
         _x__searchQuery: '',
         __filteredValues: null,
-        __filteredValuesSet: new Set<string>(),
-        // rover managers 
+
+        __prevVisibleArray: null as string[] | null,
+        __prevActiveValue: undefined,
+
+        __effectRAF: null,
+
         __inputManager: undefined,
         __optionsManager: undefined,
         __optionManager: undefined,
@@ -60,26 +62,29 @@ export default function CreateRoverRoot(
         __getByIndex: (index: number | null | undefined) => collection.getByIndex(index),
 
         init() {
-            this.$el.dataset.slot = SLOT_NAME;
-
             this.__setupManagers();
 
-            // LOADING STUFF
             effect(() => {
                 this.__isLoading = collection.pending.state;
             });
 
-            // SEARCH REACTIVITY
-            effect(() => {
-                if (String(this._x__searchQuery).length > 0) {
-                    let results = this.__searchUsingQuery(this._x__searchQuery)
-                        .map((result: Item) => result.value);
+            this.$watch('_x__searchQuery', (query: string) => {
+                this.__isLoading = true;
 
-                    if (results.length >= 0) {
+                if (query.length > 0) {
+                    const results = this.__searchUsingQuery(query).map((r: Item) => r.value);
+
+                    const prev = this.__filteredValues;
+
+                    const changed = !prev || prev.length !== results.length || results.some((v: unknown, i: number) => v !== prev[i]);
+
+                    if (changed) {
                         this.__filteredValues = results;
                     }
                 } else {
-                    this.__filteredValues = null;
+                    if (this.__filteredValues !== null) {
+                        this.__filteredValues = null;
+                    }
                 }
 
                 if (this.__activatedValue && this.__filteredValues && !this.__filteredValues.includes(this.__activatedValue)) {
@@ -89,91 +94,122 @@ export default function CreateRoverRoot(
                 if (this.__isOpen && !this.__getActiveItem() && this.__filteredValues && this.__filteredValues.length) {
                     this.__activate(this.__filteredValues[0]);
                 }
+
+                this.__isLoading = false;
             });
 
-            // has two purpose, wait in case of `x-for`, don't overload the initial process 
-            // and defer processing this bit to the next steps
             this.$nextTick(() => {
                 this.__optionsEls = Array.from(
                     this.$el.querySelectorAll('[x-rover\\:option]')
                 ) as Array<HTMLElement>;
 
-                // optmizer: will add intial overhead but make long interaction smoothers
                 this.__optionIndex = new Map();
-
                 this.__optionsEls.forEach((el: HTMLElement) => {
                     const v = el.dataset.value;
                     if (v) this.__optionIndex.set(v, el);
                 });
 
-                // this.__groupsEls = Array.from(
-                //     this.$el.querySelectorAll('[x-rover\\:group]')
-                // ) as Array<HTMLElement>;
-
-                // HANDLING INDIVIDUAL OPTION VISIBILITY AND ACTIVE STATE 
                 effect(() => {
                     const activeItem = this.__getByIndex(collection.activeIndex.value);
-
                     const activeValue = this.__activatedValue = activeItem?.value;
 
-                    const visibleValues = this.__filteredValues ? new Set(this.__filteredValues) : null;
+                    const visibleValuesArray = this.__filteredValues;
 
-                    // batches all DOM updates to the next repaint.
-                    // This prevents multiple forced reflows when updating thousands of elements.                    
-                    // Removing it causes the browser to recalc styles/layout immediately, massively slowing performance.
-                    // without this, it's 50-100x slower at 1000+ items
-                    requestAnimationFrame(() => {
-                        
-                        const s0 = performance.now();
-                        const options = this.__optionsEls;
+                    if (this.__effectRAF) cancelAnimationFrame(this.__effectRAF);
 
-                        options.forEach((opt: HTMLElement) => {
-                            const value = opt.dataset.value;
-
-                            if (!value) return;
-
-                            // Update visibility
-                            if (visibleValues !== null) {
-                                opt.hidden = !visibleValues.has(value);
-                            } else {
-                                opt.hidden = false;
-                            }
-
-                            // Update active state
-                            if (value === activeValue) {
-                                opt.setAttribute('data-active', 'true');
-                                opt.setAttribute('aria-current', 'true');
-                                opt.scrollIntoView({ block: 'nearest' });
-                            } else {
-                                opt.removeAttribute('data-active');
-                                opt.removeAttribute('aria-current');
-                            }
-                        });
-
-                        console.log(performance.now() - s0);
-
-                        // @TODO 
-                        // Handle groups visibility based on visible options
-                        // const groups = this.__groupsEls;
-
-                        // groups.forEach((group: HTMLElement) => {
-                        //     const options = group.querySelectorAll('[x-rover\\:option]');
-
-                        //     // Check if group has any visible options
-                        //     const hasVisibleOption = Array.from(options).some((opt: Element) => {
-                        //         const htmlOpt = opt as HTMLElement;
-                        //         const value = htmlOpt.dataset.value;
-
-                        //         return visibleValues
-                        //             ? visibleValues.has(value || '')
-                        //             : true;
-                        //     });
-                        //     group.hidden = !hasVisibleOption;
-                        // });
-                        this.__prevActivatedValue = activeValue;
+                    this.__effectRAF = requestAnimationFrame(() => {
+                        this.patchItemsVisibility(visibleValuesArray);
+                        this.patchItemsActivity(activeValue);
+                        this.__effectRAF = null;
                     });
                 });
             });
+        },
+
+        patchItemsVisibility(visibleValuesArray: string[] | null) {
+
+            if (!this.__optionsEls || !this.__optionIndex) return;
+
+            const prevArray = this.__prevVisibleArray;
+
+            if (visibleValuesArray === prevArray) return;
+
+            if (visibleValuesArray === null) {
+                if (prevArray === null) return;
+
+                this.__optionsEls.forEach((opt: HTMLElement) => {
+                    if (opt.hidden) opt.hidden = false;
+                });
+
+                this.__prevVisibleArray = null;
+                return;
+            }
+
+            const currentSet = new Set(visibleValuesArray);
+
+            const prevSet = prevArray ? new Set(prevArray) : null;
+
+            if (prevSet === null) {
+                // First filter - show only matching items
+                this.__optionsEls.forEach((opt: HTMLElement) => {
+                    const value = opt.dataset.value;
+                    if (!value) return;
+
+                    const shouldHide = !currentSet.has(value);
+                    if (opt.hidden !== shouldHide) {
+                        opt.hidden = shouldHide;
+                    }
+                });
+
+                this.__prevVisibleArray = visibleValuesArray;
+                return;
+            }
+
+            // Incremental diff - only update changed items
+            for (const value of prevSet) {
+                if (!currentSet.has(value as string)) {
+                    const el = this.__optionIndex.get(value);
+                    if (el) el.hidden = true;
+                }
+            }
+
+            for (const value of currentSet) {
+                if (!prevSet.has(value)) {
+                    const el = this.__optionIndex.get(value);
+                    if (el) el.hidden = false;
+                }
+            }
+
+            this.__prevVisibleArray = visibleValuesArray;
+        },
+
+        patchItemsActivity(activeValue: string | undefined) {
+
+            const prevActiveValue = this.__prevActiveValue;
+
+            if (prevActiveValue === activeValue) return;
+
+            if (prevActiveValue) {
+                const prevOpt = this.__optionIndex.get(prevActiveValue);
+                if (prevOpt) {
+                    prevOpt.removeAttribute('data-active');
+                    prevOpt.removeAttribute('aria-current');
+                }
+            }
+
+            if (activeValue) {
+                const activeOpt = this.__optionIndex.get(activeValue);
+                if (activeOpt) {
+                    activeOpt.setAttribute('data-active', 'true');
+                    activeOpt.setAttribute('aria-current', 'true');
+
+                    requestAnimationFrame(() => {
+                        activeOpt.scrollIntoView({ block: 'nearest' });
+                    });
+                }
+            }
+
+            this.__prevActiveValue = activeValue;
         },
 
         __setupManagers() {
@@ -194,17 +230,11 @@ export default function CreateRoverRoot(
         },
 
         __pushSeparatorToItems(id: string) {
-            this.__items.push({
-                type: 's',
-                id,
-            });
+            this.__items.push({ type: 's', id });
         },
 
         __pushGroupToItems(id: string) {
-            this.__items.push({
-                type: 'g',
-                id,
-            });
+            this.__items.push({ type: 'g', id });
         },
 
         __startTyping() {
@@ -224,6 +254,8 @@ export default function CreateRoverRoot(
         },
 
         destroy() {
+            if (this.__effectRAF) cancelAnimationFrame(this.__effectRAF);
+
             this.__inputManager?.destroy();
             this.__optionManager?.destroy();
             this.__optionsManager?.destroy();

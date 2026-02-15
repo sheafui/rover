@@ -24,6 +24,10 @@ export const rover = (el: ElementWithXAttributes) => {
             return data.__buttonManager;
         },
 
+        get isLoading(): boolean {
+            return data.__isLoading;
+        },
+
         activate(key: string) {
             data.__collection.activate(key)
         },

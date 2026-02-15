@@ -18,8 +18,8 @@ export type SearchIndex = Omit<Item, 'disabled'>;
 
 export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __collection: RoverCollection;
-    __optionsEls: HTMLElement[] | undefined;  
-    __groupsEls: HTMLElement[] | undefined;   
+    __optionsEls: HTMLElement[] | undefined;
+    __groupsEls: HTMLElement[] | undefined;
     __isOpen: boolean;
     __isTyping: boolean;
     __isLoading: boolean;
@@ -29,11 +29,14 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __keepActivated: boolean;
     __items: UIItem[];
     __optionsEl: HTMLElement | undefined;
-    __activatedValue: string | null | undefined;  
-    __filteredValues: string[] | null;  
-    __filteredValuesSet: Set<string>; 
+    __activatedValue: string | null | undefined;
+    __filteredValues: string[] | null;
     _x__searchQuery: string;
 
+    __optionIndex: Map<string, HTMLElement> | undefined;
+    __prevActivatedValue: string | undefined;
+
+    __effectRAF: null | number;
     // Managers
     __inputManager: InputManager | undefined;
     __optionManager: OptionManager | undefined;
@@ -41,13 +44,13 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __buttonManager: ButtonManager | undefined;
 
     // Methods
-    __add: (value: string, disabled: boolean) => void;  
-    __forget: (value: string) => void;  
-    __activate: (value: string) => void; 
-    __isActive: (value: string) => boolean; 
+    __add: (value: string, disabled: boolean) => void;
+    __forget: (value: string) => void;
+    __activate: (value: string) => void;
+    __isActive: (value: string) => boolean;
     __deactivate: () => void;
     __getActiveItem: () => Item | null;
-    __getByIndex: (index: number | null | undefined) => Item | null; 
+    __getByIndex: (index: number | null | undefined) => Item | null;
     __activateNext: () => void;
     __activatePrev: () => void;
     __activateFirst: () => void;
@@ -55,8 +58,8 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __searchUsingQuery: (query: string) => Item[];
     __startTyping: () => void;
     __stopTyping: () => void;
-    __pushGroupToItems: (id: string) => void;  
-    __pushSeparatorToItems: (id: string) => void; 
+    __pushGroupToItems: (id: string) => void;
+    __pushSeparatorToItems: (id: string) => void;
     __nextGroupId: () => number;
     __nextSeparatorId: () => number;
 }

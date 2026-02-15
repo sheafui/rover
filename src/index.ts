@@ -92,6 +92,9 @@ export default function rover(Alpine: Alpine): void {
                 if (Alpine.bound(this.$el, 'keepActivated')) {
                     this.__keepActivated = true;
                 }
+            },
+            'x-bind:data-loading'() {
+                return this.__isLoading;
             }
         })
     }
@@ -149,15 +152,18 @@ export default function rover(Alpine: Alpine): void {
     }
 
     function handleIsLoading(Alpine: Alpine, el: AlpineType.ElementWithXAttributes, modifiers: AlpineType.DirectiveData['modifiers']) {
-        let data = Alpine.$data(el);
+        // let data = Alpine.$data(el);
 
-        if (modifiers.filter((item: string) => item === 'hide')) {
-            // @todo 
-        }
+        const shouldHide = modifiers.includes('hide');
 
-        if (data) {
-            // @todo
-        }
+        Alpine.bind(el, {
+            'x-show'(this: RoverRootContext) {
+                return shouldHide ? !this.__isLoading : this.__isLoading;
+            },
+            'role': 'status',
+            'aria-live': 'polite',
+            'aria-atomic': 'true',
+        });
     }
 
     function handleSeparator(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {

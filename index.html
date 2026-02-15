@@ -29,14 +29,19 @@
             </div>
 
             <ul x-rover:options x-cloak x-show="isOpen" style="display: none;"
-                class="mt-1 max-h-60 w-full rounded-md border border-neutral-700 bg-white/5 text-white overflow-auto shadow-lg focus:outline-none">
+                class="mt-1 max-h-60 w-full transition-all rounded-md border border-neutral-700 bg-white/5 text-white overflow-auto shadow-lg focus:outline-none"
+            >
+                <!-- <li class="py-4 text-center [:not([data-loading])>&]:hidden" >
+                    loading...
+                </li> -->
+
                 <li class="py-4 text-center" x-rover:empty>
                     No result found
                 </li>
 
                 <template x-for="(item, index) in items" x-bind:key="index">
                     <li x-rover:option x-bind:value="item" x-text="item.toUpperCase()"
-                        class="px-4 data-selected:bg-red-500/10 data-active:!bg-white/10 py-2">
+                        class="px-4 data-selected:bg-red-500/10 data-active:!bg-white/10 py-2 [[data-loading]>&]:hidden_">
                     </li>
                 </template>
             </ul>
@@ -60,7 +65,8 @@
                 'grape'
             ],
             selected: 'mango',
-            count:2000,
+            count:4000,
+
             _previousSelected: undefined,
 
             init() {

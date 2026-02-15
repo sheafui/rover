@@ -406,11 +406,11 @@ function CreateRoverRoot({
   effect
 }) {
   const collection = new RoverCollection_default();
-  const SLOT_NAME = "rover-root";
   return {
     __collection: collection,
     __optionsEls: void 0,
     __groupsEls: void 0,
+    __optionIndex: void 0,
     __isOpen: false,
     __isTyping: false,
     __isLoading: false,
@@ -424,7 +424,9 @@ function CreateRoverRoot({
     __items: [],
     _x__searchQuery: "",
     __filteredValues: null,
-    __filteredValuesSet: new Set(),
+    __prevVisibleArray: null,
+    __prevActiveValue: void 0,
+    __effectRAF: null,
     __inputManager: void 0,
     __optionsManager: void 0,
     __optionManager: void 0,
@@ -442,19 +444,23 @@ function CreateRoverRoot({
     __searchUsingQuery: (query) => collection.search(query),
     __getByIndex: (index) => collection.getByIndex(index),
     init() {
-      this.$el.dataset.slot = SLOT_NAME;
       this.__setupManagers();
       effect(() => {
         this.__isLoading = collection.pending.state;
       });
-      effect(() => {
-        if (String(this._x__searchQuery).length > 0) {
-          let results = this.__searchUsingQuery(this._x__searchQuery).map((result) => result.value);
-          if (results.length >= 0) {
+      this.$watch("_x__searchQuery", (query) => {
+        this.__isLoading = true;
+        if (query.length > 0) {
+          const results = this.__searchUsingQuery(query).map((r) => r.value);
+          const prev = this.__filteredValues;
+          const changed = !prev || prev.length !== results.length || results.some((v, i) => v !== prev[i]);
+          if (changed) {
             this.__filteredValues = results;
           }
         } else {
-          this.__filteredValues = null;
+          if (this.__filteredValues !== null) {
+            this.__filteredValues = null;
+          }
         }
         if (this.__activatedValue && this.__filteredValues && !this.__filteredValues.includes(this.__activatedValue)) {
           this.__deactivate();
@@ -462,6 +468,7 @@ function CreateRoverRoot({
         if (this.__isOpen && !this.__getActiveItem() && this.__filteredValues && this.__filteredValues.length) {
           this.__activate(this.__filteredValues[0]);
         }
+        this.__isLoading = false;
       });
       this.$nextTick(() => {
         this.__optionsEls = Array.from(this.$el.querySelectorAll("[x-rover\\:option]"));
@@ -474,33 +481,86 @@ function CreateRoverRoot({
         effect(() => {
           const activeItem = this.__getByIndex(collection.activeIndex.value);
           const activeValue = this.__activatedValue = activeItem == null ? void 0 : activeItem.value;
-          const visibleValues = this.__filteredValues ? new Set(this.__filteredValues) : null;
-          requestAnimationFrame(() => {
-            const s0 = performance.now();
-            const options = this.__optionsEls;
-            options.forEach((opt) => {
-              const value = opt.dataset.value;
-              if (!value)
-                return;
-              if (visibleValues !== null) {
-                opt.hidden = !visibleValues.has(value);
-              } else {
-                opt.hidden = false;
-              }
-              if (value === activeValue) {
-                opt.setAttribute("data-active", "true");
-                opt.setAttribute("aria-current", "true");
-                opt.scrollIntoView({block: "nearest"});
-              } else {
-                opt.removeAttribute("data-active");
-                opt.removeAttribute("aria-current");
-              }
-            });
-            console.log(performance.now() - s0);
-            this.__prevActivatedValue = activeValue;
+          const visibleValuesArray = this.__filteredValues;
+          if (this.__effectRAF)
+            cancelAnimationFrame(this.__effectRAF);
+          this.__effectRAF = requestAnimationFrame(() => {
+            this.patchItemsVisibility(visibleValuesArray);
+            this.patchItemsActivity(activeValue);
+            this.__effectRAF = null;
           });
         });
       });
+    },
+    patchItemsVisibility(visibleValuesArray) {
+      if (!this.__optionsEls || !this.__optionIndex)
+        return;
+      const prevArray = this.__prevVisibleArray;
+      if (visibleValuesArray === prevArray)
+        return;
+      if (visibleValuesArray === null) {
+        if (prevArray === null)
+          return;
+        this.__optionsEls.forEach((opt) => {
+          if (opt.hidden)
+            opt.hidden = false;
+        });
+        this.__prevVisibleArray = null;
+        return;
+      }
+      const currentSet = new Set(visibleValuesArray);
+      const prevSet = prevArray ? new Set(prevArray) : null;
+      if (prevSet === null) {
+        this.__optionsEls.forEach((opt) => {
+          const value = opt.dataset.value;
+          if (!value)
+            return;
+          const shouldHide = !currentSet.has(value);
+          if (opt.hidden !== shouldHide) {
+            opt.hidden = shouldHide;
+          }
+        });
+        this.__prevVisibleArray = visibleValuesArray;
+        return;
+      }
+      for (const value of prevSet) {
+        if (!currentSet.has(value)) {
+          const el = this.__optionIndex.get(value);
+          if (el)
+            el.hidden = true;
+        }
+      }
+      for (const value of currentSet) {
+        if (!prevSet.has(value)) {
+          const el = this.__optionIndex.get(value);
+          if (el)
+            el.hidden = false;
+        }
+      }
+      this.__prevVisibleArray = visibleValuesArray;
+    },
+    patchItemsActivity(activeValue) {
+      const prevActiveValue = this.__prevActiveValue;
+      if (prevActiveValue === activeValue)
+        return;
+      if (prevActiveValue) {
+        const prevOpt = this.__optionIndex.get(prevActiveValue);
+        if (prevOpt) {
+          prevOpt.removeAttribute("data-active");
+          prevOpt.removeAttribute("aria-current");
+        }
+      }
+      if (activeValue) {
+        const activeOpt = this.__optionIndex.get(activeValue);
+        if (activeOpt) {
+          activeOpt.setAttribute("data-active", "true");
+          activeOpt.setAttribute("aria-current", "true");
+          requestAnimationFrame(() => {
+            activeOpt.scrollIntoView({block: "nearest"});
+          });
+        }
+      }
+      this.__prevActiveValue = activeValue;
     },
     __setupManagers() {
       this.__inputManager = createInputManager(this);
@@ -518,16 +578,10 @@ function CreateRoverRoot({
       });
     },
     __pushSeparatorToItems(id) {
-      this.__items.push({
-        type: "s",
-        id
-      });
+      this.__items.push({type: "s", id});
     },
     __pushGroupToItems(id) {
-      this.__items.push({
-        type: "g",
-        id
-      });
+      this.__items.push({type: "g", id});
     },
     __startTyping() {
       this.__isTyping = true;
@@ -543,6 +597,8 @@ function CreateRoverRoot({
     },
     destroy() {
       var _a, _b, _c, _d;
+      if (this.__effectRAF)
+        cancelAnimationFrame(this.__effectRAF);
       (_a = this.__inputManager) == null ? void 0 : _a.destroy();
       (_b = this.__optionManager) == null ? void 0 : _b.destroy();
       (_c = this.__optionsManager) == null ? void 0 : _c.destroy();
@@ -569,6 +625,9 @@ var rover = (el) => {
     },
     get button() {
       return data.__buttonManager;
+    },
+    get isLoading() {
+      return data.__isLoading;
     },
     activate(key) {
       data.__collection.activate(key);
@@ -734,6 +793,9 @@ function rover2(Alpine2) {
         if (Alpine2.bound(this.$el, "keepActivated")) {
           this.__keepActivated = true;
         }
+      },
+      "x-bind:data-loading"() {
+        return this.__isLoading;
       }
     });
   }
@@ -789,11 +851,15 @@ function rover2(Alpine2) {
     });
   }
   function handleIsLoading(Alpine3, el, modifiers) {
-    let data = Alpine3.$data(el);
-    if (modifiers.filter((item) => item === "hide")) {
-    }
-    if (data) {
-    }
+    const shouldHide = modifiers.includes("hide");
+    Alpine3.bind(el, {
+      "x-show"() {
+        return shouldHide ? !this.__isLoading : this.__isLoading;
+      },
+      role: "status",
+      "aria-live": "polite",
+      "aria-atomic": "true"
+    });
   }
   function handleSeparator(Alpine3, el) {
     Alpine3.bind(el, {
