@@ -10,6 +10,7 @@
     <link rel="icon" href="data:,">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+   
 </head>
 
 <body class="flex mt-20 justify-center bg-neutral-950">
@@ -29,8 +30,7 @@
             </div>
 
             <ul x-rover:options x-cloak x-show="isOpen" style="display: none;"
-                class="mt-1 max-h-60 w-full transition-all rounded-md border border-neutral-700 bg-white/5 text-white overflow-auto shadow-lg focus:outline-none"
-            >
+                class="mt-1 max-h-60 _[_contain:layout_style] w-full transition-all rounded-md border border-neutral-700 bg-white/5 text-white overflow-auto shadow-lg focus:outline-none">
                 <!-- <li class="py-4 text-center [:not([data-loading])>&]:hidden" >
                     loading...
                 </li> -->
@@ -65,12 +65,12 @@
                 'grape'
             ],
             selected: 'mango',
-            count:4000,
+            count: 2000,
 
             _previousSelected: undefined,
 
             init() {
-                if (this.count && this.count> this.items.length) {
+                if (this.count && this.count > this.items.length) {
                     const base = [...this.items]
                     this.items = Array.from({ length: this.count }, (_, i) => {
                         return base[i % base.length] + '-' + i
@@ -204,9 +204,9 @@
             },
 
             activateSelectedOrFirst(activateSelected = true) {
-                
+
                 let activeItem = this.$rover.getActiveItem();
-                
+
                 // if (activeItem) return;
 
                 if (activateSelected && this.selected) {

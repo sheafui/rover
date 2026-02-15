@@ -402,7 +402,7 @@ function CreateRoverRoot({
     __filteredValues: null,
     __prevVisibleArray: null,
     __prevActiveValue: void 0,
-    __effectRAF: null,
+    __effectRAF: NaN,
     __inputManager: void 0,
     __optionsManager: void 0,
     __optionManager: void 0,
@@ -458,15 +458,21 @@ function CreateRoverRoot({
           const activeItem = this.__getByIndex(collection.activeIndex.value);
           const activeValue = this.__activatedValue = activeItem?.value;
           const visibleValuesArray = this.__filteredValues;
-          if (this.__effectRAF)
+          if (!Number.isNaN(this.__effectRAF))
             cancelAnimationFrame(this.__effectRAF);
           this.__effectRAF = requestAnimationFrame(() => {
             this.patchItemsVisibility(visibleValuesArray);
             this.patchItemsActivity(activeValue);
+            this.handleSeparatorsVisibility();
+            this.handleGroupsVisibility();
             this.__effectRAF = null;
           });
         });
       });
+    },
+    handleGroupsVisibility() {
+    },
+    handleSeparatorsVisibility() {
     },
     patchItemsVisibility(visibleValuesArray) {
       if (!this.__optionsEls || !this.__optionIndex)
@@ -478,8 +484,7 @@ function CreateRoverRoot({
         if (prevArray === null)
           return;
         this.__optionsEls.forEach((opt) => {
-          if (opt.hidden)
-            opt.hidden = false;
+          opt.style.display = "";
         });
         this.__prevVisibleArray = null;
         return;
@@ -492,8 +497,8 @@ function CreateRoverRoot({
           if (!value)
             return;
           const shouldHide = !currentSet.has(value);
-          if (opt.hidden !== shouldHide) {
-            opt.hidden = shouldHide;
+          if (opt.style.display !== (shouldHide ? "none" : "")) {
+            opt.style.display = shouldHide ? "none" : "";
           }
         });
         this.__prevVisibleArray = visibleValuesArray;
@@ -503,14 +508,14 @@ function CreateRoverRoot({
         if (!currentSet.has(value)) {
           const el = this.__optionIndex.get(value);
           if (el)
-            el.hidden = true;
+            el.style.display = "none";
         }
       }
       for (const value of currentSet) {
         if (!prevSet.has(value)) {
           const el = this.__optionIndex.get(value);
           if (el)
-            el.hidden = false;
+            el.style.display = "";
         }
       }
       this.__prevVisibleArray = visibleValuesArray;

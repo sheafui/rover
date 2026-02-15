@@ -41,7 +41,7 @@ export default function CreateRoverRoot(
         __prevVisibleArray: null as string[] | null,
         __prevActiveValue: undefined,
 
-        __effectRAF: null,
+        __effectRAF: NaN,
 
         __inputManager: undefined,
         __optionsManager: undefined,
@@ -115,30 +115,37 @@ export default function CreateRoverRoot(
 
                     const visibleValuesArray = this.__filteredValues;
 
-                    if (this.__effectRAF) cancelAnimationFrame(this.__effectRAF);
+                    if (!Number.isNaN(this.__effectRAF)) cancelAnimationFrame(this.__effectRAF);
 
                     this.__effectRAF = requestAnimationFrame(() => {
                         this.patchItemsVisibility(visibleValuesArray);
                         this.patchItemsActivity(activeValue);
+                        this.handleSeparatorsVisibility();
+                        this.handleGroupsVisibility();
                         this.__effectRAF = null;
                     });
                 });
             });
         },
 
-        patchItemsVisibility(visibleValuesArray: string[] | null) {
+        handleGroupsVisibility() {
 
+        },
+        handleSeparatorsVisibility() {
+
+        },
+        patchItemsVisibility(visibleValuesArray: string[] | null) {
             if (!this.__optionsEls || !this.__optionIndex) return;
 
             const prevArray = this.__prevVisibleArray;
-
             if (visibleValuesArray === prevArray) return;
 
             if (visibleValuesArray === null) {
                 if (prevArray === null) return;
 
+                // Show all items
                 this.__optionsEls.forEach((opt: HTMLElement) => {
-                    if (opt.hidden) opt.hidden = false;
+                    opt.style.display = '';
                 });
 
                 this.__prevVisibleArray = null;
@@ -146,18 +153,17 @@ export default function CreateRoverRoot(
             }
 
             const currentSet = new Set(visibleValuesArray);
-
             const prevSet = prevArray ? new Set(prevArray) : null;
 
             if (prevSet === null) {
-                // First filter - show only matching items
+
                 this.__optionsEls.forEach((opt: HTMLElement) => {
                     const value = opt.dataset.value;
                     if (!value) return;
 
                     const shouldHide = !currentSet.has(value);
-                    if (opt.hidden !== shouldHide) {
-                        opt.hidden = shouldHide;
+                    if (opt.style.display !== (shouldHide ? 'none' : '')) {
+                        opt.style.display = shouldHide ? 'none' : '';
                     }
                 });
 
@@ -165,23 +171,23 @@ export default function CreateRoverRoot(
                 return;
             }
 
-            // Incremental diff - only update changed items
             for (const value of prevSet) {
                 if (!currentSet.has(value as string)) {
                     const el = this.__optionIndex.get(value);
-                    if (el) el.hidden = true;
+                    if (el) el.style.display = 'none';
                 }
             }
 
             for (const value of currentSet) {
                 if (!prevSet.has(value)) {
                     const el = this.__optionIndex.get(value);
-                    if (el) el.hidden = false;
+                    if (el) el.style.display = '';
                 }
             }
 
             this.__prevVisibleArray = visibleValuesArray;
-        },
+        }
+        ,
 
         patchItemsActivity(activeValue: string | undefined) {
 
