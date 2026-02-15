@@ -462,20 +462,20 @@
             if (!Number.isNaN(this.__effectRAF))
               cancelAnimationFrame(this.__effectRAF);
             this.__effectRAF = requestAnimationFrame(() => {
-              this.patchItemsVisibility(visibleValuesArray);
-              this.patchItemsActivity(activeValue);
-              this.handleSeparatorsVisibility();
-              this.handleGroupsVisibility();
+              this.__patchItemsVisibility(visibleValuesArray);
+              this.__patchItemsActivity(activeValue);
+              this.__handleSeparatorsVisibility();
+              this.__handleGroupsVisibility();
               this.__effectRAF = null;
             });
           });
         });
       },
-      handleGroupsVisibility() {
+      __handleGroupsVisibility() {
       },
-      handleSeparatorsVisibility() {
+      __handleSeparatorsVisibility() {
       },
-      patchItemsVisibility(visibleValuesArray) {
+      __patchItemsVisibility(visibleValuesArray) {
         if (!this.__optionsEls || !this.__optionIndex)
           return;
         const prevArray = this.__prevVisibleArray;
@@ -521,7 +521,7 @@
         }
         this.__prevVisibleArray = visibleValuesArray;
       },
-      patchItemsActivity(activeValue) {
+      __patchItemsActivity(activeValue) {
         const prevActiveValue = this.__prevActiveValue;
         if (prevActiveValue === activeValue)
           return;

@@ -34,7 +34,10 @@ export default function CreateRoverRoot(
         __optionsEl: undefined,
         __prevActivatedValue: undefined,
         __activatedValue: undefined,
+        // items only is here for handling separators 
+        // and groups visibility 
         __items: [],
+
         _x__searchQuery: '',
         __filteredValues: null,
 
@@ -118,23 +121,23 @@ export default function CreateRoverRoot(
                     if (!Number.isNaN(this.__effectRAF)) cancelAnimationFrame(this.__effectRAF);
 
                     this.__effectRAF = requestAnimationFrame(() => {
-                        this.patchItemsVisibility(visibleValuesArray);
-                        this.patchItemsActivity(activeValue);
-                        this.handleSeparatorsVisibility();
-                        this.handleGroupsVisibility();
+                        this.__patchItemsVisibility(visibleValuesArray);
+                        this.__patchItemsActivity(activeValue);
+                        this.__handleSeparatorsVisibility();
+                        this.__handleGroupsVisibility();
                         this.__effectRAF = null;
                     });
                 });
             });
         },
 
-        handleGroupsVisibility() {
+        __handleGroupsVisibility() {
 
         },
-        handleSeparatorsVisibility() {
+        __handleSeparatorsVisibility() {
 
         },
-        patchItemsVisibility(visibleValuesArray: string[] | null) {
+        __patchItemsVisibility(visibleValuesArray: string[] | null) {
             if (!this.__optionsEls || !this.__optionIndex) return;
 
             const prevArray = this.__prevVisibleArray;
@@ -189,7 +192,7 @@ export default function CreateRoverRoot(
         }
         ,
 
-        patchItemsActivity(activeValue: string | undefined) {
+        __patchItemsActivity(activeValue: string | undefined) {
 
             const prevActiveValue = this.__prevActiveValue;
 
