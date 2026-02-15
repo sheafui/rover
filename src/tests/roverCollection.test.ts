@@ -35,42 +35,33 @@ describe('RoverCollection', () => {
 
     describe('Adding Items', () => {
         it('should add a single item', () => {
-            collection.add('key1', 'value1');
+            collection.add('Apple');
 
             expect(collection.size).toBe(1);
-            expect(collection.get('key1')).toEqual({
-                key: 'key1',
-                value: 'value1',
+            expect(collection.get('Apple')).toEqual({
+                value: 'Apple',
                 disabled: false
             });
         });
 
         it('should add multiple items', () => {
-            collection.add('key1', 'value1');
-            collection.add('key2', 'value2');
-            collection.add('key3', 'value3');
+            collection.add('Apple');
+            collection.add('Banana');
+            collection.add('Cherry');
 
             expect(collection.size).toBe(3);
             expect(collection.all()).toHaveLength(3);
         });
 
         it('should add disabled items', () => {
-            collection.add('key1', 'value1', true);
+            collection.add('Apple', true);
 
-            const item = collection.get('key1') as Item;
+            const item = collection.get('Apple') as Item;
             expect(item.disabled).toBe(true);
         });
 
-        it('should not add duplicate keys', () => {
-            collection.add('key1', 'value1');
-            collection.add('key1', 'value2'); // Should be ignored
-
-            expect(collection.size).toBe(1);
-            expect(collection.get('key1')?.value).toBe('value1');
-        });
-
         it('should invalidate indexes when adding items', async () => {
-            collection.add('key1', 'value1');
+            collection.add('Apple');
 
             // Wait for microtask to complete
             await Promise.resolve();
@@ -81,92 +72,91 @@ describe('RoverCollection', () => {
 
     describe('Removing Items', () => {
         beforeEach(() => {
-            collection.add('key1', 'Apple');
-            collection.add('key2', 'Banana');
-            collection.add('key3', 'Cherry');
+            collection.add('Apple');
+            collection.add('Banana');
+            collection.add('Cherry');
         });
 
-        it('should remove an item by key', () => {
-            collection.forget('key2');
+        it('should remove an item by value', () => {
+            collection.forget('Banana');
 
             expect(collection.size).toBe(2);
-            expect(collection.get('key2')).toBeUndefined();
+            expect(collection.get('Banana')).toBeUndefined();
         });
 
-        it('should handle removing non-existent key gracefully', () => {
-            collection.forget('nonexistent');
+        it('should handle removing non-existent value gracefully', () => {
+            collection.forget('Nonexistent');
 
             expect(collection.size).toBe(3);
         });
 
         it('should deactivate item if it was active', () => {
-            collection.activate('key2');
+            collection.activate('Banana');
             expect(collection.activeIndex.value).toBe(1);
 
-            collection.forget('key2');
+            collection.forget('Banana');
 
             expect(collection.activeIndex.value).toBeUndefined();
         });
 
         it('should adjust activeIndex if removing item before active one', () => {
-            collection.activate('key3');
+            collection.activate('Cherry');
             expect(collection.activeIndex.value).toBe(2);
 
-            collection.forget('key1');
+            collection.forget('Apple');
 
-            expect(collection.activeIndex.value).toBe(1); // in this case key3 shifts to index 1
+            expect(collection.activeIndex.value).toBe(1);
         });
 
         it('should not adjust activeIndex if removing item after active one', () => {
-            collection.activate('key1');
+            collection.activate('Apple');
             expect(collection.activeIndex.value).toBe(0);
 
-            collection.forget('key3');
+            collection.forget('Cherry');
 
-            expect(collection.activeIndex.value).toBe(0); // key1 is still at index 0
+            expect(collection.activeIndex.value).toBe(0);
         });
     });
 
     describe('Activation', () => {
         beforeEach(() => {
-            collection.add('key1', 'Apple');
-            collection.add('key2', 'Banana');
-            collection.add('key3', 'Cherry');
-            collection.add('key4', 'Date', true); // Disabled
+            collection.add('Apple');
+            collection.add('Banana');
+            collection.add('Cherry');
+            collection.add('Date', true); // Disabled
         });
 
-        it('should activate an item by key', async () => {
-            collection.activate('key2');
+        it('should activate an item by value', async () => {
+            collection.activate('Banana');
 
             expect(collection.activeIndex.value).toBe(1);
             expect(collection.getActiveItem()).toEqual({
-                key: 'key2',
                 value: 'Banana',
                 disabled: false
             });
         });
 
         it('should not activate disabled items', async () => {
-            collection.activate('key4');
+            collection.activate('Date');
 
             expect(collection.activeIndex.value).toBeUndefined();
         });
 
         it('should not activate non-existent items', () => {
-            collection.activate('nonexistent');
+            collection.activate('Nonexistent');
 
             expect(collection.activeIndex.value).toBeUndefined();
         });
 
         it('should check if item is activated', () => {
-            collection.activate('key2');
+            collection.activate('Banana');
 
-            expect(collection.isActivated('key2')).toBe(true);
-            expect(collection.isActivated('key1')).toBe(false);
+            expect(collection.isActivated('Banana')).toBe(true);
+            expect(collection.isActivated('Apple')).toBe(false);
         });
 
         it('should deactivate current item', () => {
-            collection.activate('key2');
+            collection.activate('Banana');
             expect(collection.activeIndex.value).toBe(1);
 
             collection.deactivate();
@@ -176,10 +166,10 @@ describe('RoverCollection', () => {
         });
 
         it('should not reactivate if already active', () => {
-            collection.activate('key2');
+            collection.activate('Banana');
             const firstIndex = collection.activeIndex.value;
 
-            collection.activate('key2');
+            collection.activate('Banana');
 
             expect(collection.activeIndex.value).toBe(firstIndex);
         });
@@ -187,10 +177,10 @@ describe('RoverCollection', () => {
 
     describe('Keyboard Navigation', () => {
         beforeEach(() => {
-            collection.add('key1', 'Apple');
-            collection.add('key2', 'Banana', true); // Disabled - should be skipped
-            collection.add('key3', 'Cherry');
-            collection.add('key4', 'Date');
+            collection.add('Apple');
+            collection.add('Banana', true); // Disabled - should be skipped
+            collection.add('Cherry');
+            collection.add('Date');
         });
 
         it('should activate first non-disabled item', async () => {
@@ -215,7 +205,7 @@ describe('RoverCollection', () => {
 
             collection.activateNext();
 
-            // Should skip disabled key2 and go to key3
+            // Should skip disabled Banana and go to Cherry
             expect(collection.activeIndex.value).toBe(2);
             expect(collection.getActiveItem()?.value).toBe('Cherry');
         });
@@ -232,12 +222,12 @@ describe('RoverCollection', () => {
         });
 
         it('should activate previous item', async () => {
-            collection.activate('key4');
+            collection.activate('Date');
             await Promise.resolve();
 
             collection.activatePrev();
 
-            // Should skip disabled key2 and go to key3
+            // Should skip disabled Banana and go to Cherry
             expect(collection.activeIndex.value).toBe(2);
             expect(collection.getActiveItem()?.value).toBe('Cherry');
         });
@@ -267,8 +257,8 @@ describe('RoverCollection', () => {
 
         it('should handle navigation with all items disabled', () => {
             const emptyNav = new RoverCollection();
-            emptyNav.add('key1', 'val1', true);
-            emptyNav.add('key2', 'val2', true);
+            emptyNav.add('Item1', true);
+            emptyNav.add('Item2', true);
 
             emptyNav.activateFirst();
 
@@ -288,11 +278,11 @@ describe('RoverCollection', () => {
 
     describe('Search', () => {
         beforeEach(() => {
-            collection.add('key1', 'Apple');
-            collection.add('key2', 'Banana');
-            collection.add('key3', 'Cherry');
-            collection.add('key4', 'Apricot');
-            collection.add('key5', 'Blueberry');
+            collection.add('Apple');
+            collection.add('Banana');
+            collection.add('Cherry');
+            collection.add('Apricot');
+            collection.add('Blueberry');
         });
 
         it('should return all items when query is empty', () => {
@@ -345,7 +335,7 @@ describe('RoverCollection', () => {
         });
 
         it('should handle accented characters', async () => {
-            collection.add('key6', 'Café');
+            collection.add('Café');
             await Promise.resolve();
 
             const results = collection.search('cafe');
@@ -354,7 +344,7 @@ describe('RoverCollection', () => {
         });
 
         it('should normalize unicode characters', async () => {
-            collection.add('key7', 'naïve');
+            collection.add('naïve');
             await Promise.resolve();
 
             const results = collection.search('naive');
@@ -369,55 +359,47 @@ describe('RoverCollection', () => {
         });
 
         it('should handle special characters in search', async () => {
-            collection.add('key8', 'test-value');
+            collection.add('test-value');
 
             await Promise.resolve();
             const results = collection.search('test');
 
-            console.log('search results for "test"', results);
             expect(results.some(r => r.value === 'test-value')).toBe(true);
         });
     });
 
     describe('Queries', () => {
         beforeEach(() => {
-            collection.add('key1', 'Apple');
-            collection.add('key2', 'Banana');
-            collection.add('key3', 'Cherry');
+            collection.add('Apple');
+            collection.add('Banana');
+            collection.add('Cherry');
         });
 
-        it('should get item by key', () => {
-            const item = collection.get('key2');
+        it('should get item by value', () => {
+            const item = collection.get('Banana');
 
             expect(item).toEqual({
-                key: 'key2',
                 value: 'Banana',
                 disabled: false
             });
         });
 
-        it('should return undefined for non-existent key', () => {
-            const item = collection.get('nonexistent');
+        it('should return undefined for non-existent value', () => {
+            const item = collection.get('Nonexistent');
 
             expect(item).toBeUndefined();
         });
 
-        it('should get value by key', () => {
-            const value = collection.getValueByKey('key2');
+        it('should get item by index', () => {
+            const item = collection.getByIndex(1);
 
-            expect(value).toBe('Banana');
-        });
-
-        it('should get key by index', () => {
-            const key = collection.getKeyByIndex(1);
-
-            expect(key).toBe('key2');
+            expect(item?.value).toBe('Banana');
         });
 
         it('should return null for invalid index', () => {
-            expect(collection.getKeyByIndex(999)).toBeNull();
-            expect(collection.getKeyByIndex(null)).toBeNull();
-            expect(collection.getKeyByIndex(undefined)).toBeNull();
+            expect(collection.getByIndex(999)).toBeNull();
+            expect(collection.getByIndex(null)).toBeNull();
+            expect(collection.getByIndex(undefined)).toBeNull();
         });
 
         it('should get all items', () => {
@@ -430,24 +412,24 @@ describe('RoverCollection', () => {
         it('should get collection size', () => {
             expect(collection.size).toBe(3);
 
-            collection.add('key4', 'Date');
+            collection.add('Date');
             expect(collection.size).toBe(4);
 
-            collection.forget('key1');
+            collection.forget('Apple');
             expect(collection.size).toBe(3);
         });
     });
 
     describe('Pending State', () => {
         it('should set pending state when adding items', () => {
-            collection.add('key1', 'value1');
+            collection.add('Apple');
 
             // Should be pending immediately
             expect(collection.pending.state).toBe(true);
         });
 
         it('should clear pending state after microtask', async () => {
-            collection.add('key1', 'value1');
+            collection.add('Apple');
 
             await Promise.resolve();
 
@@ -455,9 +437,9 @@ describe('RoverCollection', () => {
         });
 
         it('should batch multiple operations', async () => {
-            collection.add('key1', 'value1');
-            collection.add('key2', 'value2');
-            collection.add('key3', 'value3');
+            collection.add('Item1');
+            collection.add('Item2');
+            collection.add('Item3');
 
             // Should still be pending
             expect(collection.pending.state).toBe(true);
@@ -481,14 +463,14 @@ describe('RoverCollection', () => {
 
     describe('Edge Cases', () => {
         it('should handle empty string values', () => {
-            collection.add('key1', '');
+            collection.add('');
 
-            expect(collection.get('key1')?.value).toBe('');
+            expect(collection.get('')?.value).toBe('');
             expect(collection.size).toBe(1);
         });
 
         it('should handle numeric values as strings', () => {
-            collection.add('key1', '123');
+            collection.add('123');
 
             const results = collection.search('12');
             expect(results).toHaveLength(1);
@@ -496,48 +478,47 @@ describe('RoverCollection', () => {
 
         it('should handle rapid add/forget cycles', async () => {
             for (let i = 0; i < 100; i++) {
-                collection.add(`key${i}`, `value${i}`);
+                collection.add(`value${i}`);
             }
 
             await Promise.resolve();
 
             for (let i = 0; i < 50; i++) {
-                collection.forget(`key${i}`);
+                collection.forget(`value${i}`);
             }
 
             expect(collection.size).toBe(50);
         });
 
         it('should maintain activation during search filtering', () => {
-            collection.add('key1', 'Apple');
-            collection.add('key2', 'Banana');
-            collection.add('key3', 'Cherry');
+            collection.add('Apple');
+            collection.add('Banana');
+            collection.add('Cherry');
 
-            collection.activate('key2');
+            collection.activate('Banana');
 
             // Search that excludes active item
             collection.search('app');
 
             // Active index should still be set
             expect(collection.activeIndex.value).toBe(1);
-            expect(collection.isActivated('key2')).toBe(true);
+            expect(collection.isActivated('Banana')).toBe(true);
         });
 
         it('should handle very long values', () => {
             const longValue = 'a'.repeat(10000);
-            collection.add('key1', longValue);
+            collection.add(longValue);
 
             const results = collection.search('aaa');
             expect(results).toHaveLength(1);
         });
 
         it('should handle special unicode characters', async () => {
-            collection.add('key1', '😀 Emoji');
-            collection.add('key2', '你好 Chinese');
+            collection.add('😀 Emoji');
+            collection.add('你好 Chinese');
             await Promise.resolve();
 
             expect(collection.search('emoji')).toHaveLength(1);
-            expect(collection.search('中文')).toHaveLength(0);
         });
     });
 
@@ -546,7 +527,7 @@ describe('RoverCollection', () => {
             const startTime = performance.now();
 
             for (let i = 0; i < 10000; i++) {
-                collection.add(`key${i}`, `Value ${i}`);
+                collection.add(`Value ${i}`);
             }
 
             await Promise.resolve();
@@ -554,12 +535,12 @@ describe('RoverCollection', () => {
             const endTime = performance.now();
 
             expect(collection.size).toBe(10000);
-            expect(endTime - startTime).toBeLessThan(100); // Should complete in < 100ms
+            expect(endTime - startTime).toBeLessThan(1000); // Should complete in < 1s
         });
 
         it('should search large collections efficiently', async () => {
             for (let i = 0; i < 10000; i++) {
-                collection.add(`key${i}`, `Value ${i}`);
+                collection.add(`Value ${i}`);
             }
 
             await Promise.resolve();

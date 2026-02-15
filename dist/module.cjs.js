@@ -12,19 +12,13 @@ __export(exports, {
 });
 
 // src/factories/CreateRoverOption.ts
-function CreateRoverOption(Alpine2, id) {
+function CreateRoverOption(Alpine2) {
   return {
-    __uniqueKey: "option-" + id,
     init() {
-      this.$el.dataset.key = this.__uniqueKey;
-      let value;
-      value = Alpine2.extractProp(this.$el, "value", "");
-      if (Object.hasOwn(this.$el.dataset, "key")) {
-        this.$el.dataset.key = this.__uniqueKey;
-      }
       let disabled = Alpine2.extractProp(this.$el, "disabled", false, false);
-      this.__add(this.__uniqueKey, value, disabled);
-      this.__pushOptionToItems(String(id));
+      let value = Alpine2.extractProp(this.$el, "value", "");
+      this.$el.dataset.value = value;
+      this.__add(value, disabled);
       this.$nextTick(() => {
         if (disabled) {
           this.$el.setAttribute("tabindex", "-1");
@@ -41,8 +35,6 @@ function CreateRoverOption(Alpine2, id) {
 var RoverCollection = class {
   constructor(options = {}) {
     this.items = [];
-    this.itemsMap = new Map();
-    this.searchIndex = [];
     this.currentQuery = "";
     this.currentResults = [];
     this.navIndex = [];
@@ -54,23 +46,15 @@ var RoverCollection = class {
     this.activeIndex = Alpine.reactive({value: void 0});
     this.searchThreshold = (_a = options.searchThreshold) != null ? _a : 500;
   }
-  getMap() {
-    return this.itemsMap;
-  }
-  add(key, value, disabled = false) {
-    if (this.itemsMap.has(key))
-      return;
-    const item = {key, value, disabled};
+  add(value, disabled = false) {
+    const item = {value, disabled};
     this.items.push(item);
-    this.itemsMap.set(key, item);
     this.invalidate();
   }
-  forget(key) {
-    const item = this.itemsMap.get(key);
-    if (!item)
+  forget(value) {
+    const index = this.items.findIndex((item) => item.value === value);
+    if (index === -1)
       return;
-    const index = this.items.indexOf(item);
-    this.itemsMap.delete(key);
     this.items.splice(index, 1);
     if (this.activeIndex.value === index) {
       this.activeIndex.value = void 0;
@@ -84,28 +68,18 @@ var RoverCollection = class {
     this.needsReindex = true;
     this.currentQuery = "";
     this.currentResults = [];
-    this.scheduleBatch();
+    this.scheduleBatchAsANextMicroTask();
   }
-  scheduleBatch() {
+  scheduleBatchAsANextMicroTask() {
     if (this.isProcessing)
       return;
     this.isProcessing = true;
     this.pending.state = true;
     queueMicrotask(() => {
-      this.rebuildSearchIndex();
       this.rebuildNavIndex();
       this.isProcessing = false;
       this.pending.state = false;
     });
-  }
-  rebuildSearchIndex() {
-    if (!this.needsReindex)
-      return;
-    this.searchIndex = this.items.map((item) => ({
-      key: item.key,
-      value: String(item.value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    }));
-    this.needsReindex = false;
   }
   rebuildNavIndex() {
     var _a;
@@ -121,47 +95,40 @@ var RoverCollection = class {
     this.pending.state = !this.pending.state;
   }
   search(query) {
-    if (!query) {
+    if (query === "") {
       this.currentQuery = "";
       this.currentResults = [];
       this.rebuildNavIndex();
       return this.items;
     }
-    const q = query.toLowerCase();
-    if (this.currentQuery && q.startsWith(this.currentQuery) && this.currentResults.length > 0) {
-      const filtered = this.currentResults.filter((item) => String(item.value).toLowerCase().includes(q));
-      this.currentQuery = q;
+    const normalized = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (this.currentQuery && normalized.startsWith(this.currentQuery) && this.currentResults.length > 0) {
+      const filtered = this.currentResults.filter((item) => {
+        const itemNormalized = String(item.value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return itemNormalized.includes(normalized);
+      });
+      this.currentQuery = normalized;
       this.currentResults = filtered;
       this.rebuildNavIndex();
       return filtered;
     }
-    this.rebuildSearchIndex();
-    const normalized = q.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    const results = [];
-    for (const {key, value} of this.searchIndex) {
-      if (value.includes(normalized)) {
-        const item = this.itemsMap.get(key);
-        if (item)
-          results.push(item);
-      }
-    }
-    this.currentQuery = q;
+    const results = this.items.filter((item) => {
+      const itemNormalized = String(item.value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      return itemNormalized.includes(normalized);
+    });
+    this.currentQuery = normalized;
     this.currentResults = results;
     this.rebuildNavIndex();
     return results;
   }
-  get(key) {
-    return this.itemsMap.get(key);
+  get(value) {
+    return this.items.find((item) => item.value === value);
   }
-  getValueByKey(key) {
+  getByIndex(index) {
     var _a;
-    return (_a = this.get(key)) == null ? void 0 : _a.value;
-  }
-  getKeyByIndex(index) {
-    var _a, _b;
     if (index == null || index === void 0)
       return null;
-    return (_b = (_a = this.items[index]) == null ? void 0 : _a.key) != null ? _b : null;
+    return (_a = this.items[index]) != null ? _a : null;
   }
   all() {
     return this.items;
@@ -169,13 +136,14 @@ var RoverCollection = class {
   get size() {
     return this.items.length;
   }
-  activate(key) {
-    const item = this.get(key);
-    if (!item || item.disabled)
+  activate(value) {
+    const index = this.items.findIndex((item2) => item2.value === value);
+    if (index === -1)
       return;
-    this.rebuildSearchIndex();
+    const item = this.items[index];
+    if (item == null ? void 0 : item.disabled)
+      return;
     this.rebuildNavIndex();
-    const index = this.items.indexOf(item);
     if (this.activeIndex.value === index)
       return;
     this.activeIndex.value = index;
@@ -185,11 +153,11 @@ var RoverCollection = class {
     this.activeIndex.value = void 0;
     this.activeNavPos = -1;
   }
-  isActivated(key) {
-    const item = this.get(key);
-    if (!item)
+  isActivated(value) {
+    const index = this.items.findIndex((item) => item.value === value);
+    if (index === -1)
       return false;
-    return this.items.indexOf(item) === this.activeIndex.value;
+    return index === this.activeIndex.value;
   }
   getActiveItem() {
     var _a;
@@ -198,7 +166,6 @@ var RoverCollection = class {
     return (_a = this.items[this.activeIndex.value]) != null ? _a : null;
   }
   activateFirst() {
-    this.rebuildSearchIndex();
     this.rebuildNavIndex();
     if (!this.navIndex.length)
       return;
@@ -209,7 +176,6 @@ var RoverCollection = class {
     }
   }
   activateLast() {
-    this.rebuildSearchIndex();
     this.rebuildNavIndex();
     if (!this.navIndex.length)
       return;
@@ -220,7 +186,6 @@ var RoverCollection = class {
     }
   }
   activateNext() {
-    this.rebuildSearchIndex();
     this.rebuildNavIndex();
     if (!this.navIndex.length)
       return;
@@ -235,7 +200,6 @@ var RoverCollection = class {
     }
   }
   activatePrev() {
-    this.rebuildSearchIndex();
     this.rebuildNavIndex();
     if (!this.navIndex.length)
       return;
@@ -272,8 +236,7 @@ function createInputManager(rootDataStack) {
         return;
       const listener = (event) => {
         var _a;
-        const activeKey = (_a = rootDataStack.__activatedKey) != null ? _a : void 0;
-        handler(event, activeKey);
+        handler(event, (_a = rootDataStack.__activatedValue) != null ? _a : void 0);
       };
       bindListener(inputEl, eventKey, listener, this.controller);
     },
@@ -333,8 +296,7 @@ function createOptionManager(root) {
           return;
         const listener = (event) => {
           var _a;
-          const activeKey = (_a = root.__activatedKey) != null ? _a : void 0;
-          handler(event, activeKey);
+          handler(event, (_a = root.__activatedValue) != null ? _a : void 0);
         };
         optionsEls.forEach((option) => {
           bindListener(option, eventKey, listener, this.controller);
@@ -365,8 +327,7 @@ function createOptionsManager(root) {
       const listener = (event) => {
         var _a;
         const optionEl = findClosestOption(event.target);
-        const activeKey = (_a = root.__activatedKey) != null ? _a : null;
-        handler(event, optionEl, activeKey);
+        handler(event, optionEl, (_a = root.__activatedValue) != null ? _a : null);
       };
       bindListener(optionsEl, eventKey, listener, this.controller);
     },
@@ -430,8 +391,7 @@ function createButtonManager(root) {
         return;
       const listener = (event) => {
         var _a;
-        const activeKey = (_a = root.__activatedKey) != null ? _a : void 0;
-        handler(event, activeKey);
+        handler(event, (_a = root.__activatedValue) != null ? _a : void 0);
       };
       bindListener(buttonEl, eventKey, listener, this.controller);
     },
@@ -454,35 +414,32 @@ function CreateRoverRoot({
     __isOpen: false,
     __isTyping: false,
     __isLoading: false,
-    __o_id: -1,
     __g_id: -1,
     __s_id: -1,
     __static: false,
     __keepActivated: true,
     __optionsEl: void 0,
-    __activatedKey: void 0,
-    __selectedKeys: void 0,
+    __activatedValue: void 0,
     __items: [],
     _x__searchQuery: "",
-    __filteredKeys: null,
-    __filteredKeysSet: new Set(),
+    __filteredValues: null,
+    __filteredValuesSet: new Set(),
     __inputManager: void 0,
     __optionsManager: void 0,
     __optionManager: void 0,
     __buttonManager: void 0,
-    __add: (k, v, d) => collection.add(k, v, d),
-    __forget: (k) => collection.forget(k),
-    __activate: (k) => collection.activate(k),
+    __add: (value, disabled) => collection.add(value, disabled),
+    __forget: (value) => collection.forget(value),
+    __activate: (value) => collection.activate(value),
     __deactivate: () => collection.deactivate(),
-    __isActive: (k) => collection.isActivated(k),
-    __getValueByKey: (k) => collection.getValueByKey(k),
+    __isActive: (value) => collection.isActivated(value),
     __getActiveItem: () => collection.getActiveItem(),
     __activateNext: () => collection.activateNext(),
     __activatePrev: () => collection.activatePrev(),
     __activateFirst: () => collection.activateFirst(),
     __activateLast: () => collection.activateLast(),
     __searchUsingQuery: (query) => collection.search(query),
-    __getKeyByIndex: (index) => collection.getKeyByIndex(index),
+    __getByIndex: (index) => collection.getByIndex(index),
     init() {
       this.$el.dataset.slot = SLOT_NAME;
       this.__setupManagers();
@@ -490,60 +447,61 @@ function CreateRoverRoot({
         this.__isLoading = collection.pending.state;
       });
       effect(() => {
-        this.__activatedKey = this.__getKeyByIndex(collection.activeIndex.value);
+        const activeItem = this.__getByIndex(collection.activeIndex.value);
+        console.log(activeItem);
+        this.__activatedValue = activeItem == null ? void 0 : activeItem.value;
       });
       effect(() => {
         if (String(this._x__searchQuery).length > 0) {
-          let results = this.__searchUsingQuery(this._x__searchQuery).map((result) => result.key);
+          let results = this.__searchUsingQuery(this._x__searchQuery).map((result) => result.value);
           if (results.length >= 0) {
-            this.__filteredKeys = results;
+            this.__filteredValues = results;
           }
         } else {
-          this.__filteredKeys = null;
+          this.__filteredValues = null;
         }
-        if (this.__activatedKey && this.__filteredKeys && !this.__filteredKeys.includes(this.__activatedKey)) {
+        if (this.__activatedValue && this.__filteredValues && !this.__filteredValues.includes(this.__activatedValue)) {
           this.__deactivate();
         }
-        if (this.__isOpen && !this.__getActiveItem() && this.__filteredKeys && this.__filteredKeys.length) {
-          this.__activate(this.__filteredKeys[0]);
+        if (this.__isOpen && !this.__getActiveItem() && this.__filteredValues && this.__filteredValues.length) {
+          this.__activate(this.__filteredValues[0]);
         }
       });
       this.$nextTick(() => {
         this.__optionsEls = Array.from(this.$el.querySelectorAll("[x-rover\\:option]"));
         this.__groupsEls = Array.from(this.$el.querySelectorAll("[x-rover\\:group]"));
         effect(() => {
-          const activeKey = this.__activatedKey;
-          const visibleKeys = this.__filteredKeys ? new Set(this.__filteredKeys) : null;
+          const activeValue = this.__activatedValue;
+          const visibleValues = this.__filteredValues ? new Set(this.__filteredValues) : null;
           requestAnimationFrame(() => {
             const options = this.__optionsEls;
             options.forEach((opt) => {
-              const htmlOpt = opt;
-              const key = htmlOpt.dataset.key;
-              if (!key)
+              const value = opt.dataset.value;
+              if (!value)
                 return;
-              if (visibleKeys !== null) {
-                htmlOpt.hidden = !visibleKeys.has(key);
+              if (visibleValues !== null) {
+                opt.hidden = !visibleValues.has(value);
               } else {
-                htmlOpt.hidden = false;
+                opt.hidden = false;
               }
-              if (key === activeKey) {
-                htmlOpt.setAttribute("data-active", "true");
-                htmlOpt.setAttribute("aria-current", "true");
-                htmlOpt.scrollIntoView({block: "nearest"});
+              if (value === activeValue) {
+                opt.setAttribute("data-active", "true");
+                opt.setAttribute("aria-current", "true");
+                opt.scrollIntoView({block: "nearest"});
               } else {
-                htmlOpt.removeAttribute("data-active");
-                htmlOpt.removeAttribute("aria-current");
+                opt.removeAttribute("data-active");
+                opt.removeAttribute("aria-current");
               }
             });
             const groups = this.__groupsEls;
             groups.forEach((group) => {
-              const htmlGroup = group;
-              const options2 = htmlGroup.querySelectorAll("[x-rover\\:option]");
+              const options2 = group.querySelectorAll("[x-rover\\:option]");
               const hasVisibleOption = Array.from(options2).some((opt) => {
                 const htmlOpt = opt;
-                return visibleKeys ? visibleKeys.has(htmlOpt.dataset.key || "") : true;
+                const value = htmlOpt.dataset.value;
+                return visibleValues ? visibleValues.has(value || "") : true;
               });
-              htmlGroup.hidden = !hasVisibleOption;
+              group.hidden = !hasVisibleOption;
             });
           });
         });
@@ -561,26 +519,19 @@ function CreateRoverRoot({
       this.__isOpen = true;
       requestAnimationFrame(() => {
         var _a, _b;
-        (_b = (_a = this.$refs) == null ? void 0 : _a.__input) == null ? void 0 : _b.focus({preventScroll: true});
+        (_b = (_a = this.$refs) == null ? void 0 : _a._x__input) == null ? void 0 : _b.focus({preventScroll: true});
       });
-      this.__onOpenCallback();
     },
-    __pushSeparatorToItems(key) {
+    __pushSeparatorToItems(id) {
       this.__items.push({
         type: "s",
-        key
+        id
       });
     },
-    __pushGroupToItems(key) {
+    __pushGroupToItems(id) {
       this.__items.push({
         type: "g",
-        key
-      });
-    },
-    __pushOptionToItems(key) {
-      this.__items.push({
-        type: "o",
-        key
+        id
       });
     },
     __startTyping() {
@@ -589,9 +540,6 @@ function CreateRoverRoot({
     __stopTyping() {
       this.__isTyping = false;
     },
-    __nextOptionId() {
-      return ++this.__o_id;
-    },
     __nextGroupId() {
       return ++this.__g_id;
     },
@@ -599,8 +547,11 @@ function CreateRoverRoot({
       return ++this.__s_id;
     },
     destroy() {
-      var _a;
+      var _a, _b, _c, _d;
       (_a = this.__inputManager) == null ? void 0 : _a.destroy();
+      (_b = this.__optionManager) == null ? void 0 : _b.destroy();
+      (_c = this.__optionsManager) == null ? void 0 : _c.destroy();
+      (_d = this.__buttonManager) == null ? void 0 : _d.destroy();
     }
   };
 }
@@ -630,9 +581,6 @@ var rover = (el) => {
     deactivate() {
       data.__collection.deactivate();
     },
-    getValueByKey(key) {
-      return data.__collection.getValueByKey(key);
-    },
     getActiveItem() {
       return data.__collection.getActiveItem();
     },
@@ -650,9 +598,6 @@ var rover = (el) => {
     },
     searchUsing(query) {
       return data.__collection.search(query);
-    },
-    getKeyByIndex(index) {
-      return data.__collection.getKeyByIndex(index);
     }
   };
 };
@@ -664,9 +609,6 @@ var roverOption = (dataStack) => ({
   },
   deactivate() {
     dataStack.__collection.deactivate();
-  },
-  getValueByKey(key) {
-    return dataStack.__collection.getValueByKey(key);
   },
   getActiveItem() {
     return dataStack.__collection.getActiveItem();
@@ -685,9 +627,6 @@ var roverOption = (dataStack) => ({
   },
   searchUsing(query) {
     return dataStack.__collection.search(query);
-  },
-  getKeyByIndex(index) {
-    return dataStack.__collection.getKeyByIndex(index);
   }
 });
 
@@ -813,7 +752,7 @@ function rover2(Alpine2) {
       },
       role: "option",
       "x-data"() {
-        return CreateRoverOption(Alpine3, this.__nextOptionId());
+        return CreateRoverOption(Alpine3);
       }
     });
   }
@@ -829,9 +768,6 @@ function rover2(Alpine2) {
       "x-init"() {
         const groupId = this.$id("rover-group");
         this.$el.setAttribute("aria-labelledby", `${groupId}-label`);
-        const id = String(this.__nextGroupId());
-        this.$el.dataset.key = id;
-        this.__pushGroupToItems(id);
       }
     });
   }
@@ -853,7 +789,7 @@ function rover2(Alpine2) {
       tabindex: "-1",
       "aria-haspopup": "true",
       "x-show"() {
-        return Array.isArray(this.__filteredKeys) && this.__filteredKeys.length === 0 && this.__searchQuery.length > 0;
+        return Array.isArray(this.__filteredKeys) && this.__filteredKeys.length === 0 && this._x__searchQuery.length > 0;
       }
     });
   }

@@ -9,10 +9,8 @@ import { createButtonManager } from "src/Managers/ButtonManager";
 
 export default function CreateRoverRoot(
     {
-        // el,
         effect
     }: {
-        // el: AlpineType.ElementWithXAttributes,
         effect: AlpineType.DirectiveUtilities['effect']
     }
 ): RoverRootData {
@@ -31,41 +29,37 @@ export default function CreateRoverRoot(
         __isOpen: false,
         __isTyping: false,
         __isLoading: false,
-        __o_id: -1,
         __g_id: -1,
         __s_id: -1,
         __static: false,
         __keepActivated: true,
         __optionsEl: undefined,
-        __activatedKey: undefined,
-        __selectedKeys: undefined,
+        __activatedValue: undefined,
         __items: [],
         _x__searchQuery: '',
-        __filteredKeys: null,
-        __filteredKeysSet: new Set<string>(),
-
+        __filteredValues: null,  
+        __filteredValuesSet: new Set<string>(),  
         // rover managers 
         __inputManager: undefined,
         __optionsManager: undefined,
         __optionManager: undefined,
         __buttonManager: undefined,
 
-        __add: (k: string, v: string, d: boolean) => collection.add(k, v, d),
-        __forget: (k: string) => collection.forget(k),
-        __activate: (k: string) => collection.activate(k),
+        __add: (value: string, disabled: boolean) => collection.add(value, disabled),
+        __forget: (value: string) => collection.forget(value),
+        __activate: (value: string) => collection.activate(value),
         __deactivate: () => collection.deactivate(),
-        __isActive: (k: string) => collection.isActivated(k),
-        __getValueByKey: (k: string) => collection.getValueByKey(k),
+        __isActive: (value: string) => collection.isActivated(value),
         __getActiveItem: () => collection.getActiveItem(),
         __activateNext: () => collection.activateNext(),
         __activatePrev: () => collection.activatePrev(),
         __activateFirst: () => collection.activateFirst(),
         __activateLast: () => collection.activateLast(),
         __searchUsingQuery: (query: string) => collection.search(query),
-        __getKeyByIndex: (index: number) => collection.getKeyByIndex(index),
+        __getByIndex: (index: number | null | undefined) => collection.getByIndex(index), 
+        
         init() {
             this.$el.dataset.slot = SLOT_NAME;
-
 
             this.__setupManagers();
 
@@ -74,32 +68,34 @@ export default function CreateRoverRoot(
                 this.__isLoading = collection.pending.state;
             });
 
-            // SYNC ACTIVATED KEY
+            // SYNC ACTIVATED VALUE
             effect(() => {
-                this.__activatedKey = this.__getKeyByIndex(collection.activeIndex.value);
+                const activeItem = this.__getByIndex(collection.activeIndex.value);
+                console.log(activeItem);
+                this.__activatedValue = activeItem?.value;  
             });
 
             // SEARCH REACTIVITY
             effect(() => {
                 if (String(this._x__searchQuery).length > 0) {
-                    let results = this.__searchUsingQuery(this._x__searchQuery).map((result: Item) => result.key);
+                    let results = this.__searchUsingQuery(this._x__searchQuery)
+                        .map((result: Item) => result.value);
 
                     if (results.length >= 0) {
-                        this.__filteredKeys = results;
+                        this.__filteredValues = results;
                     }
                 } else {
-                    this.__filteredKeys = null;
+                    this.__filteredValues = null;
                 }
 
-                if (this.__activatedKey && this.__filteredKeys && !this.__filteredKeys.includes(this.__activatedKey)) {
+                if (this.__activatedValue && this.__filteredValues && !this.__filteredValues.includes(this.__activatedValue)) {
                     this.__deactivate();
                 }
 
-                if (this.__isOpen && !this.__getActiveItem() && this.__filteredKeys && this.__filteredKeys.length) {
-                    this.__activate(this.__filteredKeys[0]);
+                if (this.__isOpen && !this.__getActiveItem() && this.__filteredValues && this.__filteredValues.length) {
+                    this.__activate(this.__filteredValues[0]);
                 }
             });
-
 
             this.$nextTick(() => {
                 this.__optionsEls = Array.from(
@@ -110,134 +106,98 @@ export default function CreateRoverRoot(
                     this.$el.querySelectorAll('[x-rover\\:group]')
                 ) as Array<HTMLElement>;
 
-                // HANDLING INDIVIDUAL OPTION VISIBILITY, SELECTION, ACTIVE STATE 
+                // HANDLING INDIVIDUAL OPTION VISIBILITY AND ACTIVE STATE 
                 effect(() => {
-                    const activeKey = this.__activatedKey;
-
-                    const visibleKeys = this.__filteredKeys ? new Set(this.__filteredKeys) : null;
-
-                    // const selectedKeys = new Set(Array.isArray(this.__selectedKeys)
-                    //     ? this.__selectedKeys
-                    //     : this.__selectedKeys
-                    //         ? [this.__selectedKeys]
-                    //         : []
-                    // );
+                    const activeValue = this.__activatedValue;
+                    const visibleValues = this.__filteredValues ? new Set(this.__filteredValues) : null;
 
                     // Batch all DOM updates
                     requestAnimationFrame(() => {
-
                         const options = this.__optionsEls;
 
-                        options.forEach((opt: Element) => {
-                            const htmlOpt = opt as HTMLElement;
-                            const key = htmlOpt.dataset.key;
+                        options.forEach((opt: HTMLElement) => {
+                            const value = opt.dataset.value;  
 
-                            if (!key) return;
+                            if (!value) return;
 
-                            if (visibleKeys !== null) {
-                                htmlOpt.hidden = !visibleKeys.has(key);
+                            // Update visibility
+                            if (visibleValues !== null) {
+                                opt.hidden = !visibleValues.has(value);
                             } else {
-                                htmlOpt.hidden = false;
+                                opt.hidden = false;
                             }
 
-                            if (key === activeKey) {
-                                htmlOpt.setAttribute('data-active', 'true');
-                                htmlOpt.setAttribute('aria-current', 'true');
-
-                                // Scroll into view if needed
-                                htmlOpt.scrollIntoView({ block: 'nearest' });
-
+                            // Update active state
+                            if (value === activeValue) {
+                                opt.setAttribute('data-active', 'true');
+                                opt.setAttribute('aria-current', 'true');
+                                opt.scrollIntoView({ block: 'nearest' });
                             } else {
-                                htmlOpt.removeAttribute('data-active');
-                                htmlOpt.removeAttribute('aria-current');
+                                opt.removeAttribute('data-active');
+                                opt.removeAttribute('aria-current');
                             }
-
-                            // if (selectedKeys.has(key)) {
-                            //     htmlOpt.setAttribute('aria-selected', 'true');
-                            //     htmlOpt.setAttribute('data-selected', 'true');
-                            // } else {
-                            //     htmlOpt.setAttribute('aria-selected', 'false');
-                            //     htmlOpt.removeAttribute('data-selected');
-                            // }
                         });
 
-                        // handle groups visibility based on visible options
+                        // Handle groups visibility based on visible options
                         const groups = this.__groupsEls;
 
-                        groups.forEach((group: Element) => {
-                            const htmlGroup = group as HTMLElement;
-                            const options = htmlGroup.querySelectorAll('[x-rover\\:option]');
+                        groups.forEach((group: HTMLElement) => {
+                            const options = group.querySelectorAll('[x-rover\\:option]');
 
                             // Check if group has any visible options
                             const hasVisibleOption = Array.from(options).some((opt: Element) => {
-
                                 const htmlOpt = opt as HTMLElement;
-
-                                return visibleKeys
-                                    ? visibleKeys.has(htmlOpt.dataset.key || '')
+                                const value = htmlOpt.dataset.value;
+                                
+                                return visibleValues
+                                    ? visibleValues.has(value || '')
                                     : true;
                             });
 
-                            htmlGroup.hidden = !hasVisibleOption;
+                            group.hidden = !hasVisibleOption;
                         });
                     });
                 });
             });
-
         },
 
         __setupManagers() {
             this.__inputManager = createInputManager(this);
-
             this.__optionManager = createOptionManager(this);
-
             this.__optionsManager = createOptionsManager(this);
-
             this.__buttonManager = createButtonManager(this);
         },
+
         __open() {
-            if (this.__isOpen) return
+            if (this.__isOpen) return;
 
             this.__isOpen = true;
 
             requestAnimationFrame(() => {
-                this.$refs?.__input?.focus({ preventScroll: true });
-            })
-
-            this.__onOpenCallback();
+                this.$refs?._x__input?.focus({ preventScroll: true });
+            });
         },
 
-        __pushSeparatorToItems(key: string) {
+        __pushSeparatorToItems(id: string) {
             this.__items.push({
                 type: 's',
-                key,
+                id,
             });
         },
 
-        __pushGroupToItems(key: string) {
+        __pushGroupToItems(id: string) {
             this.__items.push({
                 type: 'g',
-                key,
-            });
-        },
-
-        __pushOptionToItems(key: string) {
-            this.__items.push({
-                type: 'o',
-                key,
+                id,
             });
         },
 
         __startTyping() {
-            this.__isTyping = true
+            this.__isTyping = true;
         },
 
         __stopTyping() {
-            this.__isTyping = false
-        },
-
-        __nextOptionId() {
-            return ++this.__o_id;
+            this.__isTyping = false;
         },
 
         __nextGroupId() {
@@ -250,6 +210,9 @@ export default function CreateRoverRoot(
 
         destroy() {
             this.__inputManager?.destroy();
+            this.__optionManager?.destroy();
+            this.__optionsManager?.destroy();
+            this.__buttonManager?.destroy();
         }
     }
 }

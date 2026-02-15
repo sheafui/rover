@@ -105,7 +105,7 @@ export default function rover(Alpine: Alpine): void {
             'x-bind:id'() { return this.$id('rover-option') },
             'role': 'option',
             'x-data'(this: RoverOptionContext) {
-                return CreateRoverOption(Alpine, this.__nextOptionId());
+                return CreateRoverOption(Alpine);
             },
         });
     }
@@ -117,19 +117,15 @@ export default function rover(Alpine: Alpine): void {
         Alpine.bind(el, {
             'x-id'() { return ['rover-group'] },
             'x-bind:id'() {
-                return this.$id('rover-group')
+                return this.$id('rover-group');
             },
             'role': 'group',
             'x-init'(this: RoverRootContext) {
-                const groupId = this.$id('rover-group')
+                const groupId = this.$id('rover-group');
 
-                this.$el.setAttribute('aria-labelledby', `${groupId}-label`)
-
-                const id = String(this.__nextGroupId());
-                this.$el.dataset.key = id;
-                this.__pushGroupToItems(id);
+                this.$el.setAttribute('aria-labelledby', `${groupId}-label`);
             },
-        })
+        });
     }
 
     function handleButton(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
@@ -147,7 +143,7 @@ export default function rover(Alpine: Alpine): void {
             'tabindex': '-1',
             'aria-haspopup': 'true',
             'x-show'() {
-                return Array.isArray(this.__filteredKeys) && this.__filteredKeys.length === 0 && this.__searchQuery.length > 0;
+                return Array.isArray(this.__filteredKeys) && this.__filteredKeys.length === 0 && this._x__searchQuery.length > 0;
             }
         });
     }
@@ -156,7 +152,7 @@ export default function rover(Alpine: Alpine): void {
         let data = Alpine.$data(el);
 
         if (modifiers.filter((item: string) => item === 'hide')) {
-            // 
+            // @todo 
         }
 
         if (data) {
