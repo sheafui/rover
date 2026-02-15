@@ -6,13 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rover Plugin</title>
 
-
     <script src="./dist/cdn.js"></script>
-
     <link rel="icon" href="data:,">
-
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 
@@ -23,7 +19,7 @@
             <div class="grid grid-cols-[auto_2rem] overflow-hidden">
                 <input x-rover:input placeholder="Search..."
                     class="flex-1 col-start-1 col-span-full overflow-hidden row-start-1 w-full rounded-md bg-transparent py-2 text-neutral-300 placeholder-neutral-300 border border-neutral-500 px-4 focus:outline-none" />
-                <button x-rover:button type="button"
+                <button x-rover:button type="button" autocomplete="none"
                     class="col-start-2 row-start-1 border border-white/10 rounded-r-md text-white flex items-center self-center justify-center size-full">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="size-6">
@@ -32,21 +28,14 @@
                 </button>
             </div>
 
-            <ul 
-                x-rover:options 
-                x-cloak 
-                x-show="isOpen"
-                style="display: none;" 
-                class="mt-1 max-h-60  w-full rounded-md border border-neutral-700 bg-white/5 text-white overflow-auto shadow-lg focus:outline-none">
+            <ul x-rover:options x-cloak x-show="isOpen" style="display: none;"
+                class="mt-1 max-h-60 w-full rounded-md border border-neutral-700 bg-white/5 text-white overflow-auto shadow-lg focus:outline-none">
                 <li class="py-4 text-center" x-rover:empty>
                     No result found
                 </li>
 
                 <template x-for="(item, index) in items" x-bind:key="index">
-                    <li 
-                        x-rover:option 
-                        x-bind:value="item"
-                        x-text="item.toUpperCase()"
+                    <li x-rover:option x-bind:value="item" x-text="item.toUpperCase()"
                         class="px-4 data-selected:bg-red-500/10 data-active:!bg-white/10 py-2">
                     </li>
                 </template>
@@ -70,29 +59,29 @@
                 'mango',
                 'grape'
             ],
-            selectedKeys: 'option-1',
+            selected: 'mango',
+            _previousSelected: undefined,
 
             init() {
+                if (this.count && 1000 > this.items.length) {
+                    const base = [...this.items]
+                    this.items = Array.from({ length: 1000 }, (_, i) => {
+                        return base[i % base.length] + '-' + i
+                    })
+                }
                 let inputManager = this.$rover.input;
-
-
-                // this.$rover.opt();
-                // this.state = this.$rover.fromKeys(this.selectedKeys);
-
-                inputManager.enableDefaultInputHandlers();
-
                 let optionsManager = this.$rover.options;
 
-                this.$watch('selectedKeys', (val) => {
-                    console.log(val)
-                });
-
+                inputManager.enableDefaultInputHandlers();
                 optionsManager.enableDefaultOptionsHandlers();
 
-                inputManager.on('keydown', (event, activeKey) => {
-                    if (event.key === 'Enter' && activeKey !== undefined) {
-                        this.handleSelection(activeKey);
+                this.$watch('selected', (val) => {
+                    console.log('Selected:', val);
+                });
 
+                inputManager.on('keydown', (event, activeValue) => {
+                    if (event.key === 'Enter' && activeValue !== undefined) {
+                        this.handleSelection(activeValue);
                         this.isMultiple || this.close();
                     }
 
@@ -105,57 +94,63 @@
                     }
                 });
 
-                inputManager.on('input', (_event, _activeKey) => this.open());
+                inputManager.on('input', () => this.open());
 
-                this.$rover.button.on('click', (event) => this.handleButtonClick());
+                this.$rover.button.on('click', () => this.handleButtonClick());
 
-                // brainstorming the public APIs to work with
-                optionsManager.on('click', (event, closestOption, activeKey) => {
+                optionsManager.on('click', (event, closestOption) => {
                     if (closestOption !== undefined) {
-                        this.handleSelection(closestOption.dataset.key);
-                        this.isMultiple || this.close();
+                        const value = closestOption.dataset.value;
+                        if (value) {
+                            this.handleSelection(value);
+                            this.isMultiple || this.close();
+                        }
                     }
                 });
 
+                // diff based optimization to update selected and aria selectivity
                 Alpine.effect(() => {
-                    const selectedKeysSet = new Set(
-                        Array.isArray(this.selectedKeys)
-                            ? this.selectedKeys
-                            : this.selectedKeys
-                                ? [this.selectedKeys]
-                                : []
+                    const selectedSet = new Set(
+                        Array.isArray(this.selected) ? this.selected :
+                            this.selected ? [this.selected] : []
                     );
 
-                    // batch dom writes 
-                    this.$rover.options.all.forEach((optionEl) => {
-                        const key = optionEl.dataset.key;
-                        if (!key) return;
+                    const previousSet = this._previousSelected || new Set();
+                    const toAdd = [...selectedSet].filter(v => !previousSet.has(v));
+                    const toRemove = [...previousSet].filter(v => !selectedSet.has(v));
 
-                        if (selectedKeysSet.has(key)) {
-                            optionEl.setAttribute('data-selected', 'true');
-                            optionEl.setAttribute('aria-selected', 'true');
-                        } else {
-                            optionEl.removeAttribute('data-selected');
-                            optionEl.setAttribute('aria-selected', 'false');
-                        }
+                    if (toAdd.length === 0 && toRemove.length === 0) return;
+
+                    requestAnimationFrame(() => {
+                        toAdd.forEach(value => {
+                            const el = this.$rover.options.all.find(opt => opt.dataset.value === value);
+                            if (el) {
+                                el.setAttribute('aria-selected', 'true');
+                                el.dataset.selected = 'true';
+                            }
+                        });
+
+                        toRemove.forEach(value => {
+                            const el = this.$rover.options.all.find(opt => opt.dataset.value === value);
+                            if (el) {
+                                el.setAttribute('aria-selected', 'false');
+                                delete el.dataset.selected;
+                            }
+                        });
                     });
 
-                    this.$nextTick(() => {
-                        // this.state = this.isMultiple ? this.$rover.fromKeys(this.selectedKeys) : this.$rover.fromKey(this.selectedKeys);
-                        // this.selectedKeys = this.$rover.from(this.state)
-                    })
-
-                })
-
-
+                    this._previousSelected = new Set(selectedSet);
+                });
             },
 
             handleButtonClick() {
                 this.isOpen = !this.isOpen;
 
-                if (this.isOpen) this.activateSelectedOrFirst();
+                if (this.isOpen) {
+                    this.activateSelectedOrFirst();
+                }
 
-                this.$refs.__input.focus({})
+                this.$refs._x__input?.focus();
             },
 
             open() {
@@ -166,60 +161,55 @@
                 this.isOpen = false;
             },
 
-            handleSelection(key) {
-
-                let value = this.__getValueByKey(key);
-
+            handleSelection(value) {
                 if (!this.isMultiple) {
-                    this.selectedKeys = key;
-
+                    // Single select
                     if (this.state === value) {
+                        // Deselect
                         this.state = null;
-                        this.selectedKeys = null;
+                        this.selected = null;
                     } else {
+                        // Select
                         this.state = value;
+                        this.selected = value;
                     }
 
-                    this.$refs.__input.value = String(value).toUpperCase();
-
-                    return;
-                }
-
-                if (!Array.isArray(this.selectedKeys)) {
-                    this.selectedKeys = [];
-                }
-
-                if (!Array.isArray(this.state)) {
-                    this.state = [];
-                }
-
-                let index = this.state.indexOf(value);
-
-                let keyIndex = this.selectedKeys.indexOf(key);
-
-                if (index === -1) {
-                    this.state.push(value);
-                    this.selectedKeys.push(key);
+                    this.$refs._x__input.value = String(value).toUpperCase();
                 } else {
-                    this.state.splice(index, 1);
-                    this.selectedKeys.splice(keyIndex, 1);
+                    // Multi-select
+                    if (!Array.isArray(this.selected)) {
+                        this.selected = [];
+                    }
+
+                    if (!Array.isArray(this.state)) {
+                        this.state = [];
+                    }
+
+                    const index = this.state.indexOf(value);
+
+                    if (index === -1) {
+                        // Add to selection
+                        this.state.push(value);
+                        this.selected.push(value);
+                    } else {
+                        // Remove from selection
+                        this.state.splice(index, 1);
+                        this.selected.splice(index, 1);
+                    }
                 }
             },
 
             activateSelectedOrFirst(activateSelected = true) {
-                if (!this.$rover.isOpen) return;
-
                 let activeItem = this.$rover.getActiveItem();
-
                 if (activeItem) return;
 
-                if (activateSelected && this.selectedKeys) {
-                    const keyToActivate = this.isMultiple
-                        ? this.selectedKeys[0]
-                        : this.selectedKeys;
+                if (activateSelected && this.selected) {
+                    const valueToActivate = this.isMultiple
+                        ? this.selected[0]
+                        : this.selected;
 
-                    if (keyToActivate) {
-                        this.$rover.activate(keyToActivate);
+                    if (valueToActivate) {
+                        this.$rover.activate(valueToActivate);
                         return;
                     }
                 }
