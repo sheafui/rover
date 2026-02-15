@@ -4,24 +4,15 @@ import { RoverOptionData, RoverOptionContext } from 'src/types';
 export default function CreateRoverOption(Alpine: AlpineType): RoverOptionData {
     return {
         init(this: RoverOptionContext) {
-            // Setup
-            // this.$el.dataset.key = this.__uniqueKey;
-
-            let value;
-
-            value = Alpine.extractProp(this.$el, 'value', '') as string;
-
-            // if (Object.hasOwn(this.$el.dataset, 'key')) {
-            //     this.$el.dataset.key = this.__uniqueKey;
-            // }
 
             let disabled = Alpine.extractProp(this.$el, 'disabled', false, false) as boolean;
 
-            // this.$el.dataset.value = value;
+            let value = Alpine.extractProp(this.$el, 'value', '') as string;
+            
+            this.$el.dataset.value = value;
 
             // Add to collection
             this.__add(value, disabled);
-            // this.__pushOptionToItems(String(id));
 
             // Set disabled attribute if needed
             this.$nextTick((): void => {

@@ -34,19 +34,17 @@ export default function CreateRoverRoot(
         __static: false,
         __keepActivated: true,
         __optionsEl: undefined,
-        __activatedValue: undefined,  // ✅ Changed from __activatedKey
+        __activatedValue: undefined,
         __items: [],
         _x__searchQuery: '',
-        __filteredValues: null,  // ✅ Changed from __filteredKeys
-        __filteredValuesSet: new Set<string>(),  // ✅ Changed from __filteredKeysSet
-
+        __filteredValues: null,  
+        __filteredValuesSet: new Set<string>(),  
         // rover managers 
         __inputManager: undefined,
         __optionsManager: undefined,
         __optionManager: undefined,
         __buttonManager: undefined,
 
-        // ✅ Simplified collection methods (only 2 params now)
         __add: (value: string, disabled: boolean) => collection.add(value, disabled),
         __forget: (value: string) => collection.forget(value),
         __activate: (value: string) => collection.activate(value),
@@ -58,7 +56,7 @@ export default function CreateRoverRoot(
         __activateFirst: () => collection.activateFirst(),
         __activateLast: () => collection.activateLast(),
         __searchUsingQuery: (query: string) => collection.search(query),
-        __getByIndex: (index: number | null | undefined) => collection.getByIndex(index),  // ✅ New helper
+        __getByIndex: (index: number | null | undefined) => collection.getByIndex(index), 
         
         init() {
             this.$el.dataset.slot = SLOT_NAME;
@@ -73,6 +71,7 @@ export default function CreateRoverRoot(
             // SYNC ACTIVATED VALUE
             effect(() => {
                 const activeItem = this.__getByIndex(collection.activeIndex.value);
+                console.log(activeItem);
                 this.__activatedValue = activeItem?.value;  // ✅ Get value from item
             });
 

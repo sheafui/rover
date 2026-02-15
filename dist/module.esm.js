@@ -2,9 +2,9 @@
 function CreateRoverOption(Alpine2) {
   return {
     init() {
-      let value;
-      value = Alpine2.extractProp(this.$el, "value", "");
       let disabled = Alpine2.extractProp(this.$el, "disabled", false, false);
+      let value = Alpine2.extractProp(this.$el, "value", "");
+      this.$el.dataset.value = value;
       this.__add(value, disabled);
       this.$nextTick(() => {
         if (disabled) {
@@ -427,6 +427,7 @@ function CreateRoverRoot({
       });
       effect(() => {
         const activeItem = this.__getByIndex(collection.activeIndex.value);
+        console.log(activeItem);
         this.__activatedValue = activeItem?.value;
       });
       effect(() => {
@@ -586,9 +587,6 @@ var roverOption = (dataStack) => ({
   deactivate() {
     dataStack.__collection.deactivate();
   },
-  getValueByKey(key) {
-    return dataStack.__collection.getValueByKey(key);
-  },
   getActiveItem() {
     return dataStack.__collection.getActiveItem();
   },
@@ -606,9 +604,6 @@ var roverOption = (dataStack) => ({
   },
   searchUsing(query) {
     return dataStack.__collection.search(query);
-  },
-  getKeyByIndex(index) {
-    return dataStack.__collection.getKeyByIndex(index);
   }
 });
 
