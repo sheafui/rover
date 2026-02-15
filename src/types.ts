@@ -18,48 +18,48 @@ export type SearchIndex = Omit<Item, 'disabled'>;
 
 export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __collection: RoverCollection;
-    __optionsEls: NodeListOf<HTMLElement> | undefined;
-    __groupsEls: NodeListOf<HTMLElement> | undefined;
+    __optionsEls: HTMLElement[] | undefined;  // ✅ Changed from NodeListOf to Array
+    __groupsEls: HTMLElement[] | undefined;   // ✅ Changed from NodeListOf to Array
     __isOpen: boolean;
     __isTyping: boolean;
     __isLoading: boolean;
-    __o_id: number;
+    // ✅ Removed __o_id (no option IDs needed)
     __g_id: number;
     __s_id: number;
     __static: boolean;
     __keepActivated: boolean;
     __items: UIItem[];
     __optionsEl: HTMLElement | undefined;
-    __activatedKey: string | null | undefined;
-    __filteredKeys: string[] | null;
-    __filteredKeysSet: Set<string>;
+    __activatedValue: string | null | undefined;  // ✅ Changed from __activatedKey
+    __filteredValues: string[] | null;  // ✅ Changed from __filteredKeys
+    __filteredValuesSet: Set<string>;  // ✅ Changed from __filteredKeysSet
     _x__searchQuery: string;
-    // input related
+
+    // Managers
     __inputManager: InputManager | undefined;
     __optionManager: OptionManager | undefined;
     __optionsManager: OptionsManager | undefined;
     __buttonManager: ButtonManager | undefined;
 
     // Methods
-    __add: (k: string, v: string, d: boolean) => void;
-    __forget: (k: string) => void;
-    __activate: (k: string) => void;
-    __isActive: (k: string) => boolean;
+    __add: (value: string, disabled: boolean) => void;  // ✅ Simplified (2 params)
+    __forget: (value: string) => void;  // ✅ Uses value
+    __activate: (value: string) => void;  // ✅ Uses value
+    __isActive: (value: string) => boolean;  // ✅ Uses value
     __deactivate: () => void;
-    __getValueByKey: (k: string) => string | undefined;
     __getActiveItem: () => Item | null;
+    __getByIndex: (index: number | null | undefined) => Item | null;  // ✅ New helper
     __activateNext: () => void;
     __activatePrev: () => void;
     __activateFirst: () => void;
     __activateLast: () => void;
     __searchUsingQuery: (query: string) => Item[];
-    __getKeyByIndex: (index: number | null | undefined) => string | null;
     __startTyping: () => void;
     __stopTyping: () => void;
-    __pushGroupToItems: (key: string) => void;
-    __pushOptionToItems: (key: string) => void;
-    __pushSeparatorToItems: (key: string) => void;
-    __nextOptionId: () => number;
+    __pushGroupToItems: (id: string) => void;  // ✅ Renamed param to 'id'
+    __pushSeparatorToItems: (id: string) => void;  // ✅ Renamed param to 'id'
+    // ✅ Removed __pushOptionToItems (not needed)
+    // ✅ Removed __nextOptionId (not needed)
     __nextGroupId: () => number;
     __nextSeparatorId: () => number;
 }
@@ -73,9 +73,7 @@ export interface RoverInputData extends XDataContext {
 
 export type RoverInputContext = RoverRootData & RoverInputData & Magics<RoverInputData>;
 
-export interface RoverOptionData extends XDataContext {
-    __uniqueKey: string;
-}
+export interface RoverOptionData extends XDataContext { }
 
 export type RoverOptionContext = RoverRootData & RoverOptionData & Magics<RoverOptionData>;
 

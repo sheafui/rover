@@ -105,7 +105,7 @@ export default function rover(Alpine: Alpine): void {
             'x-bind:id'() { return this.$id('rover-option') },
             'role': 'option',
             'x-data'(this: RoverOptionContext) {
-                return CreateRoverOption(Alpine, this.__nextOptionId());
+                return CreateRoverOption(Alpine);
             },
         });
     }
@@ -124,10 +124,6 @@ export default function rover(Alpine: Alpine): void {
                 const groupId = this.$id('rover-group');
 
                 this.$el.setAttribute('aria-labelledby', `${groupId}-label`);
-
-                const id = String(this.__nextGroupId());
-                this.$el.dataset.key = id;
-                this.__pushGroupToItems(id);
             },
         });
     }
