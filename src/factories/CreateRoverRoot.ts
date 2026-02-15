@@ -71,7 +71,6 @@ export default function CreateRoverRoot(
             // SYNC ACTIVATED VALUE
             effect(() => {
                 const activeItem = this.__getByIndex(collection.activeIndex.value);
-                console.log(activeItem);
                 this.__activatedValue = activeItem?.value;  
             });
 
@@ -138,24 +137,24 @@ export default function CreateRoverRoot(
                             }
                         });
 
+                        // @TODO 
                         // Handle groups visibility based on visible options
-                        const groups = this.__groupsEls;
+                        // const groups = this.__groupsEls;
 
-                        groups.forEach((group: HTMLElement) => {
-                            const options = group.querySelectorAll('[x-rover\\:option]');
+                        // groups.forEach((group: HTMLElement) => {
+                        //     const options = group.querySelectorAll('[x-rover\\:option]');
 
-                            // Check if group has any visible options
-                            const hasVisibleOption = Array.from(options).some((opt: Element) => {
-                                const htmlOpt = opt as HTMLElement;
-                                const value = htmlOpt.dataset.value;
+                        //     // Check if group has any visible options
+                        //     const hasVisibleOption = Array.from(options).some((opt: Element) => {
+                        //         const htmlOpt = opt as HTMLElement;
+                        //         const value = htmlOpt.dataset.value;
                                 
-                                return visibleValues
-                                    ? visibleValues.has(value || '')
-                                    : true;
-                            });
-
-                            group.hidden = !hasVisibleOption;
-                        });
+                        //         return visibleValues
+                        //             ? visibleValues.has(value || '')
+                        //             : true;
+                        //     });
+                        //     group.hidden = !hasVisibleOption;
+                        // });
                     });
                 });
             });

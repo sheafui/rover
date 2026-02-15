@@ -28,21 +28,14 @@
                 </button>
             </div>
 
-            <ul 
-                x-rover:options 
-                x-cloak 
-                x-show="isOpen"
-                style="display: none;" 
+            <ul x-rover:options x-cloak x-show="isOpen" style="display: none;"
                 class="mt-1 max-h-60 w-full rounded-md border border-neutral-700 bg-white/5 text-white overflow-auto shadow-lg focus:outline-none">
                 <li class="py-4 text-center" x-rover:empty>
                     No result found
                 </li>
 
                 <template x-for="(item, index) in items" x-bind:key="index">
-                    <li 
-                        x-rover:option 
-                        x-bind:value="item"
-                        x-text="item.toUpperCase()"
+                    <li x-rover:option x-bind:value="item" x-text="item.toUpperCase()"
                         class="px-4 data-selected:bg-red-500/10 data-active:!bg-white/10 py-2">
                     </li>
                 </template>
@@ -66,7 +59,8 @@
                 'mango',
                 'grape'
             ],
-            selected: 'tenjarine',  
+            selected: 'mango',
+            _previousSelected: undefined,
 
             init() {
                 let inputManager = this.$rover.input;
@@ -108,28 +102,38 @@
                     }
                 });
 
+                // diff based optimization to update selected and aria selectivity
                 Alpine.effect(() => {
                     const selectedSet = new Set(
-                        Array.isArray(this.selected)
-                            ? this.selected
-                            : this.selected
-                                ? [this.selected]
-                                : []
+                        Array.isArray(this.selected) ? this.selected :
+                            this.selected ? [this.selected] : []
                     );
 
-                    // Batch DOM writes 
-                    this.$rover.options.all.forEach((optionEl) => {
-                        const value = optionEl.dataset.value; 
-                        if (!value) return;
+                    const previousSet = this._previousSelected || new Set();
+                    const toAdd = [...selectedSet].filter(v => !previousSet.has(v));
+                    const toRemove = [...previousSet].filter(v => !selectedSet.has(v));
 
-                        if (selectedSet.has(value)) {
-                            optionEl.setAttribute('data-selected', 'true');
-                            optionEl.setAttribute('aria-selected', 'true');
-                        } else {
-                            optionEl.removeAttribute('data-selected');
-                            optionEl.setAttribute('aria-selected', 'false');
-                        }
+                    if (toAdd.length === 0 && toRemove.length === 0) return;
+
+                    requestAnimationFrame(() => {
+                        toAdd.forEach(value => {
+                            const el = this.$rover.options.all.find(opt => opt.dataset.value === value);
+                            if (el) {
+                                el.setAttribute('aria-selected', 'true');
+                                el.dataset.selected = 'true';
+                            }
+                        });
+
+                        toRemove.forEach(value => {
+                            const el = this.$rover.options.all.find(opt => opt.dataset.value === value);
+                            if (el) {
+                                el.setAttribute('aria-selected', 'false');
+                                delete el.dataset.selected;
+                            }
+                        });
                     });
+
+                    this._previousSelected = new Set(selectedSet);
                 });
             },
 
@@ -195,8 +199,8 @@
 
                 if (activateSelected && this.selected) {
                     const valueToActivate = this.isMultiple
-                        ? this.selected[0]  
-                        : this.selected;    
+                        ? this.selected[0]
+                        : this.selected;
 
                     if (valueToActivate) {
                         this.$rover.activate(valueToActivate);
