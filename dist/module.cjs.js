@@ -41,8 +41,6 @@ function CreateRoverOption(Alpine2, id) {
 var RoverCollection = class {
   constructor(options = {}) {
     this.items = [];
-    this.itemsMap = new Map();
-    this.searchIndex = [];
     this.currentQuery = "";
     this.currentResults = [];
     this.navIndex = [];
@@ -54,23 +52,15 @@ var RoverCollection = class {
     this.activeIndex = Alpine.reactive({value: void 0});
     this.searchThreshold = (_a = options.searchThreshold) != null ? _a : 500;
   }
-  getMap() {
-    return this.itemsMap;
-  }
-  add(key, value, disabled = false) {
-    if (this.itemsMap.has(key))
-      return;
-    const item = {key, value, disabled};
+  add(value, disabled = false) {
+    const item = {value, disabled};
     this.items.push(item);
-    this.itemsMap.set(key, item);
     this.invalidate();
   }
-  forget(key) {
-    const item = this.itemsMap.get(key);
-    if (!item)
+  forget(value) {
+    const index = this.items.findIndex((item) => item.value === value);
+    if (index === -1)
       return;
-    const index = this.items.indexOf(item);
-    this.itemsMap.delete(key);
     this.items.splice(index, 1);
     if (this.activeIndex.value === index) {
       this.activeIndex.value = void 0;
@@ -92,20 +82,10 @@ var RoverCollection = class {
     this.isProcessing = true;
     this.pending.state = true;
     queueMicrotask(() => {
-      this.rebuildSearchIndex();
       this.rebuildNavIndex();
       this.isProcessing = false;
       this.pending.state = false;
     });
-  }
-  rebuildSearchIndex() {
-    if (!this.needsReindex)
-      return;
-    this.searchIndex = this.items.map((item) => ({
-      key: item.key,
-      value: String(item.value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    }));
-    this.needsReindex = false;
   }
   rebuildNavIndex() {
     var _a;
@@ -121,47 +101,40 @@ var RoverCollection = class {
     this.pending.state = !this.pending.state;
   }
   search(query) {
-    if (!query) {
+    if (query === "") {
       this.currentQuery = "";
       this.currentResults = [];
       this.rebuildNavIndex();
       return this.items;
     }
-    const q = query.toLowerCase();
-    if (this.currentQuery && q.startsWith(this.currentQuery) && this.currentResults.length > 0) {
-      const filtered = this.currentResults.filter((item) => String(item.value).toLowerCase().includes(q));
-      this.currentQuery = q;
+    const normalized = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (this.currentQuery && normalized.startsWith(this.currentQuery) && this.currentResults.length > 0) {
+      const filtered = this.currentResults.filter((item) => {
+        const itemNormalized = String(item.value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return itemNormalized.includes(normalized);
+      });
+      this.currentQuery = normalized;
       this.currentResults = filtered;
       this.rebuildNavIndex();
       return filtered;
     }
-    this.rebuildSearchIndex();
-    const normalized = q.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    const results = [];
-    for (const {key, value} of this.searchIndex) {
-      if (value.includes(normalized)) {
-        const item = this.itemsMap.get(key);
-        if (item)
-          results.push(item);
-      }
-    }
-    this.currentQuery = q;
+    const results = this.items.filter((item) => {
+      const itemNormalized = String(item.value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      return itemNormalized.includes(normalized);
+    });
+    this.currentQuery = normalized;
     this.currentResults = results;
     this.rebuildNavIndex();
     return results;
   }
-  get(key) {
-    return this.itemsMap.get(key);
+  get(value) {
+    return this.items.find((item) => item.value === value);
   }
-  getValueByKey(key) {
+  getByIndex(index) {
     var _a;
-    return (_a = this.get(key)) == null ? void 0 : _a.value;
-  }
-  getKeyByIndex(index) {
-    var _a, _b;
     if (index == null || index === void 0)
       return null;
-    return (_b = (_a = this.items[index]) == null ? void 0 : _a.key) != null ? _b : null;
+    return (_a = this.items[index]) != null ? _a : null;
   }
   all() {
     return this.items;
@@ -169,13 +142,14 @@ var RoverCollection = class {
   get size() {
     return this.items.length;
   }
-  activate(key) {
-    const item = this.get(key);
-    if (!item || item.disabled)
+  activate(value) {
+    const index = this.items.findIndex((item2) => item2.value === value);
+    if (index === -1)
       return;
-    this.rebuildSearchIndex();
+    const item = this.items[index];
+    if (item == null ? void 0 : item.disabled)
+      return;
     this.rebuildNavIndex();
-    const index = this.items.indexOf(item);
     if (this.activeIndex.value === index)
       return;
     this.activeIndex.value = index;
@@ -185,11 +159,11 @@ var RoverCollection = class {
     this.activeIndex.value = void 0;
     this.activeNavPos = -1;
   }
-  isActivated(key) {
-    const item = this.get(key);
-    if (!item)
+  isActivated(value) {
+    const index = this.items.findIndex((item) => item.value === value);
+    if (index === -1)
       return false;
-    return this.items.indexOf(item) === this.activeIndex.value;
+    return index === this.activeIndex.value;
   }
   getActiveItem() {
     var _a;
@@ -198,7 +172,6 @@ var RoverCollection = class {
     return (_a = this.items[this.activeIndex.value]) != null ? _a : null;
   }
   activateFirst() {
-    this.rebuildSearchIndex();
     this.rebuildNavIndex();
     if (!this.navIndex.length)
       return;
@@ -209,7 +182,6 @@ var RoverCollection = class {
     }
   }
   activateLast() {
-    this.rebuildSearchIndex();
     this.rebuildNavIndex();
     if (!this.navIndex.length)
       return;
@@ -220,7 +192,6 @@ var RoverCollection = class {
     }
   }
   activateNext() {
-    this.rebuildSearchIndex();
     this.rebuildNavIndex();
     if (!this.navIndex.length)
       return;
@@ -235,7 +206,6 @@ var RoverCollection = class {
     }
   }
   activatePrev() {
-    this.rebuildSearchIndex();
     this.rebuildNavIndex();
     if (!this.navIndex.length)
       return;
