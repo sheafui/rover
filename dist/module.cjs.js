@@ -17,9 +17,10 @@ function CreateRoverOption(Alpine2) {
     init() {
       let disabled = Alpine2.extractProp(this.$el, "disabled", false, false);
       let value = Alpine2.extractProp(this.$el, "value", "");
-      console.log(value, Alpine2.extractProp(this.$el, "data-search", ""));
+      const rawSearch = Alpine2.extractProp(this.$el, "data-search", value);
+      const normalizedSearch = String(rawSearch).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
       this.$el.dataset.value = value;
-      this.__add(value, disabled);
+      this.__add(value, normalizedSearch, disabled);
       this.$nextTick(() => {
         if (disabled) {
           this.$el.setAttribute("tabindex", "-1");
@@ -47,8 +48,8 @@ var RoverCollection = class {
     this.activeIndex = Alpine.reactive({value: void 0});
     this.searchThreshold = (_a = options.searchThreshold) != null ? _a : 500;
   }
-  add(value, disabled = false) {
-    const item = {value, disabled};
+  add(value, searchable, disabled = false) {
+    const item = {value, disabled, searchable};
     this.items.push(item);
     this.invalidate();
   }
@@ -427,12 +428,12 @@ function CreateRoverRoot({
     __filteredValues: null,
     __prevVisibleArray: null,
     __prevActiveValue: void 0,
-    __effectRAF: NaN,
+    __effectRAF: null,
     __inputManager: void 0,
     __optionsManager: void 0,
     __optionManager: void 0,
     __buttonManager: void 0,
-    __add: (value, disabled) => collection.add(value, disabled),
+    __add: (value, search, disabled) => collection.add(value, search, disabled),
     __forget: (value) => collection.forget(value),
     __activate: (value) => collection.activate(value),
     __deactivate: () => collection.deactivate(),

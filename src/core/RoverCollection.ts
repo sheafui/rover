@@ -30,8 +30,8 @@ export default class RoverCollection {
      * Collection Management
      * ------------------------------------- */
 
-    public add(value: string, disabled = false): void {
-        const item = { value, disabled };
+    public add(value: string, searchable: string | undefined, disabled = false): void {
+        const item = { value, disabled, searchable };
         this.items.push(item);
         this.invalidate();
     }

@@ -44,14 +44,14 @@ export default function CreateRoverRoot(
         __prevVisibleArray: null as string[] | null,
         __prevActiveValue: undefined,
 
-        __effectRAF: NaN,
+        __effectRAF: null,
 
         __inputManager: undefined,
         __optionsManager: undefined,
         __optionManager: undefined,
         __buttonManager: undefined,
 
-        __add: (value: string, disabled: boolean) => collection.add(value, disabled),
+        __add: (value: string, search: string | undefined, disabled: boolean) => collection.add(value, search, disabled),
         __forget: (value: string) => collection.forget(value),
         __activate: (value: string) => collection.activate(value),
         __deactivate: () => collection.deactivate(),

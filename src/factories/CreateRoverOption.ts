@@ -9,18 +9,25 @@ export default function CreateRoverOption(Alpine: AlpineType): RoverOptionData {
 
             let value = Alpine.extractProp(this.$el, 'value', '') as string;
 
-            console.log(value, Alpine.extractProp(this.$el, 'data-search', ''))
+            const rawSearch = Alpine.extractProp(this.$el, 'data-search', value) as string;
+
+            const normalizedSearch = String(rawSearch)
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .trim();
+
             this.$el.dataset.value = value;
 
-            // Add to collection
-            this.__add(value, disabled);
+            this.__add(value, normalizedSearch, disabled);
 
-            this.$nextTick((): void => {
+            this.$nextTick(() => {
                 if (disabled) {
                     this.$el.setAttribute('tabindex', '-1');
                 }
             });
-        },
+        }
+        ,
 
         destroy() {
             this.__forget(this.__uniqueKey);

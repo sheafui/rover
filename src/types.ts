@@ -44,7 +44,7 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __buttonManager: ButtonManager | undefined;
 
     // Methods
-    __add: (value: string, disabled: boolean) => void;
+    __add: (value: string, searchable: string | undefined, disabled: boolean) => void;
     __forget: (value: string) => void;
     __activate: (value: string) => void;
     __isActive: (value: string) => boolean;
