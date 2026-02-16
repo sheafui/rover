@@ -88,22 +88,20 @@ var RoverCollection = class {
       this.rebuildNavIndex();
       return this.items;
     }
-    const normalized = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    if (this.currentQuery && normalized.startsWith(this.currentQuery) && this.currentResults.length > 0) {
+    const normalizedQuery = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (this.currentQuery && normalizedQuery.startsWith(this.currentQuery) && this.currentResults.length > 0) {
       const filtered = this.currentResults.filter((item) => {
-        const itemNormalized = String(item.value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        return itemNormalized.includes(normalized);
+        return item.searchable.includes(normalizedQuery);
       });
-      this.currentQuery = normalized;
+      this.currentQuery = normalizedQuery;
       this.currentResults = filtered;
       this.rebuildNavIndex();
       return filtered;
     }
     const results = this.items.filter((item) => {
-      const itemNormalized = String(item.value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      return itemNormalized.includes(normalized);
+      return item.searchable.includes(normalizedQuery);
     });
-    this.currentQuery = normalized;
+    this.currentQuery = normalizedQuery;
     this.currentResults = results;
     this.rebuildNavIndex();
     return results;
@@ -427,7 +425,6 @@ function CreateRoverRoot({
         this.__isLoading = collection.pending.state;
       });
       this.$watch("_x__searchQuery", (query) => {
-        this.__isLoading = true;
         if (query.length > 0) {
           const results = this.__searchUsingQuery(query).map((r) => r.value);
           const prev = this.__filteredValues;
@@ -443,10 +440,9 @@ function CreateRoverRoot({
         if (this.__activatedValue && this.__filteredValues && !this.__filteredValues.includes(this.__activatedValue)) {
           this.__deactivate();
         }
-        if (this.__isOpen && !this.__getActiveItem() && this.__filteredValues && this.__filteredValues.length) {
+        if (!this.__getActiveItem() && this.__filteredValues && this.__filteredValues.length) {
           this.__activate(this.__filteredValues[0]);
         }
-        this.__isLoading = false;
       });
       this.$nextTick(() => {
         this.__optionsEls = Array.from(this.$el.querySelectorAll("[x-rover\\:option]"));
@@ -460,7 +456,7 @@ function CreateRoverRoot({
           const activeItem = this.__getByIndex(collection.activeIndex.value);
           const activeValue = this.__activatedValue = activeItem?.value;
           const visibleValuesArray = this.__filteredValues;
-          if (!Number.isNaN(this.__effectRAF))
+          if (this.__effectRAF !== null)
             cancelAnimationFrame(this.__effectRAF);
           this.__effectRAF = requestAnimationFrame(() => {
             this.__patchItemsVisibility(visibleValuesArray);

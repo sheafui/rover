@@ -51,7 +51,7 @@ export default function CreateRoverRoot(
         __optionManager: undefined,
         __buttonManager: undefined,
 
-        __add: (value: string, search: string | undefined, disabled: boolean) => collection.add(value, search, disabled),
+        __add: (value: string, search: string, disabled: boolean) => collection.add(value, search, disabled),
         __forget: (value: string) => collection.forget(value),
         __activate: (value: string) => collection.activate(value),
         __deactivate: () => collection.deactivate(),
@@ -72,8 +72,6 @@ export default function CreateRoverRoot(
             });
 
             this.$watch('_x__searchQuery', (query: string) => {
-                this.__isLoading = true;
-
                 if (query.length > 0) {
                     const results = this.__searchUsingQuery(query).map((r: Item) => r.value);
 
@@ -94,11 +92,9 @@ export default function CreateRoverRoot(
                     this.__deactivate();
                 }
 
-                if (this.__isOpen && !this.__getActiveItem() && this.__filteredValues && this.__filteredValues.length) {
+                if (!this.__getActiveItem() && this.__filteredValues && this.__filteredValues.length) {
                     this.__activate(this.__filteredValues[0]);
                 }
-
-                this.__isLoading = false;
             });
 
             this.$nextTick(() => {
@@ -118,7 +114,7 @@ export default function CreateRoverRoot(
 
                     const visibleValuesArray = this.__filteredValues;
 
-                    if (!Number.isNaN(this.__effectRAF)) cancelAnimationFrame(this.__effectRAF);
+                    if (this.__effectRAF !== null) cancelAnimationFrame(this.__effectRAF);
 
                     this.__effectRAF = requestAnimationFrame(() => {
                         this.__patchItemsVisibility(visibleValuesArray);

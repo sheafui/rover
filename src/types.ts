@@ -7,6 +7,7 @@ export interface Options {
 
 export interface Item {
     value: string,
+    searchable: string,
     disabled: boolean
 }
 
