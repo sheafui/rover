@@ -5,6 +5,7 @@
       init() {
         let disabled = Alpine2.extractProp(this.$el, "disabled", false, false);
         let value = Alpine2.extractProp(this.$el, "value", "");
+        console.log(value, Alpine2.extractProp(this.$el, "data-search", ""));
         this.$el.dataset.value = value;
         this.__add(value, disabled);
         this.$nextTick(() => {

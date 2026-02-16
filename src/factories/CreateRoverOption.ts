@@ -8,7 +8,8 @@ export default function CreateRoverOption(Alpine: AlpineType): RoverOptionData {
             let disabled = Alpine.extractProp(this.$el, 'disabled', false, false) as boolean;
 
             let value = Alpine.extractProp(this.$el, 'value', '') as string;
-            
+
+            console.log(value, Alpine.extractProp(this.$el, 'data-search', ''))
             this.$el.dataset.value = value;
 
             // Add to collection

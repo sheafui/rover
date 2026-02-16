@@ -70,7 +70,6 @@ export function createOptionsManager(root: RoverRootContext): OptionsManager {
                     );
                 }
             });
-
         },
 
         get all() {
