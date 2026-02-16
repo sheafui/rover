@@ -4,7 +4,9 @@ import { bindListener } from "./utils"
 export function createInputManager(
     rootDataStack: RoverRootContext
 ): InputManager {
-    const inputEl = rootDataStack.$el.querySelector('[x-rover\\:input]') as HTMLInputElement | undefined;
+    console.log(rootDataStack.$root);
+    
+    const inputEl = rootDataStack.$root.querySelector('[x-rover\\:input]') as HTMLInputElement | undefined;
 
     if (!inputEl) {
         console.warn(`Input element with [x-rover\\:input] not found`);

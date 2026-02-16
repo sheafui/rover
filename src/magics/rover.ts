@@ -27,7 +27,9 @@ export const rover = (el: ElementWithXAttributes) => {
         get isLoading(): boolean {
             return data.__isLoading;
         },
-
+        get inputEl(): HTMLElement | null {
+            return data.$root.querySelector('[x-rover\\:input]');
+        },
         activate(key: string) {
             data.__collection.activate(key)
         },

@@ -75,6 +75,7 @@ export default function CreateRoverRoot(
                 if (query.length > 0) {
                     const results = this.__searchUsingQuery(query).map((r: Item) => r.value);
 
+
                     const prev = this.__filteredValues;
 
                     const changed = !prev || prev.length !== results.length || results.some((v: unknown, i: number) => v !== prev[i]);
@@ -114,23 +115,26 @@ export default function CreateRoverRoot(
 
                     const visibleValuesArray = this.__filteredValues;
 
-                    if (this.__effectRAF !== null) cancelAnimationFrame(this.__effectRAF);
+                    console.log(visibleValuesArray);
+
+                    // if (this.__effectRAF !== null) cancelAnimationFrame(this.__effectRAF);
 
                     this.__effectRAF = requestAnimationFrame(() => {
                         this.__patchItemsVisibility(visibleValuesArray);
                         this.__patchItemsActivity(activeValue);
                         this.__handleSeparatorsVisibility();
                         this.__handleGroupsVisibility();
-                        this.__effectRAF = null;
+                        // this.__effectRAF = null;
                     });
                 });
             });
         },
 
         __handleGroupsVisibility() {
-
+            // todo this evenning with vs 
         },
         __handleSeparatorsVisibility() {
+            // todo this evening vith vs
 
         },
         __patchItemsVisibility(visibleValuesArray: string[] | null) {

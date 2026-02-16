@@ -208,7 +208,8 @@ function bindListener(el, eventKey, listener, controller) {
 
 // src/Managers/InputManager.ts
 function createInputManager(rootDataStack) {
-  const inputEl = rootDataStack.$el.querySelector("[x-rover\\:input]");
+  console.log(rootDataStack.$root);
+  const inputEl = rootDataStack.$root.querySelector("[x-rover\\:input]");
   if (!inputEl) {
     console.warn(`Input element with [x-rover\\:input] not found`);
   }
@@ -456,14 +457,12 @@ function CreateRoverRoot({
           const activeItem = this.__getByIndex(collection.activeIndex.value);
           const activeValue = this.__activatedValue = activeItem?.value;
           const visibleValuesArray = this.__filteredValues;
-          if (this.__effectRAF !== null)
-            cancelAnimationFrame(this.__effectRAF);
+          console.log(visibleValuesArray);
           this.__effectRAF = requestAnimationFrame(() => {
             this.__patchItemsVisibility(visibleValuesArray);
             this.__patchItemsActivity(activeValue);
             this.__handleSeparatorsVisibility();
             this.__handleGroupsVisibility();
-            this.__effectRAF = null;
           });
         });
       });
@@ -605,6 +604,9 @@ var rover = (el) => {
     },
     get isLoading() {
       return data.__isLoading;
+    },
+    get inputEl() {
+      return data.$root.querySelector("[x-rover\\:input]");
     },
     activate(key) {
       data.__collection.activate(key);
@@ -749,7 +751,6 @@ function rover2(Alpine2) {
   }
   function handleInput(Alpine3, el) {
     Alpine3.bind(el, {
-      "x-ref": "_x__input",
       "x-model": "_x__searchQuery",
       "x-bind:id"() {
         return this.$id("rover-input");

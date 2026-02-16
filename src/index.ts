@@ -74,7 +74,7 @@ export default function rover(Alpine: Alpine): void {
         el: AlpineType.ElementWithXAttributes
     ): void {
         Alpine.bind(el, {
-            'x-ref': '_x__input',
+            // 'x-ref': '_x__input',
             'x-model': '_x__searchQuery',
             'x-bind:id'() { return this.$id('rover-input') },
             'role': 'combobox',
