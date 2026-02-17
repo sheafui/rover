@@ -32,7 +32,6 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __optionsEl: HTMLElement | undefined;
     __activatedValue: string | null | undefined;
     __filteredValues: string[] | null;
-    _x__searchQuery: string;
 
     __optionIndex: Map<string, HTMLElement> | undefined;
     __prevActivatedValue: string | undefined;

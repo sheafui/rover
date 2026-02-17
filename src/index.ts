@@ -74,7 +74,6 @@ export default function rover(Alpine: Alpine): void {
         el: AlpineType.ElementWithXAttributes
     ): void {
         Alpine.bind(el, {
-            'x-model': '_x__searchQuery',
             'x-bind:id'() { return this.$id('rover-input') },
             'role': 'combobox',
             'tabindex': '0',
@@ -145,7 +144,7 @@ export default function rover(Alpine: Alpine): void {
             'tabindex': '-1',
             'aria-haspopup': 'true',
             'x-show'() {
-                return Array.isArray(this.__filteredValues) && this.__filteredValues.length === 0 && this._x__searchQuery.length > 0;
+                return Array.isArray(this.__filteredValues) && this.__filteredValues.length === 0 && this.__inputManager.value.length > 0;
             }
         });
     }

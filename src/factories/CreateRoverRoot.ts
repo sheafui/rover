@@ -38,7 +38,6 @@ export default function CreateRoverRoot(
         // and groups visibility 
         __items: [],
 
-        _x__searchQuery: '',
         __filteredValues: null,
 
         __prevVisibleArray: null as string[] | null,
@@ -71,14 +70,18 @@ export default function CreateRoverRoot(
                 this.__isLoading = collection.pending.state;
             });
 
-            this.$watch('_x__searchQuery', (query: string) => {
+            // input search
+            this.__inputManager.on('input', (event: InputEvent) => {
+
+                // @ts-ignore
+                let query = event?.target?.value;
+
                 if (query.length > 0) {
                     const results = this.__searchUsingQuery(query).map((r: Item) => r.value);
 
-
                     const prev = this.__filteredValues;
 
-                    const changed = !prev || prev.length !== results.length || results.some((v: unknown, i: number) => v !== prev[i]);
+                    const changed = !prev || prev.length !== results.length || results.some((v: string, i: number) => v !== prev[i]);
 
                     if (changed) {
                         this.__filteredValues = results;
@@ -89,14 +92,48 @@ export default function CreateRoverRoot(
                     }
                 }
 
-                if (this.__activatedValue && this.__filteredValues && !this.__filteredValues.includes(this.__activatedValue)) {
+                if (
+                    this.__activatedValue &&
+                    this.__filteredValues &&
+                    !this.__filteredValues.includes(this.__activatedValue)
+                ) {
                     this.__deactivate();
                 }
 
-                if (!this.__getActiveItem() && this.__filteredValues && this.__filteredValues.length) {
+                if (
+                    !this.__getActiveItem() &&
+                    this.__filteredValues &&
+                    this.__filteredValues.length
+                ) {
                     this.__activate(this.__filteredValues[0]);
                 }
             });
+
+            // this.$watch('_x__searchQuery', (query: string) => {
+            //     if (query.length > 0) {
+            //         const results = this.__searchUsingQuery(query).map((r: Item) => r.value);
+
+            //         const prev = this.__filteredValues;
+
+            //         const changed = !prev || prev.length !== results.length || results.some((v: unknown, i: number) => v !== prev[i]);
+
+            //         if (changed) {
+            //             this.__filteredValues = results;
+            //         }
+            //     } else {
+            //         if (this.__filteredValues !== null) {
+            //             this.__filteredValues = null;
+            //         }
+            //     }
+
+            //     if (this.__activatedValue && this.__filteredValues && !this.__filteredValues.includes(this.__activatedValue)) {
+            //         this.__deactivate();
+            //     }
+
+            //     if (!this.__getActiveItem() && this.__filteredValues && this.__filteredValues.length) {
+            //         this.__activate(this.__filteredValues[0]);
+            //     }
+            // });
 
             this.$nextTick(() => {
                 this.__optionsEls = Array.from(this.$el.querySelectorAll('[x-rover\\:option]')) as Array<HTMLElement>;

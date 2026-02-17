@@ -482,7 +482,6 @@ function CreateRoverRoot({
     __prevActivatedValue: void 0,
     __activatedValue: void 0,
     __items: [],
-    _x__searchQuery: "",
     __filteredValues: null,
     __prevVisibleArray: null,
     __prevActiveValue: void 0,
@@ -508,7 +507,9 @@ function CreateRoverRoot({
       effect(() => {
         this.__isLoading = collection.pending.state;
       });
-      this.$watch("_x__searchQuery", (query) => {
+      this.__inputManager.on("input", (event) => {
+        var _a;
+        let query = (_a = event == null ? void 0 : event.target) == null ? void 0 : _a.value;
         if (query.length > 0) {
           const results = this.__searchUsingQuery(query).map((r) => r.value);
           const prev = this.__filteredValues;
@@ -842,7 +843,6 @@ function rover2(Alpine2) {
   }
   function handleInput(Alpine3, el) {
     Alpine3.bind(el, {
-      "x-model": "_x__searchQuery",
       "x-bind:id"() {
         return this.$id("rover-input");
       },
@@ -915,7 +915,7 @@ function rover2(Alpine2) {
       tabindex: "-1",
       "aria-haspopup": "true",
       "x-show"() {
-        return Array.isArray(this.__filteredValues) && this.__filteredValues.length === 0 && this._x__searchQuery.length > 0;
+        return Array.isArray(this.__filteredValues) && this.__filteredValues.length === 0 && this.__inputManager.value.length > 0;
       }
     });
   }
