@@ -115,7 +115,7 @@ export default function CreateRoverRoot(
 
                     const visibleValuesArray = this.__filteredValues;
 
-                    console.log(visibleValuesArray);
+                    // console.log(visibleValuesArray);
 
                     // if (this.__effectRAF !== null) cancelAnimationFrame(this.__effectRAF);
 

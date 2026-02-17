@@ -208,7 +208,6 @@ function bindListener(el, eventKey, listener, controller) {
 
 // src/Managers/InputManager.ts
 function createInputManager(rootDataStack) {
-  console.log(rootDataStack.$root);
   const inputEl = rootDataStack.$root.querySelector("[x-rover\\:input]");
   if (!inputEl) {
     console.warn(`Input element with [x-rover\\:input] not found`);
@@ -457,7 +456,6 @@ function CreateRoverRoot({
           const activeItem = this.__getByIndex(collection.activeIndex.value);
           const activeValue = this.__activatedValue = activeItem?.value;
           const visibleValuesArray = this.__filteredValues;
-          console.log(visibleValuesArray);
           this.__effectRAF = requestAnimationFrame(() => {
             this.__patchItemsVisibility(visibleValuesArray);
             this.__patchItemsActivity(activeValue);

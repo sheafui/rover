@@ -4,8 +4,6 @@ import { bindListener } from "./utils"
 export function createInputManager(
     rootDataStack: RoverRootContext
 ): InputManager {
-    console.log(rootDataStack.$root);
-    
     const inputEl = rootDataStack.$root.querySelector('[x-rover\\:input]') as HTMLInputElement | undefined;
 
     if (!inputEl) {
