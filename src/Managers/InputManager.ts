@@ -4,10 +4,14 @@ import { bindListener } from "./utils"
 export function createInputManager(
     rootDataStack: RoverRootContext
 ): InputManager {
-    const inputEl = rootDataStack.$el.querySelector('[x-rover\\:input]') as HTMLInputElement | undefined;
+    const inputEl = rootDataStack.$root.querySelector('[x-rover\\:input]') as HTMLInputElement | undefined;
 
-    if (!inputEl) {
-        console.warn(`Input element with [x-rover\\:input] not found`);
+    const inputElExists = (): boolean => {
+        if (!inputEl) {
+            console.warn(`Input element with [x-rover\\:input] not found`);
+            return false
+        }
+        return true
     }
 
     return {
@@ -17,13 +21,14 @@ export function createInputManager(
             eventKey: K,
             handler: (event: HTMLElementEventMap[K], activeKey: string | undefined) => void
         ) {
-            if (!inputEl) return;
+            if (!inputElExists()) return;
+
 
             const listener = (event: HTMLElementEventMap[K]) => {
                 handler(event, rootDataStack.__activatedValue ?? undefined);
             };
 
-            bindListener(inputEl, eventKey, listener, this.controller);
+            bindListener(inputEl!, eventKey, listener, this.controller);
         },
 
         get value(): string {
@@ -34,8 +39,12 @@ export function createInputManager(
             if (inputEl) inputEl.value = val;
         },
 
+        focus(preventScroll: boolean = true): void {
+            requestAnimationFrame(() => inputEl?.focus({ preventScroll }))
+        },
+
         enableDefaultInputHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'> = []) {
-            if (!inputEl) return;
+            if (!inputElExists()) return;
 
             if (!disabledEvents.includes('focus')) {
                 this.on('focus', () => rootDataStack.__startTyping());
@@ -60,8 +69,21 @@ export function createInputManager(
 
                         case 'Escape':
                             e.preventDefault(); e.stopPropagation();
-                            requestAnimationFrame(() => inputEl?.focus({ preventScroll: true }));
+                            requestAnimationFrame(() => this.focus(true));
                             break;
+                        case 'Home':
+                            e.preventDefault();
+                            rootDataStack.__activateFirst();
+                            break;
+
+                        case 'End':
+                            e.preventDefault();
+                            rootDataStack.__activateLast();
+                            break;
+                        case 'Tab':
+                            rootDataStack.__stopTyping();
+                            break;
+
                     }
                 });
             }

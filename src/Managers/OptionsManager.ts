@@ -6,6 +6,7 @@ export function createOptionsManager(root: RoverRootContext): OptionsManager {
 
     const optionsEl = root.$el.querySelector('[x-rover\\:options]') as HTMLElement;
 
+
     if (!optionsEl) console.warn("Options container not found");
 
     const findClosestOption = (el: EventTarget | null): HTMLElement | undefined => {
@@ -29,7 +30,7 @@ export function createOptionsManager(root: RoverRootContext): OptionsManager {
 
             const listener = (event: HTMLElementEventMap[K]) => {
                 const optionEl = findClosestOption(event.target);
-                
+
                 handler(event, optionEl, root.__activatedValue ?? null);
             };
 
@@ -39,37 +40,70 @@ export function createOptionsManager(root: RoverRootContext): OptionsManager {
         findClosestOption,
 
         enableDefaultOptionsHandlers(disabledEvents: string[] = []) {
-            const events = {
-                click: (optionEl: HTMLElement) => {
-                    if (!optionEl.dataset.value) return;
-                    root.$nextTick(() => root.$refs.__input?.focus({ preventScroll: true }));
-                },
-                mouseover: (optionEl: HTMLElement) => {
-                    if (!optionEl.dataset.value) return;
+            if (!optionsEl) return;
+
+            optionsEl.tabIndex = 0;
+
+
+            if (!disabledEvents.includes('mouseover')) {
+                this.on('mouseover', (_event: MouseEvent, optionEl: HTMLElement) => {
+                    if (!optionEl?.dataset.value) return;
                     root.__activate(optionEl.dataset.value);
-                },
-                mousemove: (optionEl: HTMLElement) => {
-                    if (!optionEl.dataset.value || root.__isActive(optionEl.dataset.value)) return;
+                });
+            }
+
+            if (!disabledEvents.includes('mousemove')) {
+                this.on('mousemove', (_event: MouseEvent, optionEl: HTMLElement) => {
+                    if (!optionEl?.dataset.value) return;
+                    if (root.__isActive(optionEl.dataset.value)) return;
+
                     root.__activate(optionEl.dataset.value);
-                },
-                mouseout: () => {
+                });
+            }
+
+            if (!disabledEvents.includes('mouseout')) {
+                this.on('mouseout', () => {
                     if (root.__keepActivated) return;
                     root.__deactivate();
-                }
-            };
+                });
+            }
 
-            Object.entries(events).forEach(([key, handler]) => {
-                if (!disabledEvents.includes(key)) {
-                    this.on(key, (event: Event, optionEl: HTMLElement) => {
-                        event.stopPropagation();
+            if (!disabledEvents.includes('keydown')) {
+                this.on('keydown', (event: KeyboardEvent) => {
+                    event.stopPropagation();
 
-                        if (!optionEl) return;
+                    switch (event.key) {
+                        case 'ArrowDown':
+                            event.preventDefault();
+                            root.__activateNext();
+                            break;
 
-                        handler(optionEl);
+                        case 'ArrowUp':
+                            event.preventDefault();
+                            root.__activatePrev();
+                            break;
+
+                        case 'Home':
+                            event.preventDefault();
+                            root.__activateFirst();
+                            break;
+
+                        case 'End':
+                            event.preventDefault();
+                            root.__activateLast();
+                            break;
+
+                        case 'Escape':
+                            event.preventDefault();
+                            root.__deactivate();
+                            break;
+
+                        case 'Tab':
+                            root.__deactivate();
+                            break;
                     }
-                    );
-                }
-            });
+                });
+            }
 
         },
 

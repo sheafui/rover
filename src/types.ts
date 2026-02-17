@@ -7,6 +7,7 @@ export interface Options {
 
 export interface Item {
     value: string,
+    searchable: string,
     disabled: boolean
 }
 
@@ -44,7 +45,7 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __buttonManager: ButtonManager | undefined;
 
     // Methods
-    __add: (value: string, disabled: boolean) => void;
+    __add: (value: string, searchable: string | undefined, disabled: boolean) => void;
     __forget: (value: string) => void;
     __activate: (value: string) => void;
     __isActive: (value: string) => boolean;
@@ -114,6 +115,7 @@ export interface InputManager extends Destroyable, Abortable {
 
     get value(): string
     set value(val: string)
+    focus: (preventScroll: boolean) => void;
 
     enableDefaultInputHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'>): void
 }

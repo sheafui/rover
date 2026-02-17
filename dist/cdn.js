@@ -5,8 +5,10 @@
       init() {
         let disabled = Alpine2.extractProp(this.$el, "disabled", false, false);
         let value = Alpine2.extractProp(this.$el, "value", "");
+        const rawSearch = Alpine2.extractProp(this.$el, "data-search", value);
+        const normalizedSearch = String(rawSearch).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
         this.$el.dataset.value = value;
-        this.__add(value, disabled);
+        this.__add(value, normalizedSearch, disabled);
         this.$nextTick(() => {
           if (disabled) {
             this.$el.setAttribute("tabindex", "-1");
@@ -33,8 +35,8 @@
       this.activeIndex = Alpine.reactive({value: void 0});
       this.searchThreshold = options.searchThreshold ?? 500;
     }
-    add(value, disabled = false) {
-      const item = {value, disabled};
+    add(value, searchable, disabled = false) {
+      const item = {value, disabled, searchable};
       this.items.push(item);
       this.invalidate();
     }
@@ -87,22 +89,20 @@
         this.rebuildNavIndex();
         return this.items;
       }
-      const normalized = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      if (this.currentQuery && normalized.startsWith(this.currentQuery) && this.currentResults.length > 0) {
+      const normalizedQuery = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      if (this.currentQuery && normalizedQuery.startsWith(this.currentQuery) && this.currentResults.length > 0) {
         const filtered = this.currentResults.filter((item) => {
-          const itemNormalized = String(item.value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-          return itemNormalized.includes(normalized);
+          return item.searchable.includes(normalizedQuery);
         });
-        this.currentQuery = normalized;
+        this.currentQuery = normalizedQuery;
         this.currentResults = filtered;
         this.rebuildNavIndex();
         return filtered;
       }
       const results = this.items.filter((item) => {
-        const itemNormalized = String(item.value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        return itemNormalized.includes(normalized);
+        return item.searchable.includes(normalizedQuery);
       });
-      this.currentQuery = normalized;
+      this.currentQuery = normalizedQuery;
       this.currentResults = results;
       this.rebuildNavIndex();
       return results;
@@ -209,14 +209,18 @@
 
   // src/Managers/InputManager.ts
   function createInputManager(rootDataStack) {
-    const inputEl = rootDataStack.$el.querySelector("[x-rover\\:input]");
-    if (!inputEl) {
-      console.warn(`Input element with [x-rover\\:input] not found`);
-    }
+    const inputEl = rootDataStack.$root.querySelector("[x-rover\\:input]");
+    const inputElExists = () => {
+      if (!inputEl) {
+        console.warn(`Input element with [x-rover\\:input] not found`);
+        return false;
+      }
+      return true;
+    };
     return {
       controller: new AbortController(),
       on(eventKey, handler) {
-        if (!inputEl)
+        if (!inputElExists())
           return;
         const listener = (event) => {
           handler(event, rootDataStack.__activatedValue ?? void 0);
@@ -230,8 +234,11 @@
         if (inputEl)
           inputEl.value = val;
       },
+      focus(preventScroll = true) {
+        requestAnimationFrame(() => inputEl?.focus({preventScroll}));
+      },
       enableDefaultInputHandlers(disabledEvents = []) {
-        if (!inputEl)
+        if (!inputElExists())
           return;
         if (!disabledEvents.includes("focus")) {
           this.on("focus", () => rootDataStack.__startTyping());
@@ -255,7 +262,18 @@
               case "Escape":
                 e.preventDefault();
                 e.stopPropagation();
-                requestAnimationFrame(() => inputEl?.focus({preventScroll: true}));
+                requestAnimationFrame(() => this.focus(true));
+                break;
+              case "Home":
+                e.preventDefault();
+                rootDataStack.__activateFirst();
+                break;
+              case "End":
+                e.preventDefault();
+                rootDataStack.__activateLast();
+                break;
+              case "Tab":
+                rootDataStack.__stopTyping();
                 break;
             }
           });
@@ -314,38 +332,62 @@
       },
       findClosestOption,
       enableDefaultOptionsHandlers(disabledEvents = []) {
-        const events = {
-          click: (optionEl) => {
-            if (!optionEl.dataset.value)
-              return;
-            root.$nextTick(() => root.$refs.__input?.focus({preventScroll: true}));
-          },
-          mouseover: (optionEl) => {
-            if (!optionEl.dataset.value)
+        if (!optionsEl)
+          return;
+        optionsEl.tabIndex = 0;
+        if (!disabledEvents.includes("mouseover")) {
+          this.on("mouseover", (_event, optionEl) => {
+            if (!optionEl?.dataset.value)
               return;
             root.__activate(optionEl.dataset.value);
-          },
-          mousemove: (optionEl) => {
-            if (!optionEl.dataset.value || root.__isActive(optionEl.dataset.value))
+          });
+        }
+        if (!disabledEvents.includes("mousemove")) {
+          this.on("mousemove", (_event, optionEl) => {
+            if (!optionEl?.dataset.value)
+              return;
+            if (root.__isActive(optionEl.dataset.value))
               return;
             root.__activate(optionEl.dataset.value);
-          },
-          mouseout: () => {
+          });
+        }
+        if (!disabledEvents.includes("mouseout")) {
+          this.on("mouseout", () => {
             if (root.__keepActivated)
               return;
             root.__deactivate();
-          }
-        };
-        Object.entries(events).forEach(([key, handler]) => {
-          if (!disabledEvents.includes(key)) {
-            this.on(key, (event, optionEl) => {
-              event.stopPropagation();
-              if (!optionEl)
-                return;
-              handler(optionEl);
-            });
-          }
-        });
+          });
+        }
+        if (!disabledEvents.includes("keydown")) {
+          this.on("keydown", (event) => {
+            event.stopPropagation();
+            switch (event.key) {
+              case "ArrowDown":
+                event.preventDefault();
+                root.__activateNext();
+                break;
+              case "ArrowUp":
+                event.preventDefault();
+                root.__activatePrev();
+                break;
+              case "Home":
+                event.preventDefault();
+                root.__activateFirst();
+                break;
+              case "End":
+                event.preventDefault();
+                root.__activateLast();
+                break;
+              case "Escape":
+                event.preventDefault();
+                root.__deactivate();
+                break;
+              case "Tab":
+                root.__deactivate();
+                break;
+            }
+          });
+        }
       },
       get all() {
         let allOptions = root.__optionsEls;
@@ -403,12 +445,12 @@
       __filteredValues: null,
       __prevVisibleArray: null,
       __prevActiveValue: void 0,
-      __effectRAF: NaN,
+      __effectRAF: null,
       __inputManager: void 0,
       __optionsManager: void 0,
       __optionManager: void 0,
       __buttonManager: void 0,
-      __add: (value, disabled) => collection.add(value, disabled),
+      __add: (value, search, disabled) => collection.add(value, search, disabled),
       __forget: (value) => collection.forget(value),
       __activate: (value) => collection.activate(value),
       __deactivate: () => collection.deactivate(),
@@ -426,7 +468,6 @@
           this.__isLoading = collection.pending.state;
         });
         this.$watch("_x__searchQuery", (query) => {
-          this.__isLoading = true;
           if (query.length > 0) {
             const results = this.__searchUsingQuery(query).map((r) => r.value);
             const prev = this.__filteredValues;
@@ -442,10 +483,9 @@
           if (this.__activatedValue && this.__filteredValues && !this.__filteredValues.includes(this.__activatedValue)) {
             this.__deactivate();
           }
-          if (this.__isOpen && !this.__getActiveItem() && this.__filteredValues && this.__filteredValues.length) {
+          if (!this.__getActiveItem() && this.__filteredValues && this.__filteredValues.length) {
             this.__activate(this.__filteredValues[0]);
           }
-          this.__isLoading = false;
         });
         this.$nextTick(() => {
           this.__optionsEls = Array.from(this.$el.querySelectorAll("[x-rover\\:option]"));
@@ -459,14 +499,11 @@
             const activeItem = this.__getByIndex(collection.activeIndex.value);
             const activeValue = this.__activatedValue = activeItem?.value;
             const visibleValuesArray = this.__filteredValues;
-            if (!Number.isNaN(this.__effectRAF))
-              cancelAnimationFrame(this.__effectRAF);
-            this.__effectRAF = requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
               this.__patchItemsVisibility(visibleValuesArray);
               this.__patchItemsActivity(activeValue);
               this.__handleSeparatorsVisibility();
               this.__handleGroupsVisibility();
-              this.__effectRAF = null;
             });
           });
         });
@@ -577,8 +614,6 @@
         return ++this.__s_id;
       },
       destroy() {
-        if (this.__effectRAF)
-          cancelAnimationFrame(this.__effectRAF);
         this.__inputManager?.destroy();
         this.__optionManager?.destroy();
         this.__optionsManager?.destroy();
@@ -608,6 +643,14 @@
       },
       get isLoading() {
         return data.__isLoading;
+      },
+      get inputEl() {
+        return data.$root.querySelector("[x-rover\\:input]");
+      },
+      reindex() {
+      },
+      getOptionElByValue(value) {
+        return data.__optionIndex?.get(value);
       },
       activate(key) {
         data.__collection.activate(key);
@@ -752,7 +795,6 @@
     }
     function handleInput(Alpine3, el) {
       Alpine3.bind(el, {
-        "x-ref": "_x__input",
         "x-model": "_x__searchQuery",
         "x-bind:id"() {
           return this.$id("rover-input");

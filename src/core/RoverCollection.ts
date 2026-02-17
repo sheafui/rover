@@ -30,8 +30,8 @@ export default class RoverCollection {
      * Collection Management
      * ------------------------------------- */
 
-    public add(value: string, disabled = false): void {
-        const item = { value, disabled };
+    public add(value: string, searchable: string, disabled = false): void {
+        const item = { value, disabled, searchable };
         this.items.push(item);
         this.invalidate();
     }
@@ -108,22 +108,18 @@ export default class RoverCollection {
             return this.items;
         }
 
-        const normalized = query
+        const normalizedQuery = query
             .toLowerCase()
             .normalize('NFD')
             .replace(/[\u0300-\u036f]/g, '');
 
         // Incremental search optimization
-        if (this.currentQuery && normalized.startsWith(this.currentQuery) && this.currentResults.length > 0) {
+        if (this.currentQuery && normalizedQuery.startsWith(this.currentQuery) && this.currentResults.length > 0) {
             const filtered = this.currentResults.filter(item => {
-                const itemNormalized = String(item.value)
-                    .toLowerCase()
-                    .normalize('NFD')
-                    .replace(/[\u0300-\u036f]/g, '');
-                return itemNormalized.includes(normalized);
+                return item.searchable.includes(normalizedQuery);
             });
 
-            this.currentQuery = normalized;
+            this.currentQuery = normalizedQuery;
             this.currentResults = filtered;
             this.rebuildNavIndex();
             return filtered;
@@ -131,14 +127,10 @@ export default class RoverCollection {
 
         // Full search - search items directly
         const results = this.items.filter(item => {
-            const itemNormalized = String(item.value)
-                .toLowerCase()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '');
-            return itemNormalized.includes(normalized);
+            return item.searchable.includes(normalizedQuery);
         });
 
-        this.currentQuery = normalized;
+        this.currentQuery = normalizedQuery;
         this.currentResults = results;
         this.rebuildNavIndex();
 

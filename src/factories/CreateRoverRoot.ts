@@ -44,14 +44,14 @@ export default function CreateRoverRoot(
         __prevVisibleArray: null as string[] | null,
         __prevActiveValue: undefined,
 
-        __effectRAF: NaN,
+        __effectRAF: null,
 
         __inputManager: undefined,
         __optionsManager: undefined,
         __optionManager: undefined,
         __buttonManager: undefined,
 
-        __add: (value: string, disabled: boolean) => collection.add(value, disabled),
+        __add: (value: string, search: string, disabled: boolean) => collection.add(value, search, disabled),
         __forget: (value: string) => collection.forget(value),
         __activate: (value: string) => collection.activate(value),
         __deactivate: () => collection.deactivate(),
@@ -72,10 +72,9 @@ export default function CreateRoverRoot(
             });
 
             this.$watch('_x__searchQuery', (query: string) => {
-                this.__isLoading = true;
-
                 if (query.length > 0) {
                     const results = this.__searchUsingQuery(query).map((r: Item) => r.value);
+
 
                     const prev = this.__filteredValues;
 
@@ -94,17 +93,13 @@ export default function CreateRoverRoot(
                     this.__deactivate();
                 }
 
-                if (this.__isOpen && !this.__getActiveItem() && this.__filteredValues && this.__filteredValues.length) {
+                if (!this.__getActiveItem() && this.__filteredValues && this.__filteredValues.length) {
                     this.__activate(this.__filteredValues[0]);
                 }
-
-                this.__isLoading = false;
             });
 
             this.$nextTick(() => {
-                this.__optionsEls = Array.from(
-                    this.$el.querySelectorAll('[x-rover\\:option]')
-                ) as Array<HTMLElement>;
+                this.__optionsEls = Array.from(this.$el.querySelectorAll('[x-rover\\:option]')) as Array<HTMLElement>;
 
                 this.__optionIndex = new Map();
                 this.__optionsEls.forEach((el: HTMLElement) => {
@@ -114,27 +109,26 @@ export default function CreateRoverRoot(
 
                 effect(() => {
                     const activeItem = this.__getByIndex(collection.activeIndex.value);
+
                     const activeValue = this.__activatedValue = activeItem?.value;
 
                     const visibleValuesArray = this.__filteredValues;
 
-                    if (!Number.isNaN(this.__effectRAF)) cancelAnimationFrame(this.__effectRAF);
-
-                    this.__effectRAF = requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
                         this.__patchItemsVisibility(visibleValuesArray);
                         this.__patchItemsActivity(activeValue);
                         this.__handleSeparatorsVisibility();
                         this.__handleGroupsVisibility();
-                        this.__effectRAF = null;
                     });
                 });
             });
         },
 
         __handleGroupsVisibility() {
-
+            // todo this evenning with vs 
         },
         __handleSeparatorsVisibility() {
+            // todo this evening vith vs
 
         },
         __patchItemsVisibility(visibleValuesArray: string[] | null) {
@@ -189,8 +183,7 @@ export default function CreateRoverRoot(
             }
 
             this.__prevVisibleArray = visibleValuesArray;
-        }
-        ,
+        },
 
         __patchItemsActivity(activeValue: string | undefined) {
 
@@ -263,8 +256,6 @@ export default function CreateRoverRoot(
         },
 
         destroy() {
-            if (this.__effectRAF) cancelAnimationFrame(this.__effectRAF);
-
             this.__inputManager?.destroy();
             this.__optionManager?.destroy();
             this.__optionsManager?.destroy();
