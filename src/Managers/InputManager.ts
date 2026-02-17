@@ -34,6 +34,10 @@ export function createInputManager(
             if (inputEl) inputEl.value = val;
         },
 
+        focus(preventScroll: boolean = true): void {
+            inputEl?.focus({ preventScroll })
+        },
+
         enableDefaultInputHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'> = []) {
             if (!inputEl) return;
 
@@ -60,7 +64,7 @@ export function createInputManager(
 
                         case 'Escape':
                             e.preventDefault(); e.stopPropagation();
-                            requestAnimationFrame(() => inputEl?.focus({ preventScroll: true }));
+                            requestAnimationFrame(() => this.focus(true));
                             break;
                         case 'Home':
                             e.preventDefault();

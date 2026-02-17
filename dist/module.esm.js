@@ -229,6 +229,9 @@ function createInputManager(rootDataStack) {
       if (inputEl)
         inputEl.value = val;
     },
+    focus(preventScroll = true) {
+      inputEl?.focus({preventScroll});
+    },
     enableDefaultInputHandlers(disabledEvents = []) {
       if (!inputEl)
         return;
@@ -254,7 +257,7 @@ function createInputManager(rootDataStack) {
             case "Escape":
               e.preventDefault();
               e.stopPropagation();
-              requestAnimationFrame(() => inputEl?.focus({preventScroll: true}));
+              requestAnimationFrame(() => this.focus(true));
               break;
             case "Home":
               e.preventDefault();
