@@ -30,6 +30,9 @@ export const rover = (el: ElementWithXAttributes) => {
         get inputEl(): HTMLElement | null {
             return data.$root.querySelector('[x-rover\\:input]');
         },
+        getOptionElByValue(value: string): HTMLElement | undefined {
+            return data.__optionIndex?.get(value);
+        },
         activate(key: string) {
             data.__collection.activate(key)
         },

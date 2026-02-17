@@ -632,6 +632,10 @@ var rover = (el) => {
     get inputEl() {
       return data.$root.querySelector("[x-rover\\:input]");
     },
+    getOptionElByValue(value) {
+      var _a;
+      return (_a = data.__optionIndex) == null ? void 0 : _a.get(value);
+    },
     activate(key) {
       data.__collection.activate(key);
     },
