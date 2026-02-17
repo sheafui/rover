@@ -327,6 +327,7 @@
       enableDefaultOptionsHandlers(disabledEvents = []) {
         if (!optionsEl)
           return;
+        optionsEl.tabIndex = 0;
         if (!disabledEvents.includes("mouseover")) {
           this.on("mouseover", (_event, optionEl) => {
             if (!optionEl?.dataset.value)

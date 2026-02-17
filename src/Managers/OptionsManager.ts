@@ -6,6 +6,7 @@ export function createOptionsManager(root: RoverRootContext): OptionsManager {
 
     const optionsEl = root.$el.querySelector('[x-rover\\:options]') as HTMLElement;
 
+
     if (!optionsEl) console.warn("Options container not found");
 
     const findClosestOption = (el: EventTarget | null): HTMLElement | undefined => {
@@ -40,6 +41,8 @@ export function createOptionsManager(root: RoverRootContext): OptionsManager {
 
         enableDefaultOptionsHandlers(disabledEvents: string[] = []) {
             if (!optionsEl) return;
+
+            optionsEl.tabIndex = 0;
 
 
             if (!disabledEvents.includes('mouseover')) {
