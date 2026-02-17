@@ -514,6 +514,7 @@ function CreateRoverRoot({
         effect(() => {
           const activeItem = this.__getByIndex(collection.activeIndex.value);
           const activeValue = this.__activatedValue = activeItem == null ? void 0 : activeItem.value;
+          console.log("activated", this.__activatedValue);
           const visibleValuesArray = this.__filteredValues;
           this.__effectRAF = requestAnimationFrame(() => {
             this.__patchItemsVisibility(visibleValuesArray);

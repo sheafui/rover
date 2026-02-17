@@ -111,7 +111,10 @@ export default function CreateRoverRoot(
 
                 effect(() => {
                     const activeItem = this.__getByIndex(collection.activeIndex.value);
+                    
                     const activeValue = this.__activatedValue = activeItem?.value;
+
+                    console.log('activated', this.__activatedValue);
 
                     const visibleValuesArray = this.__filteredValues;
 

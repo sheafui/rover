@@ -494,6 +494,7 @@
           effect(() => {
             const activeItem = this.__getByIndex(collection.activeIndex.value);
             const activeValue = this.__activatedValue = activeItem?.value;
+            console.log("activated", this.__activatedValue);
             const visibleValuesArray = this.__filteredValues;
             this.__effectRAF = requestAnimationFrame(() => {
               this.__patchItemsVisibility(visibleValuesArray);
