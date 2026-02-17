@@ -6,8 +6,12 @@ export function createInputManager(
 ): InputManager {
     const inputEl = rootDataStack.$root.querySelector('[x-rover\\:input]') as HTMLInputElement | undefined;
 
-    if (!inputEl) {
-        console.warn(`Input element with [x-rover\\:input] not found`);
+    const inputElExists = (): boolean => {
+        if (!inputEl) {
+            console.warn(`Input element with [x-rover\\:input] not found`);
+            return false
+        }
+        return true
     }
 
     return {
@@ -17,13 +21,14 @@ export function createInputManager(
             eventKey: K,
             handler: (event: HTMLElementEventMap[K], activeKey: string | undefined) => void
         ) {
-            if (!inputEl) return;
+            if (!inputElExists()) return;
+
 
             const listener = (event: HTMLElementEventMap[K]) => {
                 handler(event, rootDataStack.__activatedValue ?? undefined);
             };
 
-            bindListener(inputEl, eventKey, listener, this.controller);
+            bindListener(inputEl!, eventKey, listener, this.controller);
         },
 
         get value(): string {
@@ -35,11 +40,11 @@ export function createInputManager(
         },
 
         focus(preventScroll: boolean = true): void {
-            inputEl?.focus({ preventScroll })
+            requestAnimationFrame(() => inputEl?.focus({ preventScroll }))
         },
 
         enableDefaultInputHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'> = []) {
-            if (!inputEl) return;
+            if (!inputElExists()) return;
 
             if (!disabledEvents.includes('focus')) {
                 this.on('focus', () => rootDataStack.__startTyping());

@@ -99,9 +99,7 @@ export default function CreateRoverRoot(
             });
 
             this.$nextTick(() => {
-                this.__optionsEls = Array.from(
-                    this.$el.querySelectorAll('[x-rover\\:option]')
-                ) as Array<HTMLElement>;
+                this.__optionsEls = Array.from(this.$el.querySelectorAll('[x-rover\\:option]')) as Array<HTMLElement>;
 
                 this.__optionIndex = new Map();
                 this.__optionsEls.forEach((el: HTMLElement) => {
@@ -111,23 +109,16 @@ export default function CreateRoverRoot(
 
                 effect(() => {
                     const activeItem = this.__getByIndex(collection.activeIndex.value);
-                    
-                    const activeValue = this.__activatedValue = activeItem?.value;
 
-                    console.log('activated', this.__activatedValue);
+                    const activeValue = this.__activatedValue = activeItem?.value;
 
                     const visibleValuesArray = this.__filteredValues;
 
-                    // console.log(visibleValuesArray);
-
-                    // if (this.__effectRAF !== null) cancelAnimationFrame(this.__effectRAF);
-
-                    this.__effectRAF = requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
                         this.__patchItemsVisibility(visibleValuesArray);
                         this.__patchItemsActivity(activeValue);
                         this.__handleSeparatorsVisibility();
                         this.__handleGroupsVisibility();
-                        // this.__effectRAF = null;
                     });
                 });
             });
@@ -192,8 +183,7 @@ export default function CreateRoverRoot(
             }
 
             this.__prevVisibleArray = visibleValuesArray;
-        }
-        ,
+        },
 
         __patchItemsActivity(activeValue: string | undefined) {
 
@@ -266,8 +256,6 @@ export default function CreateRoverRoot(
         },
 
         destroy() {
-            if (this.__effectRAF) cancelAnimationFrame(this.__effectRAF);
-
             this.__inputManager?.destroy();
             this.__optionManager?.destroy();
             this.__optionsManager?.destroy();

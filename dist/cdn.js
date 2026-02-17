@@ -210,13 +210,17 @@
   // src/Managers/InputManager.ts
   function createInputManager(rootDataStack) {
     const inputEl = rootDataStack.$root.querySelector("[x-rover\\:input]");
-    if (!inputEl) {
-      console.warn(`Input element with [x-rover\\:input] not found`);
-    }
+    const inputElExists = () => {
+      if (!inputEl) {
+        console.warn(`Input element with [x-rover\\:input] not found`);
+        return false;
+      }
+      return true;
+    };
     return {
       controller: new AbortController(),
       on(eventKey, handler) {
-        if (!inputEl)
+        if (!inputElExists())
           return;
         const listener = (event) => {
           handler(event, rootDataStack.__activatedValue ?? void 0);
@@ -231,10 +235,10 @@
           inputEl.value = val;
       },
       focus(preventScroll = true) {
-        inputEl?.focus({preventScroll});
+        requestAnimationFrame(() => inputEl?.focus({preventScroll}));
       },
       enableDefaultInputHandlers(disabledEvents = []) {
-        if (!inputEl)
+        if (!inputElExists())
           return;
         if (!disabledEvents.includes("focus")) {
           this.on("focus", () => rootDataStack.__startTyping());
@@ -494,9 +498,8 @@
           effect(() => {
             const activeItem = this.__getByIndex(collection.activeIndex.value);
             const activeValue = this.__activatedValue = activeItem?.value;
-            console.log("activated", this.__activatedValue);
             const visibleValuesArray = this.__filteredValues;
-            this.__effectRAF = requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
               this.__patchItemsVisibility(visibleValuesArray);
               this.__patchItemsActivity(activeValue);
               this.__handleSeparatorsVisibility();
@@ -611,8 +614,6 @@
         return ++this.__s_id;
       },
       destroy() {
-        if (this.__effectRAF)
-          cancelAnimationFrame(this.__effectRAF);
         this.__inputManager?.destroy();
         this.__optionManager?.destroy();
         this.__optionsManager?.destroy();
@@ -645,6 +646,8 @@
       },
       get inputEl() {
         return data.$root.querySelector("[x-rover\\:input]");
+      },
+      reindex() {
       },
       getOptionElByValue(value) {
         return data.__optionIndex?.get(value);

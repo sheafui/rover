@@ -24,11 +24,17 @@ export const rover = (el: ElementWithXAttributes) => {
             return data.__buttonManager;
         },
 
+
         get isLoading(): boolean {
             return data.__isLoading;
         },
         get inputEl(): HTMLElement | null {
             return data.$root.querySelector('[x-rover\\:input]');
+        },
+
+        // re wire up the internal index to catch changes on the dom
+        reindex(){
+            // @todo
         },
         getOptionElByValue(value: string): HTMLElement | undefined {
             return data.__optionIndex?.get(value);

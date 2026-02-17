@@ -226,13 +226,17 @@ function bindListener(el, eventKey, listener, controller) {
 // src/Managers/InputManager.ts
 function createInputManager(rootDataStack) {
   const inputEl = rootDataStack.$root.querySelector("[x-rover\\:input]");
-  if (!inputEl) {
-    console.warn(`Input element with [x-rover\\:input] not found`);
-  }
+  const inputElExists = () => {
+    if (!inputEl) {
+      console.warn(`Input element with [x-rover\\:input] not found`);
+      return false;
+    }
+    return true;
+  };
   return {
     controller: new AbortController(),
     on(eventKey, handler) {
-      if (!inputEl)
+      if (!inputElExists())
         return;
       const listener = (event) => {
         var _a;
@@ -248,10 +252,10 @@ function createInputManager(rootDataStack) {
         inputEl.value = val;
     },
     focus(preventScroll = true) {
-      inputEl == null ? void 0 : inputEl.focus({preventScroll});
+      requestAnimationFrame(() => inputEl == null ? void 0 : inputEl.focus({preventScroll}));
     },
     enableDefaultInputHandlers(disabledEvents = []) {
-      if (!inputEl)
+      if (!inputElExists())
         return;
       if (!disabledEvents.includes("focus")) {
         this.on("focus", () => rootDataStack.__startTyping());
@@ -514,9 +518,8 @@ function CreateRoverRoot({
         effect(() => {
           const activeItem = this.__getByIndex(collection.activeIndex.value);
           const activeValue = this.__activatedValue = activeItem == null ? void 0 : activeItem.value;
-          console.log("activated", this.__activatedValue);
           const visibleValuesArray = this.__filteredValues;
-          this.__effectRAF = requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
             this.__patchItemsVisibility(visibleValuesArray);
             this.__patchItemsActivity(activeValue);
             this.__handleSeparatorsVisibility();
@@ -633,8 +636,6 @@ function CreateRoverRoot({
     },
     destroy() {
       var _a, _b, _c, _d;
-      if (this.__effectRAF)
-        cancelAnimationFrame(this.__effectRAF);
       (_a = this.__inputManager) == null ? void 0 : _a.destroy();
       (_b = this.__optionManager) == null ? void 0 : _b.destroy();
       (_c = this.__optionsManager) == null ? void 0 : _c.destroy();
@@ -667,6 +668,8 @@ var rover = (el) => {
     },
     get inputEl() {
       return data.$root.querySelector("[x-rover\\:input]");
+    },
+    reindex() {
     },
     getOptionElByValue(value) {
       var _a;
