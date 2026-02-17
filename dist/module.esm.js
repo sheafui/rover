@@ -256,6 +256,17 @@ function createInputManager(rootDataStack) {
               e.stopPropagation();
               requestAnimationFrame(() => inputEl?.focus({preventScroll: true}));
               break;
+            case "Home":
+              e.preventDefault();
+              rootDataStack.__activateFirst();
+              break;
+            case "End":
+              e.preventDefault();
+              rootDataStack.__activateLast();
+              break;
+            case "Tab":
+              rootDataStack.__stopTyping();
+              break;
           }
         });
       }
@@ -313,38 +324,61 @@ function createOptionsManager(root) {
     },
     findClosestOption,
     enableDefaultOptionsHandlers(disabledEvents = []) {
-      const events = {
-        click: (optionEl) => {
-          if (!optionEl.dataset.value)
-            return;
-          root.$nextTick(() => root.$refs.__input?.focus({preventScroll: true}));
-        },
-        mouseover: (optionEl) => {
-          if (!optionEl.dataset.value)
+      if (!optionsEl)
+        return;
+      if (!disabledEvents.includes("mouseover")) {
+        this.on("mouseover", (_event, optionEl) => {
+          if (!optionEl?.dataset.value)
             return;
           root.__activate(optionEl.dataset.value);
-        },
-        mousemove: (optionEl) => {
-          if (!optionEl.dataset.value || root.__isActive(optionEl.dataset.value))
+        });
+      }
+      if (!disabledEvents.includes("mousemove")) {
+        this.on("mousemove", (_event, optionEl) => {
+          if (!optionEl?.dataset.value)
+            return;
+          if (root.__isActive(optionEl.dataset.value))
             return;
           root.__activate(optionEl.dataset.value);
-        },
-        mouseout: () => {
+        });
+      }
+      if (!disabledEvents.includes("mouseout")) {
+        this.on("mouseout", () => {
           if (root.__keepActivated)
             return;
           root.__deactivate();
-        }
-      };
-      Object.entries(events).forEach(([key, handler]) => {
-        if (!disabledEvents.includes(key)) {
-          this.on(key, (event, optionEl) => {
-            event.stopPropagation();
-            if (!optionEl)
-              return;
-            handler(optionEl);
-          });
-        }
-      });
+        });
+      }
+      if (!disabledEvents.includes("keydown")) {
+        this.on("keydown", (event) => {
+          event.stopPropagation();
+          switch (event.key) {
+            case "ArrowDown":
+              event.preventDefault();
+              root.__activateNext();
+              break;
+            case "ArrowUp":
+              event.preventDefault();
+              root.__activatePrev();
+              break;
+            case "Home":
+              event.preventDefault();
+              root.__activateFirst();
+              break;
+            case "End":
+              event.preventDefault();
+              root.__activateLast();
+              break;
+            case "Escape":
+              event.preventDefault();
+              root.__deactivate();
+              break;
+            case "Tab":
+              root.__deactivate();
+              break;
+          }
+        });
+      }
     },
     get all() {
       let allOptions = root.__optionsEls;

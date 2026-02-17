@@ -62,6 +62,19 @@ export function createInputManager(
                             e.preventDefault(); e.stopPropagation();
                             requestAnimationFrame(() => inputEl?.focus({ preventScroll: true }));
                             break;
+                        case 'Home':
+                            e.preventDefault();
+                            rootDataStack.__activateFirst();
+                            break;
+
+                        case 'End':
+                            e.preventDefault();
+                            rootDataStack.__activateLast();
+                            break;
+                        case 'Tab':
+                            rootDataStack.__stopTyping();
+                            break;
+
                     }
                 });
             }
