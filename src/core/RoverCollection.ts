@@ -18,6 +18,10 @@ export default class RoverCollection {
     private isProcessing = false;
     public pending: Pending;
 
+    private typedBuffer = '';
+    private bufferResetTimeout: ReturnType<typeof setTimeout> | null = null;
+    private bufferDelay = 1500;
+
     public searchThreshold: number;
 
     public constructor(options: Options = {}) {
@@ -260,22 +264,32 @@ export default class RoverCollection {
         }
     }
 
-    /* ----------------------------------------
-    * Type-to-Activate Helper
-    * ------------------------------------- */
-    public activateByKey(char: string): void {
-        if (!char) return;
-        const lowerChar = char.toLowerCase();
+    public activateByKey(key: string): void {
+        if (!/^[a-zA-Z0-9]$/.test(key)) return;
 
-        // Only consider items that are not disabled
-        const target = this.items.find(item =>
-            !item.disabled &&
-            item.value.toLowerCase().startsWith(lowerChar)
-        );
+        const normalizedKey = key.toLowerCase();
 
-        if (target) {
-            this.activate(target.value);
+        this.typedBuffer += normalizedKey;
+
+        if (this.bufferResetTimeout) clearTimeout(this.bufferResetTimeout);
+
+        this.bufferResetTimeout = setTimeout(() => {
+            this.typedBuffer = '';
+        }, this.bufferDelay);
+
+        const searchItems = this.currentResults.length > 0 ? this.currentResults : this.items;
+        const startIndex = this.activeIndex.value !== undefined ? this.activeIndex.value + 1 : 0;
+        const total = searchItems.length;
+
+        for (let i = 0; i < total; i++) {
+            const index = (startIndex + i) % total;
+            const item = searchItems[index];
+            if (!item?.disabled && item?.value.toLowerCase().startsWith(this.typedBuffer)) {
+                this.activate(item.value);
+                break;
+            }
         }
     }
+
 
 }

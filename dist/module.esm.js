@@ -30,6 +30,9 @@ var RoverCollection = class {
     this.activeNavPos = -1;
     this.needsReindex = false;
     this.isProcessing = false;
+    this.typedBuffer = "";
+    this.bufferResetTimeout = null;
+    this.bufferDelay = 1500;
     this.pending = Alpine.reactive({state: false});
     this.activeIndex = Alpine.reactive({value: void 0});
     this.searchThreshold = options.searchThreshold ?? 500;
@@ -196,13 +199,26 @@ var RoverCollection = class {
       this.activeIndex.value = prevIndex;
     }
   }
-  activateByKey(char) {
-    if (!char)
+  activateByKey(key) {
+    if (!/^[a-zA-Z0-9]$/.test(key))
       return;
-    const lowerChar = char.toLowerCase();
-    const target = this.items.find((item) => !item.disabled && item.value.toLowerCase().startsWith(lowerChar));
-    if (target) {
-      this.activate(target.value);
+    const normalizedKey = key.toLowerCase();
+    this.typedBuffer += normalizedKey;
+    if (this.bufferResetTimeout)
+      clearTimeout(this.bufferResetTimeout);
+    this.bufferResetTimeout = setTimeout(() => {
+      this.typedBuffer = "";
+    }, this.bufferDelay);
+    const searchItems = this.currentResults.length > 0 ? this.currentResults : this.items;
+    const startIndex = this.activeIndex.value !== void 0 ? this.activeIndex.value + 1 : 0;
+    const total = searchItems.length;
+    for (let i = 0; i < total; i++) {
+      const index = (startIndex + i) % total;
+      const item = searchItems[index];
+      if (!item?.disabled && item?.value.toLowerCase().startsWith(this.typedBuffer)) {
+        this.activate(item.value);
+        break;
+      }
     }
   }
 };
