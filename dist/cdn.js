@@ -197,6 +197,15 @@
         this.activeIndex.value = prevIndex;
       }
     }
+    activateByKey(char) {
+      if (!char)
+        return;
+      const lowerChar = char.toLowerCase();
+      const target = this.items.find((item) => !item.disabled && item.value.toLowerCase().startsWith(lowerChar));
+      if (target) {
+        this.activate(target.value);
+      }
+    }
   };
   var RoverCollection_default = RoverCollection;
 
@@ -672,6 +681,9 @@
       },
       activateLast() {
         data.__collection.activateLast();
+      },
+      activateByKey(key) {
+        data.__collection.activateByKey(key);
       },
       searchUsing(query) {
         return data.__collection.search(query);

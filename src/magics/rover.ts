@@ -33,7 +33,7 @@ export const rover = (el: ElementWithXAttributes) => {
         },
 
         // re wire up the internal index to catch changes on the dom
-        reindex(){
+        reindex() {
             // @todo
         },
         getOptionElByValue(value: string): HTMLElement | undefined {
@@ -59,6 +59,9 @@ export const rover = (el: ElementWithXAttributes) => {
         },
         activateLast() {
             data.__collection.activateLast()
+        },
+        activateByKey(key: string) {
+            data.__collection.activateByKey(key);
         },
         searchUsing(query: string): Item[] {
             return data.__collection.search(query)

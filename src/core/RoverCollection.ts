@@ -259,4 +259,23 @@ export default class RoverCollection {
             this.activeIndex.value = prevIndex;
         }
     }
+
+    /* ----------------------------------------
+    * Type-to-Activate Helper
+    * ------------------------------------- */
+    public activateByKey(char: string): void {
+        if (!char) return;
+        const lowerChar = char.toLowerCase();
+
+        // Only consider items that are not disabled
+        const target = this.items.find(item =>
+            !item.disabled &&
+            item.value.toLowerCase().startsWith(lowerChar)
+        );
+
+        if (target) {
+            this.activate(target.value);
+        }
+    }
+
 }
