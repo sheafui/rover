@@ -33,7 +33,7 @@ export const rover = (el: ElementWithXAttributes) => {
         },
 
         // re wire up the internal index to catch changes on the dom
-        reindex() {
+        reIndex() {
             // @todo
         },
         getOptionElByValue(value: string): HTMLElement | undefined {

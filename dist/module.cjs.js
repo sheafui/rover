@@ -41,11 +41,10 @@ var RoverCollection = class {
     this.currentResults = [];
     this.navIndex = [];
     this.activeNavPos = -1;
-    this.needsReindex = false;
     this.isProcessing = false;
     this.typedBuffer = "";
     this.bufferResetTimeout = null;
-    this.bufferDelay = 1500;
+    this.bufferDelay = 500;
     var _a;
     this.pending = Alpine.reactive({state: false});
     this.activeIndex = Alpine.reactive({value: void 0});
@@ -70,7 +69,6 @@ var RoverCollection = class {
     this.invalidate();
   }
   invalidate() {
-    this.needsReindex = true;
     this.currentQuery = "";
     this.currentResults = [];
     this.scheduleBatchAsANextMicroTask();
@@ -230,7 +228,7 @@ var RoverCollection = class {
     for (let i = 0; i < total; i++) {
       const index = (startIndex + i) % total;
       const item = searchItems[index];
-      if (!(item == null ? void 0 : item.disabled) && (item == null ? void 0 : item.value.toLowerCase().startsWith(this.typedBuffer))) {
+      if (!(item == null ? void 0 : item.disabled) && (item == null ? void 0 : item.searchable.toLowerCase().startsWith(this.typedBuffer))) {
         this.activate(item.value);
         break;
       }
@@ -692,7 +690,7 @@ var rover = (el) => {
     get inputEl() {
       return data.$root.querySelector("[x-rover\\:input]");
     },
-    reindex() {
+    reIndex() {
     },
     getOptionElByValue(value) {
       var _a;

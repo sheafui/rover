@@ -14,13 +14,12 @@ export default class RoverCollection {
     public activeIndex: ActiveIndex;
 
     // Batch processing
-    private needsReindex: boolean = false;
     private isProcessing = false;
     public pending: Pending;
 
     private typedBuffer = '';
     private bufferResetTimeout: ReturnType<typeof setTimeout> | null = null;
-    private bufferDelay = 1500;
+    private bufferDelay = 500;
 
     public searchThreshold: number;
 
@@ -63,7 +62,6 @@ export default class RoverCollection {
      * ------------------------------------- */
 
     private invalidate(): void {
-        this.needsReindex = true;
         this.currentQuery = '';
         this.currentResults = [];
         this.scheduleBatchAsANextMicroTask();
@@ -284,7 +282,7 @@ export default class RoverCollection {
         for (let i = 0; i < total; i++) {
             const index = (startIndex + i) % total;
             const item = searchItems[index];
-            if (!item?.disabled && item?.value.toLowerCase().startsWith(this.typedBuffer)) {
+            if (!item?.disabled && item?.searchable.toLowerCase().startsWith(this.typedBuffer)) {
                 this.activate(item.value);
                 break;
             }
