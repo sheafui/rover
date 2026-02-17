@@ -264,9 +264,9 @@ export default class RoverCollection {
         }
     }
 
+    // type ahead algorithm
     public activateByKey(key: string): void {
-        if (!/^[a-zA-Z0-9]$/.test(key)) return;
-
+       
         const normalizedKey = key.toLowerCase();
 
         this.typedBuffer += normalizedKey;

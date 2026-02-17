@@ -200,8 +200,6 @@ var RoverCollection = class {
     }
   }
   activateByKey(key) {
-    if (!/^[a-zA-Z0-9]$/.test(key))
-      return;
     const normalizedKey = key.toLowerCase();
     this.typedBuffer += normalizedKey;
     if (this.bufferResetTimeout)
