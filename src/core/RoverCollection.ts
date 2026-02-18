@@ -37,10 +37,7 @@ export default class RoverCollection {
 
         const item = { value, disabled, searchable };
 
-        console.log(item)
         this.items.push(item);
-
-        console.log(this.items);
 
         this.invalidate();
     }
@@ -99,7 +96,7 @@ export default class RoverCollection {
             }
         }
 
-        console.log(this.navIndex);
+        console.log('nav index:', this.navIndex);
     }
 
     public toggleIsPending(): void {
@@ -173,10 +170,13 @@ export default class RoverCollection {
      * ------------------------------------- */
 
     public activate(value: string): void {
+        console.log(value);
         const index = this.items.findIndex(item => item.value === value);
+
         if (index === -1) return;
 
         const item = this.items[index];
+        
         if (item?.disabled) return;
 
         this.rebuildNavIndex();

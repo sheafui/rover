@@ -53,9 +53,7 @@ var RoverCollection = class {
   }
   add(value, searchable, disabled = false) {
     const item = {value, disabled, searchable};
-    console.log(item);
     this.items.push(item);
-    console.log(this.items);
     this.invalidate();
   }
   forget(value) {
@@ -96,7 +94,7 @@ var RoverCollection = class {
         this.navIndex.push(i);
       }
     }
-    console.log(this.navIndex);
+    console.log("nav index:", this.navIndex);
   }
   toggleIsPending() {
     this.pending.state = !this.pending.state;
@@ -142,6 +140,7 @@ var RoverCollection = class {
     return this.items.length;
   }
   activate(value) {
+    console.log(value);
     const index = this.items.findIndex((item2) => item2.value === value);
     if (index === -1)
       return;
@@ -515,31 +514,33 @@ function CreateRoverRoot({
       effect(() => {
         this.__externalQuery && console.log("searching...");
       });
-      this.__inputManager.on("input", (event) => {
+      effect(() => {
         var _a;
+        this.__activatedValue = (_a = this.__getByIndex(collection.activeIndex.value)) == null ? void 0 : _a.value;
+      });
+      this.__inputManager.on("input", (event) => {
+        var _a, _b;
         const inputEl = event == null ? void 0 : event.target;
-        const itIsRemotlyDrivenSearch = ((_a = inputEl == null ? void 0 : inputEl._x_model) == null ? void 0 : _a.get()) !== void 0;
-        if (itIsRemotlyDrivenSearch) {
-          return;
-        }
-        let query = inputEl.value;
-        if (query.length > 0 && itIsRemotlyDrivenSearch) {
-          const results = this.__searchUsingQuery(query).map((r) => r.value);
-          const prev = this.__filteredValues;
-          const changed = !prev || prev.length !== results.length || results.some((v, i) => v !== prev[i]);
-          if (changed) {
-            this.__filteredValues = results;
-          }
-        } else {
-          if (this.__filteredValues !== null) {
+        const isRemoteSearch = ((_a = inputEl._x_model) == null ? void 0 : _a.get()) !== void 0;
+        if (!isRemoteSearch) {
+          const query = inputEl.value;
+          if (query.length > 0) {
+            const results = this.__searchUsingQuery(query).map((r) => r.value);
+            const prev = this.__filteredValues;
+            const changed = !prev || prev.length !== results.length || results.some((v, i) => v !== prev[i]);
+            if (changed)
+              this.__filteredValues = results;
+          } else
             this.__filteredValues = null;
-          }
         }
-        if (this.__activatedValue && this.__filteredValues && !this.__filteredValues.includes(this.__activatedValue)) {
+        const availableValues = (_b = this.__filteredValues) != null ? _b : this.__collection.all().map((i) => i.value);
+        console.log(availableValues);
+        if (this.__activatedValue && !availableValues.includes(this.__activatedValue))
           this.__deactivate();
-        }
-        if (!this.__getActiveItem() && this.__filteredValues && this.__filteredValues.length) {
-          this.__activate(this.__filteredValues[0]);
+        if (!this.__getActiveItem()) {
+          const first = this.__collection.all().find((i) => !i.disabled && availableValues.includes(i.value));
+          if (first)
+            this.__activate(first.value);
         }
       });
       this.$nextTick(() => {
@@ -552,7 +553,6 @@ function CreateRoverRoot({
         });
         effect(() => {
           const activeItem = this.__getByIndex(collection.activeIndex.value);
-          console.log(activeItem);
           const activeValue = this.__activatedValue = activeItem == null ? void 0 : activeItem.value;
           const visibleValuesArray = this.__filteredValues;
           requestAnimationFrame(() => {
@@ -867,16 +867,10 @@ function rover2(Alpine2) {
   }
   function handleOptions(el) {
     Alpine2.bind(el, {
-      "x-ref": "__options",
       "x-bind:id"() {
         return this.$id("rover-options");
       },
       role: "listbox",
-      "x-init"() {
-        if (Alpine2.bound(this.$el, "keepActivated")) {
-          this.__keepActivated = true;
-        }
-      },
       "x-bind:data-loading"() {
         return this.__isLoading;
       }

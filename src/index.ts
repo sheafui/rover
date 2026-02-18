@@ -83,14 +83,8 @@ export default function rover(Alpine: Alpine): void {
 
     function handleOptions(el: AlpineType.ElementWithXAttributes) {
         Alpine.bind(el, {
-            'x-ref': '__options',
             'x-bind:id'() { return this.$id('rover-options') },
             'role': 'listbox',
-            'x-init'() {
-                if (Alpine.bound(this.$el, 'keepActivated')) {
-                    this.__keepActivated = true;
-                }
-            },
             'x-bind:data-loading'() {
                 return this.__isLoading;
             }

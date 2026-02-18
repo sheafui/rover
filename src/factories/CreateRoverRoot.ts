@@ -1,6 +1,6 @@
 import RoverCollection from "../core/RoverCollection";
 
-import type { default as AlpineType } from "alpinejs";
+import type { default as AlpineType, GetterSetter } from "alpinejs";
 import { Item, RoverRootData } from "src/types";
 import { createInputManager } from "src/Managers/InputManager";
 import { createOptionManager } from "src/Managers/OptionManager";
@@ -75,81 +75,49 @@ export default function CreateRoverRoot(
                 this.__externalQuery && console.log('searching...')
             })
 
+            // debugg active item
+            effect(() => {
+                this.__activatedValue = this.__getByIndex(collection.activeIndex.value)?.value;
+
+                // console.log('nav index:', collection.navIndex, 'active item', this.__getByIndex(collection.activeIndex.value))
+            })
+
             // input search
             this.__inputManager.on('input', (event: InputEvent) => {
 
-                const inputEl = event?.target as HTMLInputElement as any
+                const inputEl = event?.target as HTMLInputElement & { _x_model?: undefined | GetterSetter<unknown> };
 
 
-                // here based on the search way is it internal or external to do activation work properly
-                const itIsRemotlyDrivenSearch = inputEl?._x_model?.get() !== undefined;
+                const isRemoteSearch = inputEl._x_model?.get() !== undefined;
 
-                if (itIsRemotlyDrivenSearch) {
-                    // it means the search is remotely driven and every items in the dom tree seems as dump static options there   
-                    return
+                if (!isRemoteSearch) {
+                    const query = inputEl.value;
+
+                    if (query.length > 0) {
+
+                        const results = this.__searchUsingQuery(query).map((r: Item) => r.value);
+
+                        const prev = this.__filteredValues;
+
+                        const changed = !prev || prev.length !== results.length || results.some((v: string, i: number) => v !== prev[i]);
+
+                        if (changed) this.__filteredValues = results;
+
+                    } else this.__filteredValues = null;
                 }
 
-                let query = inputEl.value;
+                const availableValues = this.__filteredValues ?? this.__collection.all().map((i: Item) => i.value);
 
-                if (query.length > 0 && itIsRemotlyDrivenSearch) {
-                    // inside this branch we search only the items we have in the dom tree
-                    const results = this.__searchUsingQuery(query).map((r: Item) => r.value);
+                console.log(availableValues);
 
-                    const prev = this.__filteredValues;
+                if (this.__activatedValue && !availableValues.includes(this.__activatedValue)) this.__deactivate();
 
-                    const changed = !prev || prev.length !== results.length || results.some((v: string, i: number) => v !== prev[i]);
-
-                    if (changed) {
-                        this.__filteredValues = results;
-                    }
-                } else {
-                    if (this.__filteredValues !== null) {
-                        this.__filteredValues = null;
-                    }
-                }
-
-                if (
-                    this.__activatedValue &&
-                    this.__filteredValues &&
-                    !this.__filteredValues.includes(this.__activatedValue)
-                ) {
-                    this.__deactivate();
-                }
-
-                if (
-                    !this.__getActiveItem() &&
-                    this.__filteredValues &&
-                    this.__filteredValues.length
-                ) {
-                    this.__activate(this.__filteredValues[0]);
+                if (!this.__getActiveItem()) {
+                    const first = this.__collection.all().find((i: Item) => !i.disabled && availableValues.includes(i.value));
+                    if (first) this.__activate(first.value);
                 }
             });
 
-            // this.$watch('_x__searchQuery', (query: string) => {
-            //     if (query.length > 0) {
-            //         const results = this.__searchUsingQuery(query).map((r: Item) => r.value);
-
-            //         const prev = this.__filteredValues;
-
-            //         const changed = !prev || prev.length !== results.length || results.some((v: unknown, i: number) => v !== prev[i]);
-
-            //         if (changed) {
-            //             this.__filteredValues = results;
-            //         }
-            //     } else {
-            //         if (this.__filteredValues !== null) {
-            //             this.__filteredValues = null;
-            //         }
-            //     }
-
-            //     if (this.__activatedValue && this.__filteredValues && !this.__filteredValues.includes(this.__activatedValue)) {
-            //         this.__deactivate();
-            //     }
-
-            //     if (!this.__getActiveItem() && this.__filteredValues && this.__filteredValues.length) {
-            //         this.__activate(this.__filteredValues[0]);
-            //     }
-            // });
 
             this.$nextTick(() => {
                 this.__optionsEls = Array.from(this.$el.querySelectorAll('[x-rover\\:option]')) as Array<HTMLElement>;
@@ -162,9 +130,6 @@ export default function CreateRoverRoot(
 
                 effect(() => {
                     const activeItem = this.__getByIndex(collection.activeIndex.value);
-
-                    console.log(activeItem);
-
 
                     const activeValue = this.__activatedValue = activeItem?.value;
 
