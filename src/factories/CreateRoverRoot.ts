@@ -71,17 +71,6 @@ export default function CreateRoverRoot(
                 this.__isLoading = collection.pending.state;
             });
 
-            effect(() => {
-                this.__externalQuery && console.log('searching...')
-            })
-
-            // debugg active item
-            effect(() => {
-                this.__activatedValue = this.__getByIndex(collection.activeIndex.value)?.value;
-
-                // console.log('nav index:', collection.navIndex, 'active item', this.__getByIndex(collection.activeIndex.value))
-            })
-
             // input search
             this.__inputManager.on('input', (event: InputEvent) => {
 
@@ -106,16 +95,19 @@ export default function CreateRoverRoot(
                     } else this.__filteredValues = null;
                 }
 
-                const availableValues = this.__filteredValues ?? this.__collection.all().map((i: Item) => i.value);
+                this.$nextTick(() => {
+                    console.log('available values:', this.__collection.all().map((i: Item) => i.value));
 
-                console.log(availableValues);
+                    const availableValues = this.__filteredValues ?? this.__collection.all().map((i: Item) => i.value);
 
-                if (this.__activatedValue && !availableValues.includes(this.__activatedValue)) this.__deactivate();
 
-                if (!this.__getActiveItem()) {
-                    const first = this.__collection.all().find((i: Item) => !i.disabled && availableValues.includes(i.value));
-                    if (first) this.__activate(first.value);
-                }
+                    if (this.__activatedValue && !availableValues.includes(this.__activatedValue)) this.__deactivate();
+
+                    if (!this.__getActiveItem()) {
+                        const first = this.__collection.all().find((i: Item) => !i.disabled && availableValues.includes(i.value));
+                        if (first) this.__activate(first.value);
+                    }
+                })
             });
 
 

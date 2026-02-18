@@ -35,6 +35,8 @@ export default class RoverCollection {
 
     public add(value: string, searchable: string, disabled = false): void {
 
+        console.log('current values', this.items.map(i => i.value));
+
         const item = { value, disabled, searchable };
 
         this.items.push(item);
@@ -43,6 +45,8 @@ export default class RoverCollection {
     }
 
     public forget(value: string): void {
+        console.log('current values', this.items.map(i => i.value));
+
         const index = this.items.findIndex(item => item.value === value);
 
         if (index === -1) return;
@@ -67,20 +71,7 @@ export default class RoverCollection {
     private invalidate(): void {
         this.currentQuery = '';
         this.currentResults = [];
-        this.scheduleBatchAsANextMicroTask();
-    }
-
-    private scheduleBatchAsANextMicroTask(): void {
-        if (this.isProcessing) return;
-
-        this.isProcessing = true;
-        this.pending.state = true;
-
-        queueMicrotask(() => {
-            this.rebuildNavIndex();
-            this.isProcessing = false;
-            this.pending.state = false;
-        });
+        this.rebuildNavIndex();
     }
 
 
@@ -94,6 +85,20 @@ export default class RoverCollection {
             if (!this.items[i]?.disabled && itemsToIndex.includes(this.items[i] as Item)) {
                 this.navIndex.push(i);
             }
+        }
+
+        // Sync activeNavPos with the current active item (if any)
+        if (this.activeIndex.value !== undefined) {
+            const newPos = this.navIndex.indexOf(this.activeIndex.value);
+            if (newPos === -1) {
+                // Active item is no longer in the navIndex → deactivate
+                this.activeIndex.value = undefined;
+                this.activeNavPos = -1;
+            } else {
+                this.activeNavPos = newPos;
+            }
+        } else {
+            this.activeNavPos = -1;
         }
 
         console.log('nav index:', this.navIndex);
@@ -170,13 +175,13 @@ export default class RoverCollection {
      * ------------------------------------- */
 
     public activate(value: string): void {
-        console.log(value);
+
         const index = this.items.findIndex(item => item.value === value);
 
         if (index === -1) return;
 
         const item = this.items[index];
-        
+
         if (item?.disabled) return;
 
         this.rebuildNavIndex();
@@ -234,7 +239,10 @@ export default class RoverCollection {
     }
 
     public activateNext(): void {
+
         this.rebuildNavIndex();
+
+        console.log('current Active', this.activeNavPos)
 
         if (!this.navIndex.length) return;
 

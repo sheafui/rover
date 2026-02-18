@@ -52,11 +52,13 @@ var RoverCollection = class {
     this.searchThreshold = (_a = options.searchThreshold) != null ? _a : 500;
   }
   add(value, searchable, disabled = false) {
+    console.log("current values", this.items.map((i) => i.value));
     const item = {value, disabled, searchable};
     this.items.push(item);
     this.invalidate();
   }
   forget(value) {
+    console.log("current values", this.items.map((i) => i.value));
     const index = this.items.findIndex((item) => item.value === value);
     if (index === -1)
       return;
@@ -72,18 +74,7 @@ var RoverCollection = class {
   invalidate() {
     this.currentQuery = "";
     this.currentResults = [];
-    this.scheduleBatchAsANextMicroTask();
-  }
-  scheduleBatchAsANextMicroTask() {
-    if (this.isProcessing)
-      return;
-    this.isProcessing = true;
-    this.pending.state = true;
-    queueMicrotask(() => {
-      this.rebuildNavIndex();
-      this.isProcessing = false;
-      this.pending.state = false;
-    });
+    this.rebuildNavIndex();
   }
   rebuildNavIndex() {
     var _a;
@@ -93,6 +84,17 @@ var RoverCollection = class {
       if (!((_a = this.items[i]) == null ? void 0 : _a.disabled) && itemsToIndex.includes(this.items[i])) {
         this.navIndex.push(i);
       }
+    }
+    if (this.activeIndex.value !== void 0) {
+      const newPos = this.navIndex.indexOf(this.activeIndex.value);
+      if (newPos === -1) {
+        this.activeIndex.value = void 0;
+        this.activeNavPos = -1;
+      } else {
+        this.activeNavPos = newPos;
+      }
+    } else {
+      this.activeNavPos = -1;
     }
     console.log("nav index:", this.navIndex);
   }
@@ -140,7 +142,6 @@ var RoverCollection = class {
     return this.items.length;
   }
   activate(value) {
-    console.log(value);
     const index = this.items.findIndex((item2) => item2.value === value);
     if (index === -1)
       return;
@@ -191,6 +192,7 @@ var RoverCollection = class {
   }
   activateNext() {
     this.rebuildNavIndex();
+    console.log("current Active", this.activeNavPos);
     if (!this.navIndex.length)
       return;
     if (this.activeNavPos === -1) {
@@ -511,15 +513,8 @@ function CreateRoverRoot({
       effect(() => {
         this.__isLoading = collection.pending.state;
       });
-      effect(() => {
-        this.__externalQuery && console.log("searching...");
-      });
-      effect(() => {
-        var _a;
-        this.__activatedValue = (_a = this.__getByIndex(collection.activeIndex.value)) == null ? void 0 : _a.value;
-      });
       this.__inputManager.on("input", (event) => {
-        var _a, _b;
+        var _a;
         const inputEl = event == null ? void 0 : event.target;
         const isRemoteSearch = ((_a = inputEl._x_model) == null ? void 0 : _a.get()) !== void 0;
         if (!isRemoteSearch) {
@@ -533,15 +528,18 @@ function CreateRoverRoot({
           } else
             this.__filteredValues = null;
         }
-        const availableValues = (_b = this.__filteredValues) != null ? _b : this.__collection.all().map((i) => i.value);
-        console.log(availableValues);
-        if (this.__activatedValue && !availableValues.includes(this.__activatedValue))
-          this.__deactivate();
-        if (!this.__getActiveItem()) {
-          const first = this.__collection.all().find((i) => !i.disabled && availableValues.includes(i.value));
-          if (first)
-            this.__activate(first.value);
-        }
+        this.$nextTick(() => {
+          var _a2;
+          console.log("available values:", this.__collection.all().map((i) => i.value));
+          const availableValues = (_a2 = this.__filteredValues) != null ? _a2 : this.__collection.all().map((i) => i.value);
+          if (this.__activatedValue && !availableValues.includes(this.__activatedValue))
+            this.__deactivate();
+          if (!this.__getActiveItem()) {
+            const first = this.__collection.all().find((i) => !i.disabled && availableValues.includes(i.value));
+            if (first)
+              this.__activate(first.value);
+          }
+        });
       });
       this.$nextTick(() => {
         this.__optionsEls = Array.from(this.$el.querySelectorAll("[x-rover\\:option]"));

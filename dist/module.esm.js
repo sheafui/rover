@@ -38,11 +38,13 @@ var RoverCollection = class {
     this.searchThreshold = options.searchThreshold ?? 500;
   }
   add(value, searchable, disabled = false) {
+    console.log("current values", this.items.map((i) => i.value));
     const item = {value, disabled, searchable};
     this.items.push(item);
     this.invalidate();
   }
   forget(value) {
+    console.log("current values", this.items.map((i) => i.value));
     const index = this.items.findIndex((item) => item.value === value);
     if (index === -1)
       return;
@@ -58,18 +60,7 @@ var RoverCollection = class {
   invalidate() {
     this.currentQuery = "";
     this.currentResults = [];
-    this.scheduleBatchAsANextMicroTask();
-  }
-  scheduleBatchAsANextMicroTask() {
-    if (this.isProcessing)
-      return;
-    this.isProcessing = true;
-    this.pending.state = true;
-    queueMicrotask(() => {
-      this.rebuildNavIndex();
-      this.isProcessing = false;
-      this.pending.state = false;
-    });
+    this.rebuildNavIndex();
   }
   rebuildNavIndex() {
     this.navIndex = [];
@@ -78,6 +69,17 @@ var RoverCollection = class {
       if (!this.items[i]?.disabled && itemsToIndex.includes(this.items[i])) {
         this.navIndex.push(i);
       }
+    }
+    if (this.activeIndex.value !== void 0) {
+      const newPos = this.navIndex.indexOf(this.activeIndex.value);
+      if (newPos === -1) {
+        this.activeIndex.value = void 0;
+        this.activeNavPos = -1;
+      } else {
+        this.activeNavPos = newPos;
+      }
+    } else {
+      this.activeNavPos = -1;
     }
     console.log("nav index:", this.navIndex);
   }
@@ -124,7 +126,6 @@ var RoverCollection = class {
     return this.items.length;
   }
   activate(value) {
-    console.log(value);
     const index = this.items.findIndex((item2) => item2.value === value);
     if (index === -1)
       return;
@@ -174,6 +175,7 @@ var RoverCollection = class {
   }
   activateNext() {
     this.rebuildNavIndex();
+    console.log("current Active", this.activeNavPos);
     if (!this.navIndex.length)
       return;
     if (this.activeNavPos === -1) {
@@ -490,12 +492,6 @@ function CreateRoverRoot({
       effect(() => {
         this.__isLoading = collection.pending.state;
       });
-      effect(() => {
-        this.__externalQuery && console.log("searching...");
-      });
-      effect(() => {
-        this.__activatedValue = this.__getByIndex(collection.activeIndex.value)?.value;
-      });
       this.__inputManager.on("input", (event) => {
         const inputEl = event?.target;
         const isRemoteSearch = inputEl._x_model?.get() !== void 0;
@@ -510,15 +506,17 @@ function CreateRoverRoot({
           } else
             this.__filteredValues = null;
         }
-        const availableValues = this.__filteredValues ?? this.__collection.all().map((i) => i.value);
-        console.log(availableValues);
-        if (this.__activatedValue && !availableValues.includes(this.__activatedValue))
-          this.__deactivate();
-        if (!this.__getActiveItem()) {
-          const first = this.__collection.all().find((i) => !i.disabled && availableValues.includes(i.value));
-          if (first)
-            this.__activate(first.value);
-        }
+        this.$nextTick(() => {
+          console.log("available values:", this.__collection.all().map((i) => i.value));
+          const availableValues = this.__filteredValues ?? this.__collection.all().map((i) => i.value);
+          if (this.__activatedValue && !availableValues.includes(this.__activatedValue))
+            this.__deactivate();
+          if (!this.__getActiveItem()) {
+            const first = this.__collection.all().find((i) => !i.disabled && availableValues.includes(i.value));
+            if (first)
+              this.__activate(first.value);
+          }
+        });
       });
       this.$nextTick(() => {
         this.__optionsEls = Array.from(this.$el.querySelectorAll("[x-rover\\:option]"));
