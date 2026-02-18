@@ -77,7 +77,9 @@ export interface RoverInputData extends XDataContext {
 
 export type RoverInputContext = RoverRootData & RoverInputData & Magics<RoverInputData>;
 
-export interface RoverOptionData extends XDataContext { }
+export interface RoverOptionData extends XDataContext {
+    __value: undefined | string
+}
 
 export type RoverOptionContext = RoverRootData & RoverOptionData & Magics<RoverOptionData>;
 

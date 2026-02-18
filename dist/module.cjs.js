@@ -14,9 +14,10 @@ __export(exports, {
 // src/factories/CreateRoverOption.ts
 function CreateRoverOption(Alpine2) {
   return {
+    __value: void 0,
     init() {
       let disabled = Alpine2.extractProp(this.$el, "disabled", false, false);
-      let value = Alpine2.extractProp(this.$el, "value", "");
+      let value = this.__value = Alpine2.extractProp(this.$el, "value", "");
       const rawSearch = Alpine2.extractProp(this.$el, "data-search", value);
       const normalizedSearch = String(rawSearch).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
       this.$el.dataset.value = value;
@@ -28,7 +29,7 @@ function CreateRoverOption(Alpine2) {
       });
     },
     destroy() {
-      this.__forget(this.__uniqueKey);
+      this.__forget(this.__value);
     }
   };
 }
@@ -52,7 +53,9 @@ var RoverCollection = class {
   }
   add(value, searchable, disabled = false) {
     const item = {value, disabled, searchable};
+    console.log(item);
     this.items.push(item);
+    console.log(this.items);
     this.invalidate();
   }
   forget(value) {
@@ -93,6 +96,7 @@ var RoverCollection = class {
         this.navIndex.push(i);
       }
     }
+    console.log(this.navIndex);
   }
   toggleIsPending() {
     this.pending.state = !this.pending.state;
@@ -507,7 +511,7 @@ function CreateRoverRoot({
       effect(() => {
         this.__isLoading = collection.pending.state;
       });
-      this.__inputManager.on("input", (event) => {
+      this.__inputManager.on("_input", (event) => {
         var _a;
         let query = (_a = event == null ? void 0 : event.target) == null ? void 0 : _a.value;
         if (query.length > 0) {

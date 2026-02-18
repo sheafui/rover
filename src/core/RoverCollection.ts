@@ -34,8 +34,14 @@ export default class RoverCollection {
      * ------------------------------------- */
 
     public add(value: string, searchable: string, disabled = false): void {
+
         const item = { value, disabled, searchable };
+
+        console.log(item)
         this.items.push(item);
+
+        console.log(this.items);
+
         this.invalidate();
     }
 
@@ -92,6 +98,8 @@ export default class RoverCollection {
                 this.navIndex.push(i);
             }
         }
+
+        console.log(this.navIndex);
     }
 
     public toggleIsPending(): void {
@@ -264,7 +272,7 @@ export default class RoverCollection {
 
     // type ahead algorithm
     public activateByKey(key: string): void {
-       
+
         const normalizedKey = key.toLowerCase();
 
         this.typedBuffer += normalizedKey;

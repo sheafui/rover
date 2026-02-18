@@ -71,7 +71,7 @@ export default function CreateRoverRoot(
             });
 
             // input search
-            this.__inputManager.on('input', (event: InputEvent) => {
+            this.__inputManager.on('_input', (event: InputEvent) => {
 
                 // @ts-ignore
                 let query = event?.target?.value;
