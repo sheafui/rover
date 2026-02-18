@@ -489,6 +489,7 @@ function CreateRoverRoot({
     __filteredValues: null,
     __prevVisibleArray: null,
     __prevActiveValue: void 0,
+    __externalQuery: null,
     __effectRAF: null,
     __inputManager: void 0,
     __optionsManager: void 0,
@@ -511,10 +512,18 @@ function CreateRoverRoot({
       effect(() => {
         this.__isLoading = collection.pending.state;
       });
-      this.__inputManager.on("_input", (event) => {
+      effect(() => {
+        this.__externalQuery && console.log("searching...");
+      });
+      this.__inputManager.on("input", (event) => {
         var _a;
-        let query = (_a = event == null ? void 0 : event.target) == null ? void 0 : _a.value;
-        if (query.length > 0) {
+        const inputEl = event == null ? void 0 : event.target;
+        const itIsRemotlyDrivenSearch = ((_a = inputEl == null ? void 0 : inputEl._x_model) == null ? void 0 : _a.get()) !== void 0;
+        if (itIsRemotlyDrivenSearch) {
+          return;
+        }
+        let query = inputEl.value;
+        if (query.length > 0 && itIsRemotlyDrivenSearch) {
           const results = this.__searchUsingQuery(query).map((r) => r.value);
           const prev = this.__filteredValues;
           const changed = !prev || prev.length !== results.length || results.some((v, i) => v !== prev[i]);
@@ -543,6 +552,7 @@ function CreateRoverRoot({
         });
         effect(() => {
           const activeItem = this.__getByIndex(collection.activeIndex.value);
+          console.log(activeItem);
           const activeValue = this.__activatedValue = activeItem == null ? void 0 : activeItem.value;
           const visibleValuesArray = this.__filteredValues;
           requestAnimationFrame(() => {

@@ -469,6 +469,7 @@
       __filteredValues: null,
       __prevVisibleArray: null,
       __prevActiveValue: void 0,
+      __externalQuery: null,
       __effectRAF: null,
       __inputManager: void 0,
       __optionsManager: void 0,
@@ -491,9 +492,17 @@
         effect(() => {
           this.__isLoading = collection.pending.state;
         });
-        this.__inputManager.on("_input", (event) => {
-          let query = event?.target?.value;
-          if (query.length > 0) {
+        effect(() => {
+          this.__externalQuery && console.log("searching...");
+        });
+        this.__inputManager.on("input", (event) => {
+          const inputEl = event?.target;
+          const itIsRemotlyDrivenSearch = inputEl?._x_model?.get() !== void 0;
+          if (itIsRemotlyDrivenSearch) {
+            return;
+          }
+          let query = inputEl.value;
+          if (query.length > 0 && itIsRemotlyDrivenSearch) {
             const results = this.__searchUsingQuery(query).map((r) => r.value);
             const prev = this.__filteredValues;
             const changed = !prev || prev.length !== results.length || results.some((v, i) => v !== prev[i]);
@@ -522,6 +531,7 @@
           });
           effect(() => {
             const activeItem = this.__getByIndex(collection.activeIndex.value);
+            console.log(activeItem);
             const activeValue = this.__activatedValue = activeItem?.value;
             const visibleValuesArray = this.__filteredValues;
             requestAnimationFrame(() => {

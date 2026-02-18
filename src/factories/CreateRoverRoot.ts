@@ -42,6 +42,7 @@ export default function CreateRoverRoot(
 
         __prevVisibleArray: null as string[] | null,
         __prevActiveValue: undefined,
+        __externalQuery: null,
 
         __effectRAF: null,
 
@@ -70,13 +71,28 @@ export default function CreateRoverRoot(
                 this.__isLoading = collection.pending.state;
             });
 
+            effect(() => {
+                this.__externalQuery && console.log('searching...')
+            })
+
             // input search
-            this.__inputManager.on('_input', (event: InputEvent) => {
+            this.__inputManager.on('input', (event: InputEvent) => {
 
-                // @ts-ignore
-                let query = event?.target?.value;
+                const inputEl = event?.target as HTMLInputElement as any
 
-                if (query.length > 0) {
+
+                // here based on the search way is it internal or external to do activation work properly
+                const itIsRemotlyDrivenSearch = inputEl?._x_model?.get() !== undefined;
+
+                if (itIsRemotlyDrivenSearch) {
+                    // it means the search is remotely driven and every items in the dom tree seems as dump static options there   
+                    return
+                }
+
+                let query = inputEl.value;
+
+                if (query.length > 0 && itIsRemotlyDrivenSearch) {
+                    // inside this branch we search only the items we have in the dom tree
                     const results = this.__searchUsingQuery(query).map((r: Item) => r.value);
 
                     const prev = this.__filteredValues;
@@ -146,6 +162,9 @@ export default function CreateRoverRoot(
 
                 effect(() => {
                     const activeItem = this.__getByIndex(collection.activeIndex.value);
+
+                    console.log(activeItem);
+
 
                     const activeValue = this.__activatedValue = activeItem?.value;
 
