@@ -37,13 +37,11 @@ var RoverCollection = class {
     this.searchThreshold = options.searchThreshold ?? 500;
   }
   add(value, searchable, disabled = false) {
-    console.log("from add the current values are ", this.items.map((i) => i.value));
     const item = {value, disabled, searchable};
     this.items.push(item);
     this.invalidate();
   }
   forget(value) {
-    console.log("from forget current values are ", this.items.map((i) => i.value));
     const index = this.items.findIndex((item) => item.value === value);
     if (index === -1)
       return;
@@ -80,10 +78,6 @@ var RoverCollection = class {
     } else {
       this.activeNavPos = -1;
     }
-    console.log("nav index:", this.navIndex);
-  }
-  toggleIsPending() {
-    this.pending.state = !this.pending.state;
   }
   search(query) {
     if (query === "") {
@@ -505,17 +499,15 @@ function CreateRoverRoot({
           } else
             this.__filteredValues = null;
         }
-        this.$nextTick(() => {
-          console.log("available values:", this.__collection.all().map((i) => i.value));
-          const availableValues = this.__filteredValues ?? this.__collection.all().map((i) => i.value);
-          if (this.__activatedValue && !availableValues.includes(this.__activatedValue))
-            this.__deactivate();
-          if (!this.__getActiveItem()) {
-            const first = this.__collection.all().find((i) => !i.disabled && availableValues.includes(i.value));
-            if (first)
-              this.__activate(first.value);
-          }
-        });
+        console.log("available values:", this.__collection.all());
+        const availableValues = this.__filteredValues ?? this.__collection.all().map((i) => i.value);
+        if (this.__activatedValue && !availableValues.includes(this.__activatedValue))
+          this.__deactivate();
+        if (!this.__getActiveItem()) {
+          const first = this.__collection.all().find((i) => !i.disabled && availableValues.includes(i.value));
+          if (first)
+            this.__activate(first.value);
+        }
       });
       this.$nextTick(() => {
         this.__optionsEls = Array.from(this.$el.querySelectorAll("[x-rover\\:option]"));

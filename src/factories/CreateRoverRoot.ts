@@ -95,19 +95,17 @@ export default function CreateRoverRoot(
                     } else this.__filteredValues = null;
                 }
 
-                this.$nextTick(() => {
-                    console.log('available values:', this.__collection.all().map((i: Item) => i.value));
+                console.log('available values:', this.__collection.all());
 
-                    const availableValues = this.__filteredValues ?? this.__collection.all().map((i: Item) => i.value);
+                const availableValues = this.__filteredValues ?? this.__collection.all().map((i: Item) => i.value);
 
 
-                    if (this.__activatedValue && !availableValues.includes(this.__activatedValue)) this.__deactivate();
+                if (this.__activatedValue && !availableValues.includes(this.__activatedValue)) this.__deactivate();
 
-                    if (!this.__getActiveItem()) {
-                        const first = this.__collection.all().find((i: Item) => !i.disabled && availableValues.includes(i.value));
-                        if (first) this.__activate(first.value);
-                    }
-                })
+                if (!this.__getActiveItem()) {
+                    const first = this.__collection.all().find((i: Item) => !i.disabled && availableValues.includes(i.value));
+                    if (first) this.__activate(first.value);
+                }
             });
 
 

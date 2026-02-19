@@ -34,17 +34,17 @@ export default class RoverCollection {
 
     public add(value: string, searchable: string, disabled = false): void {
 
-        console.log('from add the current values are ', this.items.map(i => i.value));
 
         const item = { value, disabled, searchable };
 
         this.items.push(item);
 
+        // console.log('from add the current values are ', this.items.map(i => i.value));
         this.invalidate();
     }
 
     public forget(value: string): void {
-        console.log('from forget current values are ', this.items.map(i => i.value));
+
 
         const index = this.items.findIndex(item => item.value === value);
 
@@ -52,13 +52,14 @@ export default class RoverCollection {
 
         this.items.splice(index, 1);
 
-        // Update active index if necessary
         if (this.activeIndex.value === index) {
             this.activeIndex.value = undefined;
             this.activeNavPos = -1;
         } else if (this.activeIndex.value !== undefined && this.activeIndex.value > index) {
             this.activeIndex.value--;
         }
+        
+        // console.log('from forget current values are ', this.items.map(i => i.value));
 
         this.invalidate();
     }
@@ -77,7 +78,6 @@ export default class RoverCollection {
     private rebuildNavIndex(): void {
         this.navIndex = [];
 
-        // Use search results if there's an active search, otherwise use all items
         const itemsToIndex = this.currentResults.length > 0 ? this.currentResults : this.items;
 
         for (let i = 0; i < this.items.length; i++) {
@@ -86,11 +86,9 @@ export default class RoverCollection {
             }
         }
 
-        // Sync activeNavPos with the current active item (if any)
         if (this.activeIndex.value !== undefined) {
             const newPos = this.navIndex.indexOf(this.activeIndex.value);
             if (newPos === -1) {
-                // Active item is no longer in the navIndex → deactivate
                 this.activeIndex.value = undefined;
                 this.activeNavPos = -1;
             } else {
@@ -99,12 +97,6 @@ export default class RoverCollection {
         } else {
             this.activeNavPos = -1;
         }
-
-        console.log('nav index:', this.navIndex);
-    }
-
-    public toggleIsPending(): void {
-        this.pending.state = !this.pending.state;
     }
 
     /* ----------------------------------------
