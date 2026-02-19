@@ -39,6 +39,7 @@ var RoverCollection = class {
   add(value, searchable, disabled = false) {
     const item = {value, disabled, searchable};
     this.items.push(item);
+    console.log("from add the current values are ", this.items.map((i) => i.value));
     this.invalidate();
   }
   forget(value) {
@@ -52,6 +53,7 @@ var RoverCollection = class {
     } else if (this.activeIndex.value !== void 0 && this.activeIndex.value > index) {
       this.activeIndex.value--;
     }
+    console.log("from forget current values are ", this.items.map((i) => i.value));
     this.invalidate();
   }
   invalidate() {
@@ -499,8 +501,8 @@ function CreateRoverRoot({
           } else
             this.__filteredValues = null;
         }
-        console.log("available values:", this.__collection.all());
         const availableValues = this.__filteredValues ?? this.__collection.all().map((i) => i.value);
+        console.log("current values:", availableValues);
         if (this.__activatedValue && !availableValues.includes(this.__activatedValue))
           this.__deactivate();
         if (!this.__getActiveItem()) {
@@ -522,10 +524,8 @@ function CreateRoverRoot({
           const activeValue = this.__activatedValue = activeItem?.value;
           const visibleValuesArray = this.__filteredValues;
           requestAnimationFrame(() => {
-            this.__patchItemsVisibility(visibleValuesArray);
-            this.__patchItemsActivity(activeValue);
-            this.__handleSeparatorsVisibility();
-            this.__handleGroupsVisibility();
+            this.patchItemsVisibility(visibleValuesArray);
+            this.patchItemsActivity(activeValue);
           });
         });
       });
@@ -534,7 +534,7 @@ function CreateRoverRoot({
     },
     __handleSeparatorsVisibility() {
     },
-    __patchItemsVisibility(visibleValuesArray) {
+    patchItemsVisibility(visibleValuesArray) {
       if (!this.__optionsEls || !this.__optionIndex)
         return;
       const prevArray = this.__prevVisibleArray;
@@ -580,7 +580,7 @@ function CreateRoverRoot({
       }
       this.__prevVisibleArray = visibleValuesArray;
     },
-    __patchItemsActivity(activeValue) {
+    patchItemsActivity(activeValue) {
       const prevActiveValue = this.__prevActiveValue;
       if (prevActiveValue === activeValue)
         return;

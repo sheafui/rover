@@ -95,10 +95,20 @@ export default function CreateRoverRoot(
                     } else this.__filteredValues = null;
                 }
 
-                console.log('available values:', this.__collection.all());
 
                 const availableValues = this.__filteredValues ?? this.__collection.all().map((i: Item) => i.value);
 
+                console.log('current values:',availableValues);
+
+                // Livewire.hook('commit', ({ component, succeed }) => {
+                //     succeed(() => {
+                //         // DOM is updated, options have re-registered via __add/__forget
+                //         // Collection is now stable and correct
+                //         this.$nextTick(() => {
+                //             console.log('available values from input event inside the hook:', inputEl.value, Alpine.raw(this.__collection.all().map((item: Item) => item.value)));
+                //         });
+                //     });
+                // });
 
                 if (this.__activatedValue && !availableValues.includes(this.__activatedValue)) this.__deactivate();
 
@@ -113,6 +123,7 @@ export default function CreateRoverRoot(
                 this.__optionsEls = Array.from(this.$el.querySelectorAll('[x-rover\\:option]')) as Array<HTMLElement>;
 
                 this.__optionIndex = new Map();
+
                 this.__optionsEls.forEach((el: HTMLElement) => {
                     const v = el.dataset.value;
                     if (v) this.__optionIndex.set(v, el);
@@ -126,10 +137,8 @@ export default function CreateRoverRoot(
                     const visibleValuesArray = this.__filteredValues;
 
                     requestAnimationFrame(() => {
-                        this.__patchItemsVisibility(visibleValuesArray);
-                        this.__patchItemsActivity(activeValue);
-                        this.__handleSeparatorsVisibility();
-                        this.__handleGroupsVisibility();
+                        this.patchItemsVisibility(visibleValuesArray);
+                        this.patchItemsActivity(activeValue);
                     });
                 });
             });
@@ -142,7 +151,7 @@ export default function CreateRoverRoot(
             // todo this evening vith vs
 
         },
-        __patchItemsVisibility(visibleValuesArray: string[] | null) {
+        patchItemsVisibility(visibleValuesArray: string[] | null) {
             if (!this.__optionsEls || !this.__optionIndex) return;
 
             const prevArray = this.__prevVisibleArray;
@@ -196,7 +205,7 @@ export default function CreateRoverRoot(
             this.__prevVisibleArray = visibleValuesArray;
         },
 
-        __patchItemsActivity(activeValue: string | undefined) {
+        patchItemsActivity(activeValue: string | undefined) {
 
             const prevActiveValue = this.__prevActiveValue;
 

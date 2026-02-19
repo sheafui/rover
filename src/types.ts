@@ -62,10 +62,10 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __pushSeparatorToItems: (id: string) => void;
     __nextGroupId: () => number;
     __nextSeparatorId: () => number;
-    __handleGroupsVisibility: () => void,
-    __handleSeparatorsVisibility: () => void,
-    __patchItemsVisibility: (value: string[] | null) => void,
-    __patchItemsActivity: (value: string | undefined) => void,
+    // __handleGroupsVisibility: () => void,
+    // __handleSeparatorsVisibility: () => void,
+    patchItemsVisibility: (value: string[] | null) => void,
+    patchItemsActivity: (value: string | undefined) => void,
 }
 
 export type RoverRootContext = RoverRootData & Magics<RoverRootData>;
