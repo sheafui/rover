@@ -42,7 +42,6 @@ var RoverCollection = class {
     this.currentResults = [];
     this.navIndex = [];
     this.activeNavPos = -1;
-    this.isProcessing = false;
     this.typedBuffer = "";
     this.bufferResetTimeout = null;
     this.bufferDelay = 500;
@@ -52,13 +51,13 @@ var RoverCollection = class {
     this.searchThreshold = (_a = options.searchThreshold) != null ? _a : 500;
   }
   add(value, searchable, disabled = false) {
-    console.log("current values", this.items.map((i) => i.value));
+    console.log("from add the current values are ", this.items.map((i) => i.value));
     const item = {value, disabled, searchable};
     this.items.push(item);
     this.invalidate();
   }
   forget(value) {
-    console.log("current values", this.items.map((i) => i.value));
+    console.log("from forget current values are ", this.items.map((i) => i.value));
     const index = this.items.findIndex((item) => item.value === value);
     if (index === -1)
       return;

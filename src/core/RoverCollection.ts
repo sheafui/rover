@@ -14,7 +14,6 @@ export default class RoverCollection {
     public activeIndex: ActiveIndex;
 
     // Batch processing
-    private isProcessing = false;
     public pending: Pending;
 
     private typedBuffer = '';
@@ -35,7 +34,7 @@ export default class RoverCollection {
 
     public add(value: string, searchable: string, disabled = false): void {
 
-        console.log('current values', this.items.map(i => i.value));
+        console.log('from add the current values are ', this.items.map(i => i.value));
 
         const item = { value, disabled, searchable };
 
@@ -45,7 +44,7 @@ export default class RoverCollection {
     }
 
     public forget(value: string): void {
-        console.log('current values', this.items.map(i => i.value));
+        console.log('from forget current values are ', this.items.map(i => i.value));
 
         const index = this.items.findIndex(item => item.value === value);
 
