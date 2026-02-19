@@ -40,7 +40,6 @@
     add(value, searchable, disabled = false) {
       const item = {value, disabled, searchable};
       this.items.push(item);
-      console.log("from add the current values are ", this.items.map((i) => i.value));
       this.invalidate();
     }
     forget(value) {
@@ -54,7 +53,6 @@
       } else if (this.activeIndex.value !== void 0 && this.activeIndex.value > index) {
         this.activeIndex.value--;
       }
-      console.log("from forget current values are ", this.items.map((i) => i.value));
       this.invalidate();
     }
     invalidate() {
@@ -81,6 +79,7 @@
       } else {
         this.activeNavPos = -1;
       }
+      console.log("nav index", this.navIndex);
     }
     search(query) {
       if (query === "") {

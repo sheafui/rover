@@ -39,7 +39,7 @@ export default class RoverCollection {
 
         this.items.push(item);
 
-        console.log('from add the current values are ', this.items.map(i => i.value));
+        // console.log('from add the current values are ', this.items.map(i => i.value));
         this.invalidate();
     }
 
@@ -58,8 +58,8 @@ export default class RoverCollection {
         } else if (this.activeIndex.value !== undefined && this.activeIndex.value > index) {
             this.activeIndex.value--;
         }
-        
-        console.log('from forget current values are ', this.items.map(i => i.value));
+
+        // console.log('from forget current values are ', this.items.map(i => i.value));
 
         this.invalidate();
     }
@@ -97,6 +97,8 @@ export default class RoverCollection {
         } else {
             this.activeNavPos = -1;
         }
+
+        console.log('nav index', this.navIndex);
     }
 
     /* ----------------------------------------

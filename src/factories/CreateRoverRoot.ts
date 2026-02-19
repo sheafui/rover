@@ -98,7 +98,7 @@ export default function CreateRoverRoot(
 
                 const availableValues = this.__filteredValues ?? this.__collection.all().map((i: Item) => i.value);
 
-                console.log('current values:',availableValues);
+                console.log('current values:', availableValues);
 
                 // Livewire.hook('commit', ({ component, succeed }) => {
                 //     succeed(() => {
