@@ -2,7 +2,8 @@ import { Magics, XDataContext } from "alpinejs";
 import RoverCollection from "./core/RoverCollection";
 
 export interface Options {
-    searchThreshold?: number
+    searchThreshold?: number;
+    throwOnDuplication: boolean
 }
 
 export interface Item {
@@ -11,7 +12,7 @@ export interface Item {
     disabled: boolean
 }
 
-export type Pending = { state: boolean };
+export type Pending = { value: boolean };
 
 export type ActiveIndex = { value: undefined | number };
 

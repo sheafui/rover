@@ -36,202 +36,28 @@ function CreateRoverOption(Alpine2) {
 
 // src/core/RoverCollection.ts
 var RoverCollection = class {
-  constructor(options = {}) {
+  constructor(options) {
     this.items = [];
-    this.currentQuery = "";
-    this.currentResults = [];
-    this.navIndex = [];
-    this.activeNavPos = -1;
-    this.typedBuffer = "";
-    this.bufferResetTimeout = null;
-    this.bufferDelay = 500;
-    var _a;
-    this.pending = Alpine.reactive({state: false});
-    this.activeIndex = Alpine.reactive({value: void 0});
-    this.searchThreshold = (_a = options.searchThreshold) != null ? _a : 500;
+    this.throwOnDuplication = false;
+    this.pending = Alpine.reactive({value: false});
+    this.activatedValue = Alpine.reactive({value: void 0});
+    this.throwOnDuplication = options.throwOnDuplication;
   }
   add(value, searchable, disabled = false) {
     const item = {value, disabled, searchable};
+    if (this.itemsSet.has(value)) {
+      if (this.throwOnDuplication)
+        console.warn("duplicate value detected for", value);
+      this.itemsSet.delete(value);
+    }
     this.items.push(item);
-    this.invalidate();
+    this.itemsSet.add(value);
   }
   forget(value) {
     const index = this.items.findIndex((item) => item.value === value);
     if (index === -1)
       return;
     this.items.splice(index, 1);
-    if (this.activeIndex.value === index) {
-      this.activeIndex.value = void 0;
-      this.activeNavPos = -1;
-    } else if (this.activeIndex.value !== void 0 && this.activeIndex.value > index) {
-      this.activeIndex.value--;
-    }
-    this.invalidate();
-  }
-  invalidate() {
-    this.currentQuery = "";
-    this.currentResults = [];
-    this.rebuildNavIndex();
-  }
-  rebuildNavIndex() {
-    var _a;
-    this.navIndex = [];
-    const itemsToIndex = this.currentResults.length > 0 ? this.currentResults : this.items;
-    for (let i = 0; i < this.items.length; i++) {
-      if (!((_a = this.items[i]) == null ? void 0 : _a.disabled) && itemsToIndex.includes(this.items[i])) {
-        this.navIndex.push(i);
-      }
-    }
-    if (this.activeIndex.value !== void 0) {
-      const newPos = this.navIndex.indexOf(this.activeIndex.value);
-      if (newPos === -1) {
-        this.activeIndex.value = void 0;
-        this.activeNavPos = -1;
-      } else {
-        this.activeNavPos = newPos;
-      }
-    } else {
-      this.activeNavPos = -1;
-    }
-    console.log("nav index", this.navIndex);
-  }
-  search(query) {
-    if (query === "") {
-      this.currentQuery = "";
-      this.currentResults = [];
-      this.rebuildNavIndex();
-      return this.items;
-    }
-    const normalizedQuery = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    if (this.currentQuery && normalizedQuery.startsWith(this.currentQuery) && this.currentResults.length > 0) {
-      const filtered = this.currentResults.filter((item) => {
-        return item.searchable.includes(normalizedQuery);
-      });
-      this.currentQuery = normalizedQuery;
-      this.currentResults = filtered;
-      this.rebuildNavIndex();
-      return filtered;
-    }
-    const results = this.items.filter((item) => {
-      return item.searchable.includes(normalizedQuery);
-    });
-    this.currentQuery = normalizedQuery;
-    this.currentResults = results;
-    this.rebuildNavIndex();
-    return results;
-  }
-  get(value) {
-    return this.items.find((item) => item.value === value);
-  }
-  getByIndex(index) {
-    var _a;
-    if (index == null || index === void 0)
-      return null;
-    return (_a = this.items[index]) != null ? _a : null;
-  }
-  all() {
-    return this.items;
-  }
-  get size() {
-    return this.items.length;
-  }
-  activate(value) {
-    const index = this.items.findIndex((item2) => item2.value === value);
-    if (index === -1)
-      return;
-    const item = this.items[index];
-    if (item == null ? void 0 : item.disabled)
-      return;
-    this.rebuildNavIndex();
-    if (this.activeIndex.value === index)
-      return;
-    this.activeIndex.value = index;
-    this.activeNavPos = this.navIndex.indexOf(index);
-  }
-  deactivate() {
-    this.activeIndex.value = void 0;
-    this.activeNavPos = -1;
-  }
-  isActivated(value) {
-    const index = this.items.findIndex((item) => item.value === value);
-    if (index === -1)
-      return false;
-    return index === this.activeIndex.value;
-  }
-  getActiveItem() {
-    var _a;
-    if (this.activeIndex.value === void 0)
-      return null;
-    return (_a = this.items[this.activeIndex.value]) != null ? _a : null;
-  }
-  activateFirst() {
-    this.rebuildNavIndex();
-    if (!this.navIndex.length)
-      return;
-    const firstIndex = this.navIndex[0];
-    if (firstIndex !== void 0) {
-      this.activeIndex.value = firstIndex;
-      this.activeNavPos = 0;
-    }
-  }
-  activateLast() {
-    this.rebuildNavIndex();
-    if (!this.navIndex.length)
-      return;
-    this.activeNavPos = this.navIndex.length - 1;
-    const lastIndex = this.navIndex[this.activeNavPos];
-    if (typeof lastIndex === "number") {
-      this.activeIndex.value = lastIndex;
-    }
-  }
-  activateNext() {
-    this.rebuildNavIndex();
-    console.log("current Active", this.activeNavPos);
-    if (!this.navIndex.length)
-      return;
-    if (this.activeNavPos === -1) {
-      this.activateFirst();
-      return;
-    }
-    this.activeNavPos = (this.activeNavPos + 1) % this.navIndex.length;
-    const nextIndex = this.navIndex[this.activeNavPos];
-    if (nextIndex !== void 0) {
-      this.activeIndex.value = nextIndex;
-    }
-  }
-  activatePrev() {
-    this.rebuildNavIndex();
-    if (!this.navIndex.length)
-      return;
-    if (this.activeNavPos === -1) {
-      this.activateLast();
-      return;
-    }
-    this.activeNavPos = this.activeNavPos === 0 ? this.navIndex.length - 1 : this.activeNavPos - 1;
-    const prevIndex = this.navIndex[this.activeNavPos];
-    if (prevIndex !== void 0) {
-      this.activeIndex.value = prevIndex;
-    }
-  }
-  activateByKey(key) {
-    const normalizedKey = key.toLowerCase();
-    this.typedBuffer += normalizedKey;
-    if (this.bufferResetTimeout)
-      clearTimeout(this.bufferResetTimeout);
-    this.bufferResetTimeout = setTimeout(() => {
-      this.typedBuffer = "";
-    }, this.bufferDelay);
-    const searchItems = this.currentResults.length > 0 ? this.currentResults : this.items;
-    const startIndex = this.activeIndex.value !== void 0 ? this.activeIndex.value + 1 : 0;
-    const total = searchItems.length;
-    for (let i = 0; i < total; i++) {
-      const index = (startIndex + i) % total;
-      const item = searchItems[index];
-      if (!(item == null ? void 0 : item.disabled) && (item == null ? void 0 : item.searchable.toLowerCase().startsWith(this.typedBuffer))) {
-        this.activate(item.value);
-        break;
-      }
-    }
   }
 };
 var RoverCollection_default = RoverCollection;
