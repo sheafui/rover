@@ -1,10 +1,19 @@
 import type { Item, Options, Pending } from "src/types";
 
 export default class RoverCollection {
+
     // -----------------------
     // Core storage
     // -----------------------
     private itemsMap: Map<string, Item> = new Map();
+
+    /**
+     * Tracks DOM insertion order separately from the Map.
+     * Maps don't guarantee stable order across delete+re-add cycles —
+     * morphdom forget → add pushes the item to the end of Map iteration.
+     * This array is the canonical order for nav traversal.
+     */
+    private _insertionOrder: string[] = [];
 
     // -----------------------
     // Search state
@@ -15,8 +24,22 @@ export default class RoverCollection {
     // -----------------------
     // Navigation
     // -----------------------
-    public navIndex: string[] = [];          // filtered and enabled values
-    public activatedValue;
+
+    /**
+     * Ordered list of navigable value strings:
+     * - respects _insertionOrder (not Map iteration order)
+     * - excludes disabled items
+     * - filtered to currentResults when a search is active
+     */
+    public navIndex: string[] = [];
+
+    /**
+     * O(1) reverse lookup: value → position in navIndex.
+     * Rebuilt alongside navIndex. Eliminates indexOf on every arrow key.
+     */
+    private _navPosMap: Map<string, number> = new Map();
+
+    public activatedValue: { value: string | null };
 
     // -----------------------
     // Batch / dirty flag
@@ -46,16 +69,22 @@ export default class RoverCollection {
     // -----------------------
     // Add / Forget
     // -----------------------
+
     public add(value: string, searchable: string, disabled = false): void {
         if (this.itemsMap.has(value)) return;
+
         this.itemsMap.set(value, { value, searchable, disabled });
 
-        if (this.currentQuery && this.currentResults.length) {
-            const item = this.itemsMap.get(value)!;
-            if (!disabled && item.searchable.includes(this.currentQuery)) {
-                this.currentResults.push(item);
-            }
-        }
+        this._insertionOrder.push(value);
+
+        // // Incrementally update currentResults if a search is active,
+        // // avoiding a full re-search on every morphdom add.
+        // if (this.currentQuery && this.currentResults.length) {
+        //     const item = this.itemsMap.get(value)!;
+        //     if (!disabled && item.searchable.includes(this.currentQuery)) {
+        //         this.currentResults.push(item);
+        //     }
+        // }
 
         this._markDirty();
     }
@@ -66,8 +95,11 @@ export default class RoverCollection {
 
         this.itemsMap.delete(value);
 
-        const idx = this.currentResults.indexOf(item);
-        if (idx !== -1) this.currentResults.splice(idx, 1);
+        const oi = this._insertionOrder.indexOf(value);
+        if (oi !== -1) this._insertionOrder.splice(oi, 1);
+
+        const ri = this.currentResults.indexOf(item);
+        if (ri !== -1) this.currentResults.splice(ri, 1);
 
         if (this.activatedValue.value === value) {
             this.activatedValue.value = null;
@@ -79,25 +111,49 @@ export default class RoverCollection {
     // -----------------------
     // Search
     // -----------------------
-    private static _normalize(s: string) {
-        return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+    /**
+     * Normalizes raw user query input.
+     * Item searchable strings are already normalized upstream in CreateRoverOption
+     * and are never re-normalized here.
+     */
+    public static _normalize(s: string): string {
+        const lower = s.toLowerCase();
+        // Skip NFD normalization if no non-ASCII characters present —
+        // avoids the most expensive part of the chain for typical Latin input.
+        if (!/[^\u0000-\u007f]/.test(lower)) return lower;
+        return lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     }
 
+    /**
+     * Two-pass substring search:
+     *   Pass 1 — prefix matches (searchable starts with query) → ranked first
+     *   Pass 2 — mid-string matches (searchable contains query)
+     * Single loop, two buckets, one concat. No sort pass needed.
+     */
     public search(query: string): Item[] {
-        if (!query) {
+
+        console.log('here');
+
+        if (query = '') {
             this.currentQuery = '';
             this.currentResults = [];
             this._markDirty();
+
+
             return Array.from(this.itemsMap.values());
         }
 
         const normalizedQuery = RoverCollection._normalize(query);
 
-        const source = this.currentQuery &&
-            normalizedQuery.startsWith(this.currentQuery) &&
-            this.currentResults.length
-            ? this.currentResults
-            : Array.from(this.itemsMap.values());
+        // Narrowing optimisation: if the new query extends the previous one,
+        // filter only the existing (smaller) result set instead of all items.
+        const source: Item[] =
+            this.currentQuery &&
+                normalizedQuery.startsWith(this.currentQuery) &&
+                this.currentResults.length
+                ? this.currentResults
+                : Array.from(this.itemsMap.values());
 
         const prefix: Item[] = [];
         const mid: Item[] = [];
@@ -109,7 +165,7 @@ export default class RoverCollection {
         }
 
         this.currentQuery = normalizedQuery;
-        this.currentResults = prefix.concat(mid);
+        this.currentResults = prefix.length || mid.length ? prefix.concat(mid) : [];
         this._markDirty();
 
         return this.currentResults;
@@ -118,16 +174,20 @@ export default class RoverCollection {
     // -----------------------
     // Lookup
     // -----------------------
+
     public get(value: string): Item | undefined {
         return this.itemsMap.get(value);
     }
 
     public getActiveItem(): Item | null {
-        return this.activatedValue.value ? this.itemsMap.get(this.activatedValue.value) ?? null : null;
+        return this.activatedValue.value
+            ? this.itemsMap.get(this.activatedValue.value) ?? null
+            : null;
     }
 
     public all(): Item[] {
-        return Array.from(this.itemsMap.values());
+        // Return items in stable insertion order, not Map iteration order.
+        return this._insertionOrder.map(v => this.itemsMap.get(v)!);
     }
 
     public get size(): number {
@@ -135,8 +195,9 @@ export default class RoverCollection {
     }
 
     // -----------------------
-    // NavIndex Lazy Build
+    // NavIndex — lazy build
     // -----------------------
+
     private _markDirty(): void {
         this._navDirty = true;
         if (!this._flushQueued) {
@@ -155,26 +216,36 @@ export default class RoverCollection {
     private _rebuildNavIndex(): void {
         this._navDirty = false;
 
-        const source = this.currentResults.length ? this.currentResults : Array.from(this.itemsMap.values());
-        this.navIndex = source.filter(i => !i.disabled).map(i => i.value);
+        // Use _insertionOrder as the traversal base so nav order always
+        // matches DOM order, even after morphdom forget → add cycles.
+        const resultSet: Set<Item> | null = this.currentResults.length
+            ? new Set(this.currentResults)
+            : null;
 
-        // preserve canonical active value even if temporarily hidden
-        if (this.activatedValue.value && !this.navIndex.includes(this.activatedValue.value)) {
-            // do nothing, keep canonical value
-        } else if (!this.activatedValue.value && this.navIndex.length > 0) {
-            this.activatedValue.value = null;
+        const next: string[] = [];
+
+        for (const value of this._insertionOrder) {
+            const item = this.itemsMap.get(value);
+            if (!item || item.disabled) continue;
+            if (resultSet !== null && !resultSet.has(item)) continue;
+            next.push(value);
         }
+
+        this.navIndex = next;
+
+        // Rebuild the O(1) position lookup alongside navIndex.
+        this._navPosMap = new Map(next.map((v, i) => [v, i]));
     }
 
     // -----------------------
     // Activation
     // -----------------------
+
     public activate(value: string): void {
         this._ensureNavIndex();
         const item = this.itemsMap.get(value);
         if (!item || item.disabled) return;
         if (this.activatedValue.value === value) return;
-
         this.activatedValue.value = value;
     }
 
@@ -189,42 +260,50 @@ export default class RoverCollection {
     // -----------------------
     // Keyboard Navigation
     // -----------------------
-    private setActiveByIndex(index: number): void {
-        if (index < 0 || index >= this.navIndex.length) return;
-        this.activatedValue.value = this.navIndex[index];
+
+    private _setActiveByIndex(index: number): void {
+        const value = this.navIndex[index];
+        if (value !== undefined) this.activatedValue.value = value;
     }
 
     public activateFirst(): void {
         this._ensureNavIndex();
         if (!this.navIndex.length) return;
-        this.setActiveByIndex(0);
+        this._setActiveByIndex(0);
     }
 
     public activateLast(): void {
         this._ensureNavIndex();
         if (!this.navIndex.length) return;
-        this.setActiveByIndex(this.navIndex.length - 1);
+        this._setActiveByIndex(this.navIndex.length - 1);
     }
 
     public activateNext(): void {
         this._ensureNavIndex();
         if (!this.navIndex.length) return;
-        const currentIndex = this.activatedValue.value ? this.navIndex.indexOf(this.activatedValue.value) : -1;
-        const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % this.navIndex.length;
-        this.setActiveByIndex(nextIndex);
+
+        const current = this.activatedValue.value !== null
+            ? (this._navPosMap.get(this.activatedValue.value) ?? -1)
+            : -1;
+
+        this._setActiveByIndex(current === -1 ? 0 : (current + 1) % this.navIndex.length);
     }
 
     public activatePrev(): void {
         this._ensureNavIndex();
         if (!this.navIndex.length) return;
-        const currentIndex = this.activatedValue.value ? this.navIndex.indexOf(this.activatedValue.value) : -1;
-        const prevIndex = currentIndex <= 0 ? this.navIndex.length - 1 : currentIndex - 1;
-        this.setActiveByIndex(prevIndex);
+
+        const current = this.activatedValue.value !== null
+            ? (this._navPosMap.get(this.activatedValue.value) ?? -1)
+            : -1;
+
+        this._setActiveByIndex(current <= 0 ? this.navIndex.length - 1 : current - 1);
     }
 
     // -----------------------
     // Type-ahead
     // -----------------------
+
     public activateByKey(key: string): void {
         this._ensureNavIndex();
 
@@ -234,13 +313,18 @@ export default class RoverCollection {
 
         if (!this.navIndex.length) return;
 
-        const startIndex = this.activatedValue.value ? this.navIndex.indexOf(this.activatedValue.value) + 1 : 0;
+        const currentPos = this.activatedValue.value !== null
+            ? (this._navPosMap.get(this.activatedValue.value) ?? -1)
+            : -1;
 
-        for (let i = 0; i < this.navIndex.length; i++) {
-            const idx = (startIndex + i) % this.navIndex.length;
-            const item = this.itemsMap.get(this.navIndex[idx]!);
-            if (item && !item.disabled && item.searchable.startsWith(this.typedBuffer)) {
-                this.activatedValue.value = item.value;
+        const startIndex = currentPos === -1 ? 0 : (currentPos + 1) % this.navIndex.length;
+        const total = this.navIndex.length;
+
+        for (let i = 0; i < total; i++) {
+            const value = this.navIndex[(startIndex + i) % total]!;
+            const item = this.itemsMap.get(value);
+            if (item && item.searchable.startsWith(this.typedBuffer)) {
+                this.activatedValue.value = value;
                 break;
             }
         }
