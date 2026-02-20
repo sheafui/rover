@@ -103,18 +103,6 @@ export default function CreateRoverRoot(
 
                 const availableValues = this.__filteredValues ?? this.__collection.all().map((i: Item) => i.value);
 
-                console.log('current values:', availableValues);
-
-                // Livewire.hook('commit', ({ component, succeed }) => {
-                //     succeed(() => {
-                //         // DOM is updated, options have re-registered via __add/__forget
-                //         // Collection is now stable and correct
-                //         this.$nextTick(() => {
-                //             console.log('available values from input event inside the hook:', inputEl.value, Alpine.raw(this.__collection.all().map((item: Item) => item.value)));
-                //         });
-                //     });
-                // });
-
                 if (this.__activatedValue && !availableValues.includes(this.__activatedValue)) this.__deactivate();
 
                 if (!this.__getActiveItem()) {

@@ -492,7 +492,6 @@ function CreateRoverRoot({
           ;
         }
         const availableValues = this.__filteredValues ?? this.__collection.all().map((i) => i.value);
-        console.log("current values:", availableValues);
         if (this.__activatedValue && !availableValues.includes(this.__activatedValue))
           this.__deactivate();
         if (!this.__getActiveItem()) {
