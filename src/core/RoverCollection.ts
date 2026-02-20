@@ -1,4 +1,4 @@
-import type { Item, Options, Pending, ActiveIndex } from "src/types";
+import type { Item, Options, Pending } from "src/types";
 
 export default class RoverCollection {
     // -----------------------
