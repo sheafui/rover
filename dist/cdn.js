@@ -47,6 +47,20 @@
         return;
       this.items.splice(index, 1);
     }
+    get(value) {
+      return this.items.find((item) => item.value === value);
+    }
+    getByIndex(index) {
+      if (index == null || index === void 0)
+        return null;
+      return this.items[index] ?? null;
+    }
+    all() {
+      return this.items;
+    }
+    get size() {
+      return this.items.length;
+    }
   };
   var RoverCollection_default = RoverCollection;
 
@@ -315,7 +329,7 @@
       init() {
         this.__setupManagers();
         effect(() => {
-          this.__isLoading = collection.pending.state;
+          this.__isLoading = collection.pending.value;
         });
         this.__inputManager.on("input", (event) => {
           const inputEl = event?.target;
@@ -350,7 +364,7 @@
               this.__optionIndex.set(v, el);
           });
           effect(() => {
-            const activeItem = this.__getByIndex(collection.activeIndex.value);
+            const activeItem = this.__getByIndex(collection.activatedValue.value);
             const activeValue = this.__activatedValue = activeItem?.value;
             const visibleValuesArray = this.__filteredValues;
             requestAnimationFrame(() => {

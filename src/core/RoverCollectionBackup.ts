@@ -146,22 +146,22 @@ export default class RoverCollection {
      * Queries
      * ------------------------------------- */
 
-    public get(value: string): Item | undefined {
-        return this.items.find(item => item.value === value);
-    }
+    // public get(value: string): Item | undefined {
+    //     return this.items.find(item => item.value === value);
+    // }
 
-    public getByIndex(index: number | null | undefined): Item | null {
-        if (index == null || index === undefined) return null;
-        return this.items[index] ?? null;
-    }
+    // public getByIndex(index: number | null | undefined): Item | null {
+    //     if (index == null || index === undefined) return null;
+    //     return this.items[index] ?? null;
+    // }
 
-    public all(): Item[] {
-        return this.items;
-    }
+    // public all(): Item[] {
+    //     return this.items;
+    // }
 
-    public get size(): number {
-        return this.items.length;
-    }
+    // public get size(): number {
+    //     return this.items.length;
+    // }
 
     /* ----------------------------------------
      * Activation

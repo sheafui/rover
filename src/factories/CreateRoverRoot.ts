@@ -68,7 +68,7 @@ export default function CreateRoverRoot(
             this.__setupManagers();
 
             effect(() => {
-                this.__isLoading = collection.pending.state;
+                this.__isLoading = collection.pending.value;
             });
 
             // input search
@@ -130,7 +130,7 @@ export default function CreateRoverRoot(
                 });
 
                 effect(() => {
-                    const activeItem = this.__getByIndex(collection.activeIndex.value);
+                    const activeItem = this.__getByIndex(collection.activatedValue.value);
 
                     const activeValue = this.__activatedValue = activeItem?.value;
 
