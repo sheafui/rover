@@ -15,7 +15,7 @@ export default function CreateRoverRoot(
     }
 ): RoverRootData {
 
-    const collection = new RoverCollection();
+    const collection = new RoverCollection({ preventDuplication: true });
 
     return {
         __collection: collection,
@@ -62,7 +62,6 @@ export default function CreateRoverRoot(
         __activateFirst: () => collection.activateFirst(),
         __activateLast: () => collection.activateLast(),
         __searchUsingQuery: (query: string) => collection.search(query),
-        __getByIndex: (index: number | null | undefined) => collection.getByIndex(index),
 
         init() {
             this.__setupManagers();
@@ -130,7 +129,7 @@ export default function CreateRoverRoot(
                 });
 
                 effect(() => {
-                    const activeItem = this.__getByIndex(collection.activatedValue.value);
+                    const activeItem = collection.getActiveItem();
 
                     const activeValue = this.__activatedValue = activeItem?.value;
 

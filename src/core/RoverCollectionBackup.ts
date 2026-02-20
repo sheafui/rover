@@ -11,7 +11,7 @@ export default class RoverCollection {
     // Navigation state
     public navIndex: Array<number> = [];
     private activeNavPos: number = -1;
-    public activeIndex: ActiveIndex;
+    public activatedValue: ActiveIndex;
 
     // Batch processing
     public pending: Pending;
@@ -22,9 +22,9 @@ export default class RoverCollection {
 
     public searchThreshold: number;
 
-    public constructor(options: Options = {}) {
-        this.pending = Alpine.reactive<Pending>({ state: false });
-        this.activeIndex = Alpine.reactive<ActiveIndex>({ value: undefined });
+    public constructor(options: Options) {
+        this.pending = Alpine.reactive<Pending>({ value: false });
+        this.activatedValue = Alpine.reactive<ActiveIndex>({ value: undefined });
         this.searchThreshold = options.searchThreshold ?? 500;
     }
 
@@ -52,11 +52,11 @@ export default class RoverCollection {
 
         this.items.splice(index, 1);
 
-        if (this.activeIndex.value === index) {
-            this.activeIndex.value = undefined;
+        if (this.activatedValue.value === index) {
+            this.activatedValue.value = undefined;
             this.activeNavPos = -1;
-        } else if (this.activeIndex.value !== undefined && this.activeIndex.value > index) {
-            this.activeIndex.value--;
+        } else if (this.activatedValue.value !== undefined && this.activatedValue.value > index) {
+            this.activatedValue.value--;
         }
 
         // console.log('from forget current values are ', this.items.map(i => i.value));
@@ -86,10 +86,10 @@ export default class RoverCollection {
             }
         }
 
-        if (this.activeIndex.value !== undefined) {
-            const newPos = this.navIndex.indexOf(this.activeIndex.value);
+        if (this.activatedValue.value !== undefined) {
+            const newPos = this.navIndex.indexOf(this.activatedValue.value);
             if (newPos === -1) {
-                this.activeIndex.value = undefined;
+                this.activatedValue.value = undefined;
                 this.activeNavPos = -1;
             } else {
                 this.activeNavPos = newPos;
@@ -146,22 +146,22 @@ export default class RoverCollection {
      * Queries
      * ------------------------------------- */
 
-    // public get(value: string): Item | undefined {
-    //     return this.items.find(item => item.value === value);
-    // }
+    public get(value: string): Item | undefined {
+        return this.items.find(item => item.value === value);
+    }
 
-    // public getByIndex(index: number | null | undefined): Item | null {
-    //     if (index == null || index === undefined) return null;
-    //     return this.items[index] ?? null;
-    // }
+    public getByIndex(index: number | null | undefined): Item | null {
+        if (index == null || index === undefined) return null;
+        return this.items[index] ?? null;
+    }
 
-    // public all(): Item[] {
-    //     return this.items;
-    // }
+    public all(): Item[] {
+        return this.items;
+    }
 
-    // public get size(): number {
-    //     return this.items.length;
-    // }
+    public get size(): number {
+        return this.items.length;
+    }
 
     /* ----------------------------------------
      * Activation
@@ -179,14 +179,14 @@ export default class RoverCollection {
 
         this.rebuildNavIndex();
 
-        if (this.activeIndex.value === index) return;
+        if (this.activatedValue.value === index) return;
 
-        this.activeIndex.value = index;
+        this.activatedValue.value = index;
         this.activeNavPos = this.navIndex.indexOf(index);
     }
 
     public deactivate(): void {
-        this.activeIndex.value = undefined;
+        this.activatedValue.value = undefined;
         this.activeNavPos = -1;
     }
 
@@ -194,12 +194,12 @@ export default class RoverCollection {
         const index = this.items.findIndex(item => item.value === value);
         if (index === -1) return false;
 
-        return index === this.activeIndex.value;
+        return index === this.activatedValue.value;
     }
 
     public getActiveItem(): Item | null {
-        if (this.activeIndex.value === undefined) return null;
-        return this.items[this.activeIndex.value] ?? null;
+        if (this.activatedValue.value === undefined) return null;
+        return this.items[this.activatedValue.value] ?? null;
     }
 
     /* ----------------------------------------
@@ -213,7 +213,7 @@ export default class RoverCollection {
 
         const firstIndex = this.navIndex[0];
         if (firstIndex !== undefined) {
-            this.activeIndex.value = firstIndex;
+            this.activatedValue.value = firstIndex;
             this.activeNavPos = 0;
         }
     }
@@ -227,7 +227,7 @@ export default class RoverCollection {
 
         const lastIndex = this.navIndex[this.activeNavPos];
         if (typeof lastIndex === 'number') {
-            this.activeIndex.value = lastIndex;
+            this.activatedValue.value = lastIndex;
         }
     }
 
@@ -247,7 +247,7 @@ export default class RoverCollection {
         this.activeNavPos = (this.activeNavPos + 1) % this.navIndex.length;
         const nextIndex = this.navIndex[this.activeNavPos];
         if (nextIndex !== undefined) {
-            this.activeIndex.value = nextIndex;
+            this.activatedValue.value = nextIndex;
         }
     }
 
@@ -267,7 +267,7 @@ export default class RoverCollection {
 
         const prevIndex = this.navIndex[this.activeNavPos];
         if (prevIndex !== undefined) {
-            this.activeIndex.value = prevIndex;
+            this.activatedValue.value = prevIndex;
         }
     }
 
@@ -285,7 +285,7 @@ export default class RoverCollection {
         }, this.bufferDelay);
 
         const searchItems = this.currentResults.length > 0 ? this.currentResults : this.items;
-        const startIndex = this.activeIndex.value !== undefined ? this.activeIndex.value + 1 : 0;
+        const startIndex = this.activatedValue.value !== undefined ? this.activatedValue.value + 1 : 0;
         const total = searchItems.length;
 
         for (let i = 0; i < total; i++) {

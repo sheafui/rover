@@ -25,41 +25,183 @@
   // src/core/RoverCollection.ts
   var RoverCollection = class {
     constructor(options) {
-      this.items = [];
-      this.throwOnDuplication = false;
+      this.itemsMap = new Map();
+      this.currentQuery = "";
+      this.currentResults = [];
+      this.navIndex = [];
+      this.activeNavPos = -1;
+      this._navDirty = false;
+      this._flushQueued = false;
+      this.typedBuffer = "";
+      this.bufferResetTimeout = null;
+      this.bufferDelay = 500;
       this.pending = Alpine.reactive({value: false});
-      this.activatedValue = Alpine.reactive({value: void 0});
-      this.throwOnDuplication = options.throwOnDuplication;
+      this.activatedValue = Alpine.reactive({value: null});
+      this.searchThreshold = options.searchThreshold ?? 500;
     }
     add(value, searchable, disabled = false) {
-      const item = {value, disabled, searchable};
-      if (this.itemsSet.has(value)) {
-        if (this.throwOnDuplication)
-          console.warn("duplicate value detected for", value);
-        this.itemsSet.delete(value);
+      if (this.itemsMap.has(value))
+        return;
+      this.itemsMap.set(value, {value, searchable, disabled});
+      if (this.currentQuery && this.currentResults.length) {
+        const item = this.itemsMap.get(value);
+        if (!disabled && item.searchable.includes(this.currentQuery)) {
+          this.currentResults.push(item);
+        }
       }
-      this.items.push(item);
-      this.itemsSet.add(value);
+      this._markDirty();
     }
     forget(value) {
-      const index = this.items.findIndex((item) => item.value === value);
-      if (index === -1)
+      const item = this.itemsMap.get(value);
+      if (!item)
         return;
-      this.items.splice(index, 1);
+      this.itemsMap.delete(value);
+      const idx = this.currentResults.indexOf(item);
+      if (idx !== -1)
+        this.currentResults.splice(idx, 1);
+      if (this.activatedValue.value === value) {
+        this.activatedValue.value = null;
+        this.activeNavPos = -1;
+      }
+      this._markDirty();
+    }
+    static _normalize(s) {
+      return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    search(query) {
+      if (!query) {
+        this.currentQuery = "";
+        this.currentResults = [];
+        this._markDirty();
+        return Array.from(this.itemsMap.values());
+      }
+      const normalizedQuery = RoverCollection._normalize(query);
+      const source = this.currentQuery && normalizedQuery.startsWith(this.currentQuery) && this.currentResults.length ? this.currentResults : Array.from(this.itemsMap.values());
+      const prefix = [];
+      const mid = [];
+      for (const item of source) {
+        const s = item.searchable;
+        if (s.startsWith(normalizedQuery))
+          prefix.push(item);
+        else if (s.includes(normalizedQuery))
+          mid.push(item);
+      }
+      this.currentQuery = normalizedQuery;
+      this.currentResults = prefix.concat(mid);
+      this._markDirty();
+      return this.currentResults;
     }
     get(value) {
-      return this.items.find((item) => item.value === value);
+      return this.itemsMap.get(value);
     }
-    getByIndex(index) {
-      if (index == null || index === void 0)
-        return null;
-      return this.items[index] ?? null;
+    getActiveItem() {
+      return this.activatedValue.value ? this.itemsMap.get(this.activatedValue.value) ?? null : null;
     }
     all() {
-      return this.items;
+      return Array.from(this.itemsMap.values());
     }
     get size() {
-      return this.items.length;
+      return this.itemsMap.size;
+    }
+    _markDirty() {
+      this._navDirty = true;
+      if (!this._flushQueued) {
+        this._flushQueued = true;
+        queueMicrotask(() => {
+          this._flushQueued = false;
+          if (this._navDirty)
+            this._rebuildNavIndex();
+        });
+      }
+    }
+    _ensureNavIndex() {
+      if (this._navDirty)
+        this._rebuildNavIndex();
+    }
+    _rebuildNavIndex() {
+      this._navDirty = false;
+      const source = this.currentResults.length ? this.currentResults : Array.from(this.itemsMap.values());
+      this.navIndex = source.filter((i) => !i.disabled).map((i) => i.value);
+      if (this.activatedValue.value) {
+        const pos = this.navIndex.indexOf(this.activatedValue.value);
+        this.activeNavPos = pos;
+        if (pos === -1)
+          this.activatedValue.value = null;
+      } else {
+        this.activeNavPos = -1;
+      }
+    }
+    activate(value) {
+      this._ensureNavIndex();
+      const item = this.itemsMap.get(value);
+      if (!item || item.disabled)
+        return;
+      if (this.activatedValue.value === value)
+        return;
+      this.activatedValue.value = value;
+      this.activeNavPos = this.navIndex.indexOf(value);
+    }
+    deactivate() {
+      this.activatedValue.value = null;
+      this.activeNavPos = -1;
+    }
+    isActivated(value) {
+      return this.activatedValue.value === value;
+    }
+    setActiveByNavPos() {
+      const value = this.navIndex[this.activeNavPos];
+      if (!value)
+        return;
+      this.activatedValue.value = value;
+    }
+    activateFirst() {
+      this._ensureNavIndex();
+      if (!this.navIndex.length)
+        return;
+      this.activeNavPos = 0;
+      this.setActiveByNavPos();
+    }
+    activateLast() {
+      this._ensureNavIndex();
+      if (!this.navIndex.length)
+        return;
+      this.activeNavPos = this.navIndex.length - 1;
+      this.setActiveByNavPos();
+    }
+    activateNext() {
+      this._ensureNavIndex();
+      if (!this.navIndex.length)
+        return;
+      if (this.activeNavPos === -1)
+        return this.activateFirst();
+      this.activeNavPos = (this.activeNavPos + 1) % this.navIndex.length;
+      this.setActiveByNavPos();
+    }
+    activatePrev() {
+      this._ensureNavIndex();
+      if (!this.navIndex.length)
+        return;
+      if (this.activeNavPos === -1)
+        return this.activateLast();
+      this.activeNavPos = this.activeNavPos === 0 ? this.navIndex.length - 1 : this.activeNavPos - 1;
+      this.setActiveByNavPos();
+    }
+    activateByKey(key) {
+      this._ensureNavIndex();
+      this.typedBuffer += key.toLowerCase();
+      if (this.bufferResetTimeout)
+        clearTimeout(this.bufferResetTimeout);
+      this.bufferResetTimeout = setTimeout(() => this.typedBuffer = "", this.bufferDelay);
+      const source = this.currentResults.length ? this.currentResults : Array.from(this.itemsMap.values());
+      const start = this.activatedValue.value ? this.navIndex.indexOf(this.activatedValue.value) + 1 : 0;
+      const total = source.length;
+      for (let i = 0; i < total; i++) {
+        const item = source[(start + i) % total];
+        if (item && !item.disabled && item.searchable.startsWith(this.typedBuffer)) {
+          this.activate(item.value);
+          break;
+        }
+      }
     }
   };
   var RoverCollection_default = RoverCollection;
@@ -288,7 +430,7 @@
   function CreateRoverRoot({
     effect
   }) {
-    const collection = new RoverCollection_default();
+    const collection = new RoverCollection_default({preventDuplication: true});
     return {
       __collection: collection,
       __optionsEls: void 0,
@@ -325,7 +467,6 @@
       __activateFirst: () => collection.activateFirst(),
       __activateLast: () => collection.activateLast(),
       __searchUsingQuery: (query) => collection.search(query),
-      __getByIndex: (index) => collection.getByIndex(index),
       init() {
         this.__setupManagers();
         effect(() => {
@@ -364,7 +505,7 @@
               this.__optionIndex.set(v, el);
           });
           effect(() => {
-            const activeItem = this.__getByIndex(collection.activatedValue.value);
+            const activeItem = collection.getActiveItem();
             const activeValue = this.__activatedValue = activeItem?.value;
             const visibleValuesArray = this.__filteredValues;
             requestAnimationFrame(() => {

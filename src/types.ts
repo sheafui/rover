@@ -3,7 +3,7 @@ import RoverCollection from "./core/RoverCollection";
 
 export interface Options {
     searchThreshold?: number;
-    throwOnDuplication: boolean
+    preventDuplication: boolean
 }
 
 export interface Item {
@@ -51,7 +51,6 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __isActive: (value: string) => boolean;
     __deactivate: () => void;
     __getActiveItem: () => Item | null;
-    __getByIndex: (index: number | null | undefined) => Item | null;
     __activateNext: () => void;
     __activatePrev: () => void;
     __activateFirst: () => void;
