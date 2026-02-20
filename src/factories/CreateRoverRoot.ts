@@ -82,7 +82,10 @@ export default function CreateRoverRoot(
                     const query = inputEl.value;
 
                     if (query.length > 0) {
-                        this.__filteredValues = this.__searchUsingQuery(query).map((r: Item) => r.value);
+
+                        this.__filteredValues = this.__searchUsingQuery(query)
+                        // @todo: prevent this O(n) loop by return value at first place
+                        .map((r: Item) => r.value);
                     } else {
                         this.__filteredValues = null;
                         // on the true branch the reindex handled internally but since 
@@ -137,6 +140,7 @@ export default function CreateRoverRoot(
 
         },
         patchItemsVisibility(visibleValuesArray: string[] | null) {
+            
             if (!this.__optionsEls || !this.__optionIndex) return;
 
             const prevArray = this.__prevVisibleArray;
