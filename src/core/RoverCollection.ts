@@ -15,9 +15,8 @@ export default class RoverCollection {
     // -----------------------
     // Navigation
     // -----------------------
-    public navIndex: string[] = [];          // array of value strings
-    private activeNavPos: number = -1;       // position in navIndex
-    public activatedValue; // canonical reactive
+    public navIndex: string[] = [];          // filtered and enabled values
+    public activatedValue;
 
     // -----------------------
     // Batch / dirty flag
@@ -72,7 +71,6 @@ export default class RoverCollection {
 
         if (this.activatedValue.value === value) {
             this.activatedValue.value = null;
-            this.activeNavPos = -1;
         }
 
         this._markDirty();
@@ -158,15 +156,13 @@ export default class RoverCollection {
         this._navDirty = false;
 
         const source = this.currentResults.length ? this.currentResults : Array.from(this.itemsMap.values());
-
         this.navIndex = source.filter(i => !i.disabled).map(i => i.value);
 
-        if (this.activatedValue.value) {
-            const pos = this.navIndex.indexOf(this.activatedValue.value);
-            this.activeNavPos = pos;
-            if (pos === -1) this.activatedValue.value = null;
-        } else {
-            this.activeNavPos = -1;
+        // preserve canonical active value even if temporarily hidden
+        if (this.activatedValue.value && !this.navIndex.includes(this.activatedValue.value)) {
+            // do nothing, keep canonical value
+        } else if (!this.activatedValue.value && this.navIndex.length > 0) {
+            this.activatedValue.value = null;
         }
     }
 
@@ -180,12 +176,10 @@ export default class RoverCollection {
         if (this.activatedValue.value === value) return;
 
         this.activatedValue.value = value;
-        this.activeNavPos = this.navIndex.indexOf(value);
     }
 
     public deactivate(): void {
         this.activatedValue.value = null;
-        this.activeNavPos = -1;
     }
 
     public isActivated(value: string): boolean {
@@ -195,40 +189,37 @@ export default class RoverCollection {
     // -----------------------
     // Keyboard Navigation
     // -----------------------
-    private setActiveByNavPos(): void {
-        const value = this.navIndex[this.activeNavPos];
-        if (!value) return;
-        this.activatedValue.value = value;
+    private setActiveByIndex(index: number): void {
+        if (index < 0 || index >= this.navIndex.length) return;
+        this.activatedValue.value = this.navIndex[index];
     }
 
     public activateFirst(): void {
         this._ensureNavIndex();
         if (!this.navIndex.length) return;
-        this.activeNavPos = 0;
-        this.setActiveByNavPos();
+        this.setActiveByIndex(0);
     }
 
     public activateLast(): void {
         this._ensureNavIndex();
         if (!this.navIndex.length) return;
-        this.activeNavPos = this.navIndex.length - 1;
-        this.setActiveByNavPos();
+        this.setActiveByIndex(this.navIndex.length - 1);
     }
 
     public activateNext(): void {
         this._ensureNavIndex();
         if (!this.navIndex.length) return;
-        if (this.activeNavPos === -1) return this.activateFirst();
-        this.activeNavPos = (this.activeNavPos + 1) % this.navIndex.length;
-        this.setActiveByNavPos();
+        const currentIndex = this.activatedValue.value ? this.navIndex.indexOf(this.activatedValue.value) : -1;
+        const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % this.navIndex.length;
+        this.setActiveByIndex(nextIndex);
     }
 
     public activatePrev(): void {
         this._ensureNavIndex();
         if (!this.navIndex.length) return;
-        if (this.activeNavPos === -1) return this.activateLast();
-        this.activeNavPos = this.activeNavPos === 0 ? this.navIndex.length - 1 : this.activeNavPos - 1;
-        this.setActiveByNavPos();
+        const currentIndex = this.activatedValue.value ? this.navIndex.indexOf(this.activatedValue.value) : -1;
+        const prevIndex = currentIndex <= 0 ? this.navIndex.length - 1 : currentIndex - 1;
+        this.setActiveByIndex(prevIndex);
     }
 
     // -----------------------
@@ -241,18 +232,17 @@ export default class RoverCollection {
         if (this.bufferResetTimeout) clearTimeout(this.bufferResetTimeout);
         this.bufferResetTimeout = setTimeout(() => (this.typedBuffer = ''), this.bufferDelay);
 
-        const source = this.currentResults.length ? this.currentResults : Array.from(this.itemsMap.values());
-        const start = this.activatedValue.value ? this.navIndex.indexOf(this.activatedValue.value) + 1 : 0;
+        if (!this.navIndex.length) return;
 
-        const total = source.length;
-        for (let i = 0; i < total; i++) {
-            const item = source[(start + i) % total];
+        const startIndex = this.activatedValue.value ? this.navIndex.indexOf(this.activatedValue.value) + 1 : 0;
 
+        for (let i = 0; i < this.navIndex.length; i++) {
+            const idx = (startIndex + i) % this.navIndex.length;
+            const item = this.itemsMap.get(this.navIndex[idx]!);
             if (item && !item.disabled && item.searchable.startsWith(this.typedBuffer)) {
-                this.activate(item.value);
+                this.activatedValue.value = item.value;
                 break;
             }
         }
     }
 }
-

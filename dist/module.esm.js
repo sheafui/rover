@@ -28,7 +28,6 @@ var RoverCollection = class {
     this.currentQuery = "";
     this.currentResults = [];
     this.navIndex = [];
-    this.activeNavPos = -1;
     this._navDirty = false;
     this._flushQueued = false;
     this.typedBuffer = "";
@@ -60,7 +59,6 @@ var RoverCollection = class {
       this.currentResults.splice(idx, 1);
     if (this.activatedValue.value === value) {
       this.activatedValue.value = null;
-      this.activeNavPos = -1;
     }
     this._markDirty();
   }
@@ -121,13 +119,9 @@ var RoverCollection = class {
     this._navDirty = false;
     const source = this.currentResults.length ? this.currentResults : Array.from(this.itemsMap.values());
     this.navIndex = source.filter((i) => !i.disabled).map((i) => i.value);
-    if (this.activatedValue.value) {
-      const pos = this.navIndex.indexOf(this.activatedValue.value);
-      this.activeNavPos = pos;
-      if (pos === -1)
-        this.activatedValue.value = null;
-    } else {
-      this.activeNavPos = -1;
+    if (this.activatedValue.value && !this.navIndex.includes(this.activatedValue.value)) {
+    } else if (!this.activatedValue.value && this.navIndex.length > 0) {
+      this.activatedValue.value = null;
     }
   }
   activate(value) {
@@ -138,52 +132,45 @@ var RoverCollection = class {
     if (this.activatedValue.value === value)
       return;
     this.activatedValue.value = value;
-    this.activeNavPos = this.navIndex.indexOf(value);
   }
   deactivate() {
     this.activatedValue.value = null;
-    this.activeNavPos = -1;
   }
   isActivated(value) {
     return this.activatedValue.value === value;
   }
-  setActiveByNavPos() {
-    const value = this.navIndex[this.activeNavPos];
-    if (!value)
+  setActiveByIndex(index) {
+    if (index < 0 || index >= this.navIndex.length)
       return;
-    this.activatedValue.value = value;
+    this.activatedValue.value = this.navIndex[index];
   }
   activateFirst() {
     this._ensureNavIndex();
     if (!this.navIndex.length)
       return;
-    this.activeNavPos = 0;
-    this.setActiveByNavPos();
+    this.setActiveByIndex(0);
   }
   activateLast() {
     this._ensureNavIndex();
     if (!this.navIndex.length)
       return;
-    this.activeNavPos = this.navIndex.length - 1;
-    this.setActiveByNavPos();
+    this.setActiveByIndex(this.navIndex.length - 1);
   }
   activateNext() {
     this._ensureNavIndex();
     if (!this.navIndex.length)
       return;
-    if (this.activeNavPos === -1)
-      return this.activateFirst();
-    this.activeNavPos = (this.activeNavPos + 1) % this.navIndex.length;
-    this.setActiveByNavPos();
+    const currentIndex = this.activatedValue.value ? this.navIndex.indexOf(this.activatedValue.value) : -1;
+    const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % this.navIndex.length;
+    this.setActiveByIndex(nextIndex);
   }
   activatePrev() {
     this._ensureNavIndex();
     if (!this.navIndex.length)
       return;
-    if (this.activeNavPos === -1)
-      return this.activateLast();
-    this.activeNavPos = this.activeNavPos === 0 ? this.navIndex.length - 1 : this.activeNavPos - 1;
-    this.setActiveByNavPos();
+    const currentIndex = this.activatedValue.value ? this.navIndex.indexOf(this.activatedValue.value) : -1;
+    const prevIndex = currentIndex <= 0 ? this.navIndex.length - 1 : currentIndex - 1;
+    this.setActiveByIndex(prevIndex);
   }
   activateByKey(key) {
     this._ensureNavIndex();
@@ -191,13 +178,14 @@ var RoverCollection = class {
     if (this.bufferResetTimeout)
       clearTimeout(this.bufferResetTimeout);
     this.bufferResetTimeout = setTimeout(() => this.typedBuffer = "", this.bufferDelay);
-    const source = this.currentResults.length ? this.currentResults : Array.from(this.itemsMap.values());
-    const start = this.activatedValue.value ? this.navIndex.indexOf(this.activatedValue.value) + 1 : 0;
-    const total = source.length;
-    for (let i = 0; i < total; i++) {
-      const item = source[(start + i) % total];
+    if (!this.navIndex.length)
+      return;
+    const startIndex = this.activatedValue.value ? this.navIndex.indexOf(this.activatedValue.value) + 1 : 0;
+    for (let i = 0; i < this.navIndex.length; i++) {
+      const idx = (startIndex + i) % this.navIndex.length;
+      const item = this.itemsMap.get(this.navIndex[idx]);
       if (item && !item.disabled && item.searchable.startsWith(this.typedBuffer)) {
-        this.activate(item.value);
+        this.activatedValue.value = item.value;
         break;
       }
     }
