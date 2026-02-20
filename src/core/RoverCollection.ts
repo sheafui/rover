@@ -77,15 +77,6 @@ export default class RoverCollection {
 
         this._insertionOrder.push(value);
 
-        // // Incrementally update currentResults if a search is active,
-        // // avoiding a full re-search on every morphdom add.
-        // if (this.currentQuery && this.currentResults.length) {
-        //     const item = this.itemsMap.get(value)!;
-        //     if (!disabled && item.searchable.includes(this.currentQuery)) {
-        //         this.currentResults.push(item);
-        //     }
-        // }
-
         this._markDirty();
     }
 
@@ -132,24 +123,14 @@ export default class RoverCollection {
      * Single loop, two buckets, one concat. No sort pass needed.
      */
     public search(query: string): Item[] {
-        if (!query) {
-            this.currentQuery = '';
-            this.currentResults = [];
-            this._markDirty();
-            console.log('here');
-            return Array.from(this.itemsMap.values());
-        }
 
         const normalizedQuery = RoverCollection._normalize(query);
 
         // Narrowing optimisation: if the new query extends the previous one,
         // filter only the existing (smaller) result set instead of all items.
-        const source: Item[] =
-            this.currentQuery &&
-                normalizedQuery.startsWith(this.currentQuery) &&
-                this.currentResults.length
-                ? this.currentResults
-                : Array.from(this.itemsMap.values());
+        const narrowNewFilterToPreviousResultsSet = this.currentQuery && normalizedQuery.startsWith(this.currentQuery) && this.currentResults.length;
+        
+        const source: Item[] = narrowNewFilterToPreviousResultsSet ? this.currentResults : Array.from(this.itemsMap.values());
 
         const prefix: Item[] = [];
         const mid: Item[] = [];

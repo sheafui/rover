@@ -70,15 +70,9 @@
       return lower.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     }
     search(query) {
-      if (!query) {
-        this.currentQuery = "";
-        this.currentResults = [];
-        this._markDirty();
-        console.log("here");
-        return Array.from(this.itemsMap.values());
-      }
       const normalizedQuery = RoverCollection._normalize(query);
-      const source = this.currentQuery && normalizedQuery.startsWith(this.currentQuery) && this.currentResults.length ? this.currentResults : Array.from(this.itemsMap.values());
+      const narrowNewFilterToPreviousResultsSet = this.currentQuery && normalizedQuery.startsWith(this.currentQuery) && this.currentResults.length;
+      const source = narrowNewFilterToPreviousResultsSet ? this.currentResults : Array.from(this.itemsMap.values());
       const prefix = [];
       const mid = [];
       for (const item of source) {
