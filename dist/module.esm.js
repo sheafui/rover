@@ -480,11 +480,7 @@ function CreateRoverRoot({
         if (!isRemoteSearch) {
           const query = inputEl.value;
           if (query.length > 0) {
-            const results = this.__searchUsingQuery(query).map((r) => r.value);
-            const prev = this.__filteredValues;
-            const changed = !prev || prev.length !== results.length || results.some((v, i) => v !== prev[i]);
-            if (changed)
-              this.__filteredValues = results;
+            this.__filteredValues = this.__searchUsingQuery(query).map((r) => r.value);
           } else {
             this.__filteredValues = null;
             collection.reset();
