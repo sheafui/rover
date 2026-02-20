@@ -83,11 +83,11 @@ var RoverCollection = class {
     return lower.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   }
   search(query) {
-    console.log("here");
-    if (query = "") {
+    if (!query) {
       this.currentQuery = "";
       this.currentResults = [];
       this._markDirty();
+      console.log("here");
       return Array.from(this.itemsMap.values());
     }
     const normalizedQuery = RoverCollection._normalize(query);
@@ -105,6 +105,11 @@ var RoverCollection = class {
     this.currentResults = prefix.length || mid.length ? prefix.concat(mid) : [];
     this._markDirty();
     return this.currentResults;
+  }
+  reset() {
+    this.currentQuery = "";
+    this.currentResults = [];
+    this._markDirty();
   }
   get(value) {
     return this.itemsMap.get(value);
@@ -503,8 +508,11 @@ function CreateRoverRoot({
             const changed = !prev || prev.length !== results.length || results.some((v, i) => v !== prev[i]);
             if (changed)
               this.__filteredValues = results;
-          } else
+          } else {
             this.__filteredValues = null;
+            collection.reset();
+          }
+          ;
         }
         const availableValues = (_b = this.__filteredValues) != null ? _b : this.__collection.all().map((i) => i.value);
         console.log("current values:", availableValues);

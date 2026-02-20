@@ -91,7 +91,13 @@ export default function CreateRoverRoot(
 
                         if (changed) this.__filteredValues = results;
 
-                    } else this.__filteredValues = null;
+                    } else {
+                        this.__filteredValues = null;
+                        // on the true branch the reindex handled internally but since 
+                        // we don't reach to the colleciton when the query is empty
+                        // we need to reindex the collection again for full actvation
+                        collection.reset();
+                    };
                 }
 
 

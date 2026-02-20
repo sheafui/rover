@@ -132,15 +132,11 @@ export default class RoverCollection {
      * Single loop, two buckets, one concat. No sort pass needed.
      */
     public search(query: string): Item[] {
-
-        console.log('here');
-
-        if (query = '') {
+        if (!query) {
             this.currentQuery = '';
             this.currentResults = [];
             this._markDirty();
-
-
+            console.log('here');
             return Array.from(this.itemsMap.values());
         }
 
@@ -169,6 +165,12 @@ export default class RoverCollection {
         this._markDirty();
 
         return this.currentResults;
+    }
+
+    public reset(): void {
+        this.currentQuery = '';
+        this.currentResults = [];
+        this._markDirty();
     }
 
     // -----------------------
