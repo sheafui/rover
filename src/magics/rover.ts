@@ -31,7 +31,6 @@ export const rover = (el: ElementWithXAttributes) => {
         get inputEl(): HTMLElement | null {
             return data.$root.querySelector('[x-rover\\:input]');
         },
-
         // re wire up the internal index to catch changes on the dom
         reIndex() {
             // @todo

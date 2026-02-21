@@ -62,6 +62,8 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __pushSeparatorToItems: (id: string) => void;
     __nextGroupId: () => number;
     __nextSeparatorId: () => number;
+    __flush: () => void;
+    __buildOptions: () => void;
     // __handleGroupsVisibility: () => void,
     // __handleSeparatorsVisibility: () => void,
     patchItemsVisibility: (value: string[] | null) => void,
@@ -130,7 +132,8 @@ export interface OptionsManager extends Destroyable, Abortable {
             activeKey: string | null
         ) => void
     ): void
-    get all(): Array<HTMLElement>
+    get all(): Array<HTMLElement>;
+    flush(): void;
     findClosestOption(el: HTMLElement | null): HTMLElement | undefined
 
     enableDefaultOptionsHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'>): void

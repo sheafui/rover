@@ -398,6 +398,9 @@
           return [];
         return Array.from(allOptions);
       },
+      flush() {
+        root.__flush();
+      },
       destroy() {
         this.controller.abort();
       }
@@ -424,9 +427,7 @@
   }
 
   // src/factories/CreateRoverRoot.ts
-  function CreateRoverRoot({
-    effect
-  }) {
+  function CreateRoverRoot({effect}) {
     const collection = new RoverCollection_default({preventDuplication: true});
     return {
       __collection: collection,

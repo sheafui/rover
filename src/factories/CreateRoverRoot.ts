@@ -7,13 +7,7 @@ import { createOptionManager } from "src/Managers/OptionManager";
 import { createOptionsManager } from "src/Managers/OptionsManager";
 import { createButtonManager } from "src/Managers/ButtonManager";
 
-export default function CreateRoverRoot(
-    {
-        effect
-    }: {
-        effect: AlpineType.DirectiveUtilities['effect']
-    }
-): RoverRootData {
+export default function CreateRoverRoot({ effect }: { effect: AlpineType.DirectiveUtilities['effect'] }): RoverRootData {
 
     const collection = new RoverCollection({ preventDuplication: true });
 
@@ -110,6 +104,7 @@ export default function CreateRoverRoot(
             this.$nextTick(() => {
 
                 this.__buildOptions();
+
                 effect(() => {
                     const activeItem = collection.getActiveItem();
 

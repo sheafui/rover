@@ -114,6 +114,9 @@ export function createOptionsManager(root: RoverRootContext): OptionsManager {
 
             return Array.from(allOptions);
         },
+        flush() {
+            root.__flush();
+        },
         destroy() {
             this.controller.abort();
         }
