@@ -59,6 +59,7 @@ var RoverCollection = class {
     this.itemsMap.set(value, {value, searchable, disabled});
     this._insertionOrder.push(value);
     this._markDirty();
+    console.log("from add", this.itemsMap);
   }
   forget(value) {
     const item = this.itemsMap.get(value);
@@ -75,6 +76,7 @@ var RoverCollection = class {
       this.activatedValue.value = null;
     }
     this._markDirty();
+    console.log("from add", this.itemsMap);
   }
   static _normalize(s) {
     const lower = s.toLowerCase();

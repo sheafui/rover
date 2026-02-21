@@ -78,6 +78,7 @@ export default class RoverCollection {
         this._insertionOrder.push(value);
 
         this._markDirty();
+        console.log('from add', this.itemsMap);
     }
 
     public forget(value: string): void {
@@ -97,6 +98,8 @@ export default class RoverCollection {
         }
 
         this._markDirty();
+
+        console.log('from add', this.itemsMap);
     }
 
     // -----------------------

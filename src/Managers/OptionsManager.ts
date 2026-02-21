@@ -47,7 +47,9 @@ export function createOptionsManager(root: RoverRootContext): OptionsManager {
 
             if (!disabledEvents.includes('mouseover')) {
                 this.on('mouseover', (_event: MouseEvent, optionEl: HTMLElement) => {
+
                     if (!optionEl?.dataset.value) return;
+                    
                     root.__activate(optionEl.dataset.value);
                 });
             }
