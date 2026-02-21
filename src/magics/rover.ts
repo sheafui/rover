@@ -24,7 +24,6 @@ export const rover = (el: ElementWithXAttributes) => {
             return data.__buttonManager;
         },
 
-
         get isLoading(): boolean {
             return data.__isLoading;
         },
@@ -36,7 +35,6 @@ export const rover = (el: ElementWithXAttributes) => {
             // @todo
         },
         getOptionElByValue(value: string): HTMLElement | undefined {
-            // console.log(data.__optionIndex)
             return data.__optionIndex?.get(value);
         },
         activate(key: string) {
@@ -66,5 +64,9 @@ export const rover = (el: ElementWithXAttributes) => {
         searchUsing(query: string): Item[] {
             return data.__collection.search(query)
         },
+        reconcileDom() {
+            this.options.flush();
+            this.activateFirst();
+        }
     }
 }

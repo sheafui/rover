@@ -695,6 +695,10 @@
       },
       searchUsing(query) {
         return data.__collection.search(query);
+      },
+      reconcileDom() {
+        this.options.flush();
+        this.activateFirst();
       }
     };
   };
