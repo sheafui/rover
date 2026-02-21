@@ -9,9 +9,10 @@ export default class RoverCollection {
 
     /**
      * tracks DOM order separately from the Map. for external
-     *  search is very hard to track  morph dom reconcilation
-     *  to extract the order, so we will fill this
-     *  while flushing the index... 
+     * search is very hard to track morph dom reconcilation
+     * to extract the order, so we will fill this
+     * while flushing the index...
+     * this is also called ones per flush and it's effecient since on completly new html need to be scanned once as local searhc  
      */
     private VALUES_IN_DOM_ORDER: string[] = [];
 
@@ -165,10 +166,10 @@ export default class RoverCollection {
             : null;
     }
 
-    public all(): Item[] {
-        // Return items in stable insertion order, not Map iteration order.
-        return this.VALUES_IN_DOM_ORDER.map(v => this.itemsMap.get(v)!);
+    public getAllValues(): string[] {
+        return this.VALUES_IN_DOM_ORDER;
     }
+
 
     public get size(): number {
         return this.itemsMap.size;
@@ -195,8 +196,6 @@ export default class RoverCollection {
     }
 
     private _rebuildNavIndex(): void {
-        this._navDirty = false;
-
         // Use VALUES_IN_DOM_ORDER as the traversal base so nav order always
         // matches DOM order, even after morphdom forget → add cycles.
         const resultSet: Set<Item> | null = this.currentResults.length
@@ -206,15 +205,30 @@ export default class RoverCollection {
         const next: string[] = [];
 
         for (const value of this.VALUES_IN_DOM_ORDER) {
+
             const item = this.itemsMap.get(value);
+
             if (!item || item.disabled) continue;
+
             if (resultSet !== null && !resultSet.has(item)) continue;
+
             next.push(value);
         }
 
         this.navIndex = next;
 
         this._navPosMap = new Map(next.map((v, i) => [v, i]));
+
+        this._navDirty = false;
+    }
+
+    public setValuesInDomOrder(values: Array<string>) {
+
+        this.VALUES_IN_DOM_ORDER = values;
+
+        this._navDirty = true;
+
+        this._rebuildNavIndex();
     }
 
     // -----------------------

@@ -90,7 +90,7 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
                 }
 
 
-                const availableValues = this.__filteredValues ?? this.__collection.all().map((i: Item) => i.value);
+                const availableValues = this.__filteredValues ?? this.__collection.getAllValues();
 
                 if (this.__activatedValue && !availableValues.includes(this.__activatedValue)) this.__deactivate();
 
@@ -104,6 +104,8 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
             this.$nextTick(() => {
 
                 this.__buildOptions();
+                this.__setValuesInDomOrder();
+
 
                 effect(() => {
                     const activeItem = collection.getActiveItem();
@@ -212,13 +214,14 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
         },
 
         __flush() {
-            this.__optionsEls = undefined;
-
-            this.__optionIndex = undefined;
-
             this.__buildOptions();
+            this.__setValuesInDomOrder();
+        },
 
-            this.collection.DOM_ORDER;
+        __setValuesInDomOrder() {
+            let values = this.__optionsEls.map((el: HTMLUListElement) => el.dataset.value);
+
+            collection.setValuesInDomOrder(values);
         },
 
         __buildOptions() {

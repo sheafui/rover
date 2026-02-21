@@ -95,8 +95,8 @@
     getActiveItem() {
       return this.activatedValue.value ? this.itemsMap.get(this.activatedValue.value) ?? null : null;
     }
-    all() {
-      return this.VALUES_IN_DOM_ORDER.map((v) => this.itemsMap.get(v));
+    getAllValues() {
+      return this.VALUES_IN_DOM_ORDER;
     }
     get size() {
       return this.itemsMap.size;
@@ -117,7 +117,6 @@
         this._rebuildNavIndex();
     }
     _rebuildNavIndex() {
-      this._navDirty = false;
       const resultSet = this.currentResults.length ? new Set(this.currentResults) : null;
       const next = [];
       for (const value of this.VALUES_IN_DOM_ORDER) {
@@ -130,6 +129,12 @@
       }
       this.navIndex = next;
       this._navPosMap = new Map(next.map((v, i) => [v, i]));
+      this._navDirty = false;
+    }
+    setValuesInDomOrder(values) {
+      this.VALUES_IN_DOM_ORDER = values;
+      this._navDirty = true;
+      this._rebuildNavIndex();
     }
     activate(value) {
       this._ensureNavIndex();
@@ -484,7 +489,7 @@
             }
             ;
           }
-          const availableValues = this.__filteredValues ?? this.__collection.all().map((i) => i.value);
+          const availableValues = this.__filteredValues ?? this.__collection.getAllValues();
           if (this.__activatedValue && !availableValues.includes(this.__activatedValue))
             this.__deactivate();
           if (!this.__getActiveItem()) {
@@ -495,6 +500,7 @@
         });
         this.$nextTick(() => {
           this.__buildOptions();
+          this.__setValuesInDomOrder();
           effect(() => {
             const activeItem = collection.getActiveItem();
             const activeValue = this.__activatedValue = activeItem?.value;
@@ -580,10 +586,12 @@
         this.__prevActiveValue = activeValue;
       },
       __flush() {
-        this.__optionsEls = void 0;
-        this.__optionIndex = void 0;
         this.__buildOptions();
-        this.collection.DOM_ORDER;
+        this.__setValuesInDomOrder();
+      },
+      __setValuesInDomOrder() {
+        let values = this.__optionsEls.map((el) => el.dataset.value);
+        collection.setValuesInDomOrder(values);
       },
       __buildOptions() {
         this.__optionsEls = Array.from(this.$el.querySelectorAll("[x-rover\\:option]"));
