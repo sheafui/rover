@@ -71,7 +71,6 @@ var RoverCollection = class {
       this.activatedValue.value = null;
     }
     this._markDirty();
-    console.log("from add", this.itemsMap);
   }
   static _normalize(s) {
     const lower = s.toLowerCase();
@@ -188,7 +187,6 @@ var RoverCollection = class {
     if (!this.navIndex.length)
       return;
     const current = this.activatedValue.value !== null ? (_a = this._navPosMap.get(this.activatedValue.value)) != null ? _a : -1 : -1;
-    console.log(this.navIndex);
     this._setActiveByIndex(current === -1 ? 0 : (current + 1) % this.navIndex.length);
   }
   activatePrev() {

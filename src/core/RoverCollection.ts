@@ -93,8 +93,6 @@ export default class RoverCollection {
         }
 
         this._markDirty();
-
-        console.log('from add', this.itemsMap);
     }
 
     // -----------------------
@@ -111,6 +109,7 @@ export default class RoverCollection {
         // Skip NFD normalization if no non-ASCII characters present —
         // avoids the most expensive part of the chain for typical Latin input.
         if (!/[^\u0000-\u007f]/.test(lower)) return lower;
+        
         return lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     }
 
@@ -280,7 +279,6 @@ export default class RoverCollection {
             ? (this._navPosMap.get(this.activatedValue.value) ?? -1)
             : -1;
 
-        console.log(this.navIndex);
 
         this._setActiveByIndex(current === -1 ? 0 : (current + 1) % this.navIndex.length);
     }
