@@ -283,6 +283,9 @@ function createInputManager(rootDataStack) {
         });
       }
     },
+    get el() {
+      return inputEl;
+    },
     destroy() {
       this.controller.abort();
     }
