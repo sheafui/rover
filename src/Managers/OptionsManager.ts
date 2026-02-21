@@ -56,7 +56,6 @@ export function createOptionsManager(root: RoverRootContext): OptionsManager {
                 this.on('mousemove', (_event: MouseEvent, optionEl: HTMLElement) => {
                     if (!optionEl?.dataset.value) return;
                     if (root.__isActive(optionEl.dataset.value)) return;
-
                     root.__activate(optionEl.dataset.value);
                 });
             }
@@ -70,8 +69,8 @@ export function createOptionsManager(root: RoverRootContext): OptionsManager {
 
             if (!disabledEvents.includes('keydown')) {
                 this.on('keydown', (event: KeyboardEvent) => {
+                    
                     event.stopPropagation();
-
                     switch (event.key) {
                         case 'ArrowDown':
                             event.preventDefault();
@@ -113,6 +112,9 @@ export function createOptionsManager(root: RoverRootContext): OptionsManager {
             if (!allOptions) return []
 
             return Array.from(allOptions);
+        },
+        flush() {
+            root.__flush();
         },
         destroy() {
             this.controller.abort();

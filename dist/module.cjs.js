@@ -36,204 +36,184 @@ function CreateRoverOption(Alpine2) {
 
 // src/core/RoverCollection.ts
 var RoverCollection = class {
-  constructor(options = {}) {
-    this.items = [];
+  constructor(options) {
+    this.itemsMap = new Map();
+    this.VALUES_IN_DOM_ORDER = [];
     this.currentQuery = "";
     this.currentResults = [];
     this.navIndex = [];
-    this.activeNavPos = -1;
-    this.isProcessing = false;
+    this._navPosMap = new Map();
+    this._navDirty = false;
+    this._flushQueued = false;
     this.typedBuffer = "";
     this.bufferResetTimeout = null;
     this.bufferDelay = 500;
     var _a;
-    this.pending = Alpine.reactive({state: false});
-    this.activeIndex = Alpine.reactive({value: void 0});
+    this.pending = Alpine.reactive({value: false});
+    this.activatedValue = Alpine.reactive({value: null});
     this.searchThreshold = (_a = options.searchThreshold) != null ? _a : 500;
   }
   add(value, searchable, disabled = false) {
-    const item = {value, disabled, searchable};
-    console.log(item);
-    this.items.push(item);
-    console.log(this.items);
-    this.invalidate();
+    if (this.itemsMap.has(value))
+      return;
+    this.itemsMap.set(value, {value, searchable, disabled});
+    this._markDirty();
   }
   forget(value) {
-    const index = this.items.findIndex((item) => item.value === value);
-    if (index === -1)
+    const item = this.itemsMap.get(value);
+    if (!item)
       return;
-    this.items.splice(index, 1);
-    if (this.activeIndex.value === index) {
-      this.activeIndex.value = void 0;
-      this.activeNavPos = -1;
-    } else if (this.activeIndex.value !== void 0 && this.activeIndex.value > index) {
-      this.activeIndex.value--;
+    this.itemsMap.delete(value);
+    const ri = this.currentResults.indexOf(item);
+    if (ri !== -1)
+      this.currentResults.splice(ri, 1);
+    if (this.activatedValue.value === value) {
+      this.activatedValue.value = null;
     }
-    this.invalidate();
+    this._markDirty();
   }
-  invalidate() {
-    this.currentQuery = "";
-    this.currentResults = [];
-    this.scheduleBatchAsANextMicroTask();
-  }
-  scheduleBatchAsANextMicroTask() {
-    if (this.isProcessing)
-      return;
-    this.isProcessing = true;
-    this.pending.state = true;
-    queueMicrotask(() => {
-      this.rebuildNavIndex();
-      this.isProcessing = false;
-      this.pending.state = false;
-    });
-  }
-  rebuildNavIndex() {
-    var _a;
-    this.navIndex = [];
-    const itemsToIndex = this.currentResults.length > 0 ? this.currentResults : this.items;
-    for (let i = 0; i < this.items.length; i++) {
-      if (!((_a = this.items[i]) == null ? void 0 : _a.disabled) && itemsToIndex.includes(this.items[i])) {
-        this.navIndex.push(i);
-      }
-    }
-    console.log(this.navIndex);
-  }
-  toggleIsPending() {
-    this.pending.state = !this.pending.state;
+  static _normalize(s) {
+    const lower = s.toLowerCase();
+    if (!/[^\u0000-\u007f]/.test(lower))
+      return lower;
+    return lower.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   }
   search(query) {
-    if (query === "") {
-      this.currentQuery = "";
-      this.currentResults = [];
-      this.rebuildNavIndex();
-      return this.items;
+    const normalizedQuery = RoverCollection._normalize(query);
+    const narrowNewFilterToPreviousResultsSet = this.currentQuery && normalizedQuery.startsWith(this.currentQuery) && this.currentResults.length;
+    const source = narrowNewFilterToPreviousResultsSet ? this.currentResults : Array.from(this.itemsMap.values());
+    const prefix = [];
+    const mid = [];
+    for (const item of source) {
+      const s = item.searchable;
+      if (s.startsWith(normalizedQuery))
+        prefix.push(item);
+      else if (s.includes(normalizedQuery))
+        mid.push(item);
     }
-    const normalizedQuery = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    if (this.currentQuery && normalizedQuery.startsWith(this.currentQuery) && this.currentResults.length > 0) {
-      const filtered = this.currentResults.filter((item) => {
-        return item.searchable.includes(normalizedQuery);
-      });
-      this.currentQuery = normalizedQuery;
-      this.currentResults = filtered;
-      this.rebuildNavIndex();
-      return filtered;
-    }
-    const results = this.items.filter((item) => {
-      return item.searchable.includes(normalizedQuery);
-    });
     this.currentQuery = normalizedQuery;
-    this.currentResults = results;
-    this.rebuildNavIndex();
-    return results;
+    this.currentResults = prefix.length || mid.length ? prefix.concat(mid) : [];
+    this._markDirty();
+    return this.currentResults;
+  }
+  reset() {
+    this.currentQuery = "";
+    this.currentResults = [];
+    this._markDirty();
   }
   get(value) {
-    return this.items.find((item) => item.value === value);
-  }
-  getByIndex(index) {
-    var _a;
-    if (index == null || index === void 0)
-      return null;
-    return (_a = this.items[index]) != null ? _a : null;
-  }
-  all() {
-    return this.items;
-  }
-  get size() {
-    return this.items.length;
-  }
-  activate(value) {
-    const index = this.items.findIndex((item2) => item2.value === value);
-    if (index === -1)
-      return;
-    const item = this.items[index];
-    if (item == null ? void 0 : item.disabled)
-      return;
-    this.rebuildNavIndex();
-    if (this.activeIndex.value === index)
-      return;
-    this.activeIndex.value = index;
-    this.activeNavPos = this.navIndex.indexOf(index);
-  }
-  deactivate() {
-    this.activeIndex.value = void 0;
-    this.activeNavPos = -1;
-  }
-  isActivated(value) {
-    const index = this.items.findIndex((item) => item.value === value);
-    if (index === -1)
-      return false;
-    return index === this.activeIndex.value;
+    return this.itemsMap.get(value);
   }
   getActiveItem() {
     var _a;
-    if (this.activeIndex.value === void 0)
-      return null;
-    return (_a = this.items[this.activeIndex.value]) != null ? _a : null;
+    return this.activatedValue.value ? (_a = this.itemsMap.get(this.activatedValue.value)) != null ? _a : null : null;
+  }
+  getAllValues() {
+    return this.VALUES_IN_DOM_ORDER;
+  }
+  get size() {
+    return this.itemsMap.size;
+  }
+  _markDirty() {
+    this._navDirty = true;
+    if (!this._flushQueued) {
+      this._flushQueued = true;
+      queueMicrotask(() => {
+        this._flushQueued = false;
+        if (this._navDirty)
+          this._rebuildNavIndex();
+      });
+    }
+  }
+  _ensureNavIndex() {
+    if (this._navDirty)
+      this._rebuildNavIndex();
+  }
+  _rebuildNavIndex() {
+    const resultSet = this.currentResults.length ? new Set(this.currentResults) : null;
+    const next = [];
+    for (const value of this.VALUES_IN_DOM_ORDER) {
+      const item = this.itemsMap.get(value);
+      if (!item || item.disabled)
+        continue;
+      if (resultSet !== null && !resultSet.has(item))
+        continue;
+      next.push(value);
+    }
+    this.navIndex = next;
+    this._navPosMap = new Map(next.map((v, i) => [v, i]));
+    this._navDirty = false;
+  }
+  setValuesInDomOrder(values) {
+    this.VALUES_IN_DOM_ORDER = values;
+    this._navDirty = true;
+    this._rebuildNavIndex();
+  }
+  activate(value) {
+    this._ensureNavIndex();
+    const item = this.itemsMap.get(value);
+    if (!item || item.disabled)
+      return;
+    if (this.activatedValue.value === value)
+      return;
+    this.activatedValue.value = value;
+  }
+  deactivate() {
+    this.activatedValue.value = null;
+  }
+  isActivated(value) {
+    return this.activatedValue.value === value;
+  }
+  _setActiveByIndex(index) {
+    const value = this.navIndex[index];
+    if (value !== void 0)
+      this.activatedValue.value = value;
   }
   activateFirst() {
-    this.rebuildNavIndex();
+    this._ensureNavIndex();
     if (!this.navIndex.length)
       return;
-    const firstIndex = this.navIndex[0];
-    if (firstIndex !== void 0) {
-      this.activeIndex.value = firstIndex;
-      this.activeNavPos = 0;
-    }
+    this._setActiveByIndex(0);
   }
   activateLast() {
-    this.rebuildNavIndex();
+    this._ensureNavIndex();
     if (!this.navIndex.length)
       return;
-    this.activeNavPos = this.navIndex.length - 1;
-    const lastIndex = this.navIndex[this.activeNavPos];
-    if (typeof lastIndex === "number") {
-      this.activeIndex.value = lastIndex;
-    }
+    this._setActiveByIndex(this.navIndex.length - 1);
   }
   activateNext() {
-    this.rebuildNavIndex();
+    var _a;
+    this._ensureNavIndex();
     if (!this.navIndex.length)
       return;
-    if (this.activeNavPos === -1) {
-      this.activateFirst();
-      return;
-    }
-    this.activeNavPos = (this.activeNavPos + 1) % this.navIndex.length;
-    const nextIndex = this.navIndex[this.activeNavPos];
-    if (nextIndex !== void 0) {
-      this.activeIndex.value = nextIndex;
-    }
+    const current = this.activatedValue.value !== null ? (_a = this._navPosMap.get(this.activatedValue.value)) != null ? _a : -1 : -1;
+    this._setActiveByIndex(current === -1 ? 0 : (current + 1) % this.navIndex.length);
   }
   activatePrev() {
-    this.rebuildNavIndex();
+    var _a;
+    this._ensureNavIndex();
     if (!this.navIndex.length)
       return;
-    if (this.activeNavPos === -1) {
-      this.activateLast();
-      return;
-    }
-    this.activeNavPos = this.activeNavPos === 0 ? this.navIndex.length - 1 : this.activeNavPos - 1;
-    const prevIndex = this.navIndex[this.activeNavPos];
-    if (prevIndex !== void 0) {
-      this.activeIndex.value = prevIndex;
-    }
+    const current = this.activatedValue.value !== null ? (_a = this._navPosMap.get(this.activatedValue.value)) != null ? _a : -1 : -1;
+    this._setActiveByIndex(current <= 0 ? this.navIndex.length - 1 : current - 1);
   }
   activateByKey(key) {
-    const normalizedKey = key.toLowerCase();
-    this.typedBuffer += normalizedKey;
+    var _a;
+    this._ensureNavIndex();
+    this.typedBuffer += key.toLowerCase();
     if (this.bufferResetTimeout)
       clearTimeout(this.bufferResetTimeout);
-    this.bufferResetTimeout = setTimeout(() => {
-      this.typedBuffer = "";
-    }, this.bufferDelay);
-    const searchItems = this.currentResults.length > 0 ? this.currentResults : this.items;
-    const startIndex = this.activeIndex.value !== void 0 ? this.activeIndex.value + 1 : 0;
-    const total = searchItems.length;
+    this.bufferResetTimeout = setTimeout(() => this.typedBuffer = "", this.bufferDelay);
+    if (!this.navIndex.length)
+      return;
+    const currentPos = this.activatedValue.value !== null ? (_a = this._navPosMap.get(this.activatedValue.value)) != null ? _a : -1 : -1;
+    const startIndex = currentPos === -1 ? 0 : (currentPos + 1) % this.navIndex.length;
+    const total = this.navIndex.length;
     for (let i = 0; i < total; i++) {
-      const index = (startIndex + i) % total;
-      const item = searchItems[index];
-      if (!(item == null ? void 0 : item.disabled) && (item == null ? void 0 : item.searchable.toLowerCase().startsWith(this.typedBuffer))) {
-        this.activate(item.value);
+      const value = this.navIndex[(startIndex + i) % total];
+      const item = this.itemsMap.get(value);
+      if (item && item.searchable.startsWith(this.typedBuffer)) {
+        this.activatedValue.value = value;
         break;
       }
     }
@@ -320,6 +300,9 @@ function createInputManager(rootDataStack) {
           }
         });
       }
+    },
+    get el() {
+      return inputEl;
     },
     destroy() {
       this.controller.abort();
@@ -439,6 +422,9 @@ function createOptionsManager(root) {
         return [];
       return Array.from(allOptions);
     },
+    flush() {
+      root.__flush();
+    },
     destroy() {
       this.controller.abort();
     }
@@ -466,10 +452,8 @@ function createButtonManager(root) {
 }
 
 // src/factories/CreateRoverRoot.ts
-function CreateRoverRoot({
-  effect
-}) {
-  const collection = new RoverCollection_default();
+function CreateRoverRoot({effect}) {
+  const collection = new RoverCollection_default({preventDuplication: true});
   return {
     __collection: collection,
     __optionsEls: void 0,
@@ -506,60 +490,42 @@ function CreateRoverRoot({
     __activateFirst: () => collection.activateFirst(),
     __activateLast: () => collection.activateLast(),
     __searchUsingQuery: (query) => collection.search(query),
-    __getByIndex: (index) => collection.getByIndex(index),
     init() {
       this.__setupManagers();
       effect(() => {
-        this.__isLoading = collection.pending.state;
-      });
-      effect(() => {
-        this.__externalQuery && console.log("searching...");
+        this.__isLoading = collection.pending.value;
       });
       this.__inputManager.on("input", (event) => {
-        var _a;
+        var _a, _b;
         const inputEl = event == null ? void 0 : event.target;
-        const itIsRemotlyDrivenSearch = ((_a = inputEl == null ? void 0 : inputEl._x_model) == null ? void 0 : _a.get()) !== void 0;
-        if (itIsRemotlyDrivenSearch) {
-          return;
-        }
-        let query = inputEl.value;
-        if (query.length > 0 && itIsRemotlyDrivenSearch) {
-          const results = this.__searchUsingQuery(query).map((r) => r.value);
-          const prev = this.__filteredValues;
-          const changed = !prev || prev.length !== results.length || results.some((v, i) => v !== prev[i]);
-          if (changed) {
-            this.__filteredValues = results;
-          }
-        } else {
-          if (this.__filteredValues !== null) {
+        const isRemoteSearch = ((_a = inputEl._x_model) == null ? void 0 : _a.get()) !== void 0;
+        if (!isRemoteSearch) {
+          const query = inputEl.value;
+          if (query.length > 0) {
+            this.__filteredValues = this.__searchUsingQuery(query).map((r) => r.value);
+          } else {
             this.__filteredValues = null;
+            collection.reset();
           }
+          ;
         }
-        if (this.__activatedValue && this.__filteredValues && !this.__filteredValues.includes(this.__activatedValue)) {
+        const availableValues = (_b = this.__filteredValues) != null ? _b : this.__collection.getAllValues();
+        if (this.__activatedValue && !availableValues.includes(this.__activatedValue))
           this.__deactivate();
-        }
-        if (!this.__getActiveItem() && this.__filteredValues && this.__filteredValues.length) {
-          this.__activate(this.__filteredValues[0]);
+        if (!this.__collection.getActiveItem()) {
+          this.__collection.activateFirst();
         }
       });
       this.$nextTick(() => {
-        this.__optionsEls = Array.from(this.$el.querySelectorAll("[x-rover\\:option]"));
-        this.__optionIndex = new Map();
-        this.__optionsEls.forEach((el) => {
-          const v = el.dataset.value;
-          if (v)
-            this.__optionIndex.set(v, el);
-        });
+        this.__buildOptions();
+        this.__setValuesInDomOrder();
         effect(() => {
-          const activeItem = this.__getByIndex(collection.activeIndex.value);
-          console.log(activeItem);
+          const activeItem = collection.getActiveItem();
           const activeValue = this.__activatedValue = activeItem == null ? void 0 : activeItem.value;
           const visibleValuesArray = this.__filteredValues;
           requestAnimationFrame(() => {
-            this.__patchItemsVisibility(visibleValuesArray);
-            this.__patchItemsActivity(activeValue);
-            this.__handleSeparatorsVisibility();
-            this.__handleGroupsVisibility();
+            this.patchItemsVisibility(visibleValuesArray);
+            this.patchItemsActivity(activeValue);
           });
         });
       });
@@ -568,7 +534,7 @@ function CreateRoverRoot({
     },
     __handleSeparatorsVisibility() {
     },
-    __patchItemsVisibility(visibleValuesArray) {
+    patchItemsVisibility(visibleValuesArray) {
       if (!this.__optionsEls || !this.__optionIndex)
         return;
       const prevArray = this.__prevVisibleArray;
@@ -614,7 +580,7 @@ function CreateRoverRoot({
       }
       this.__prevVisibleArray = visibleValuesArray;
     },
-    __patchItemsActivity(activeValue) {
+    patchItemsActivity(activeValue) {
       const prevActiveValue = this.__prevActiveValue;
       if (prevActiveValue === activeValue)
         return;
@@ -636,6 +602,23 @@ function CreateRoverRoot({
         }
       }
       this.__prevActiveValue = activeValue;
+    },
+    __flush() {
+      this.__buildOptions();
+      this.__setValuesInDomOrder();
+    },
+    __setValuesInDomOrder() {
+      let values = this.__optionsEls.map((el) => el.dataset.value);
+      collection.setValuesInDomOrder(values);
+    },
+    __buildOptions() {
+      this.__optionsEls = Array.from(this.$el.querySelectorAll("[x-rover\\:option]"));
+      this.__optionIndex = new Map();
+      this.__optionsEls.forEach((el) => {
+        const v = el.dataset.value;
+        if (v)
+          this.__optionIndex.set(v, el);
+      });
     },
     __setupManagers() {
       this.__inputManager = createInputManager(this);
@@ -737,6 +720,10 @@ var rover = (el) => {
     },
     searchUsing(query) {
       return data.__collection.search(query);
+    },
+    reconcileDom() {
+      this.options.flush();
+      this.activateFirst();
     }
   };
 };
@@ -867,16 +854,10 @@ function rover2(Alpine2) {
   }
   function handleOptions(el) {
     Alpine2.bind(el, {
-      "x-ref": "__options",
       "x-bind:id"() {
         return this.$id("rover-options");
       },
       role: "listbox",
-      "x-init"() {
-        if (Alpine2.bound(this.$el, "keepActivated")) {
-          this.__keepActivated = true;
-        }
-      },
       "x-bind:data-loading"() {
         return this.__isLoading;
       }

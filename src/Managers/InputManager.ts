@@ -88,7 +88,9 @@ export function createInputManager(
                 });
             }
         },
-
+        get el(): HTMLInputElement | undefined {
+            return inputEl;
+        },
         destroy() {
             this.controller.abort();
         }

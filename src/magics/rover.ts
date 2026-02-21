@@ -24,14 +24,12 @@ export const rover = (el: ElementWithXAttributes) => {
             return data.__buttonManager;
         },
 
-
         get isLoading(): boolean {
             return data.__isLoading;
         },
         get inputEl(): HTMLElement | null {
             return data.$root.querySelector('[x-rover\\:input]');
         },
-
         // re wire up the internal index to catch changes on the dom
         reIndex() {
             // @todo
@@ -66,5 +64,9 @@ export const rover = (el: ElementWithXAttributes) => {
         searchUsing(query: string): Item[] {
             return data.__collection.search(query)
         },
+        reconcileDom() {
+            this.options.flush();
+            this.activateFirst();
+        }
     }
 }

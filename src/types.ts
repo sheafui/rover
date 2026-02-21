@@ -2,7 +2,8 @@ import { Magics, XDataContext } from "alpinejs";
 import RoverCollection from "./core/RoverCollection";
 
 export interface Options {
-    searchThreshold?: number
+    searchThreshold?: number;
+    preventDuplication: boolean
 }
 
 export interface Item {
@@ -11,7 +12,7 @@ export interface Item {
     disabled: boolean
 }
 
-export type Pending = { state: boolean };
+export type Pending = { value: boolean };
 
 export type ActiveIndex = { value: undefined | number };
 
@@ -50,7 +51,6 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __isActive: (value: string) => boolean;
     __deactivate: () => void;
     __getActiveItem: () => Item | null;
-    __getByIndex: (index: number | null | undefined) => Item | null;
     __activateNext: () => void;
     __activatePrev: () => void;
     __activateFirst: () => void;
@@ -62,10 +62,12 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __pushSeparatorToItems: (id: string) => void;
     __nextGroupId: () => number;
     __nextSeparatorId: () => number;
-    __handleGroupsVisibility: () => void,
-    __handleSeparatorsVisibility: () => void,
-    __patchItemsVisibility: (value: string[] | null) => void,
-    __patchItemsActivity: (value: string | undefined) => void,
+    __flush: () => void;
+    __buildOptions: () => void;
+    // __handleGroupsVisibility: () => void,
+    // __handleSeparatorsVisibility: () => void,
+    patchItemsVisibility: (value: string[] | null) => void,
+    patchItemsActivity: (value: string | undefined) => void,
 }
 
 export type RoverRootContext = RoverRootData & Magics<RoverRootData>;
@@ -112,13 +114,14 @@ export interface InputManager extends Destroyable, Abortable {
             event: HTMLElementEventMap[K],
             activeKey: string | undefined
         ) => void
-    ): void
+    ): void;
 
     get value(): string
     set value(val: string)
     focus: (preventScroll: boolean) => void;
+    get el(): HTMLInputElement | undefined;
 
-    enableDefaultInputHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'>): void
+    enableDefaultInputHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'>): void;
 }
 
 export interface OptionsManager extends Destroyable, Abortable {
@@ -130,7 +133,8 @@ export interface OptionsManager extends Destroyable, Abortable {
             activeKey: string | null
         ) => void
     ): void
-    get all(): Array<HTMLElement>
+    get all(): Array<HTMLElement>;
+    flush(): void;
     findClosestOption(el: HTMLElement | null): HTMLElement | undefined
 
     enableDefaultOptionsHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'>): void

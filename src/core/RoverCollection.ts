@@ -1,301 +1,326 @@
-import type { Item, Options, Pending, ActiveIndex } from "src/types";
+import type { Item, Options, Pending } from "src/types";
 
 export default class RoverCollection {
 
-    private items: Array<Item> = [];
+    // -----------------------
+    // Core storage
+    // -----------------------
+    private itemsMap: Map<string, Item> = new Map();
 
+    /**
+     * tracks DOM order separately from the Map. for external
+     * search is very hard to track morph dom reconcilation
+     * to extract the order, so we will fill this
+     * while flushing the index...
+     * this is also called ones per flush and it's effecient since on completly new html need to be scanned once as local searhc  
+     */
+    private VALUES_IN_DOM_ORDER: string[] = [];
+
+    // -----------------------
     // Search state
+    // -----------------------
     private currentQuery = '';
-    private currentResults: Array<Item> = [];
+    private currentResults: Item[] = [];
 
-    // Navigation state
-    public navIndex: Array<number> = [];
-    private activeNavPos: number = -1;
-    public activeIndex: ActiveIndex;
+    // -----------------------
+    // Navigation
+    // -----------------------
 
-    // Batch processing
-    private isProcessing = false;
-    public pending: Pending;
+    /**
+     * Ordered list of navigable value strings:
+     * -IN_ respects VALUES_DOM_ORDER (not Map iteration order)
+     * - excludes disabled items
+     * - filtered to currentResults when a search is active
+     */
+    public navIndex: string[] = [];
 
+    /**
+     * O(1) reverse lookup: value → position in navIndex.
+     * Rebuilt alongside navIndex. Eliminates indexOf on every arrow key.
+     */
+    private _navPosMap: Map<string, number> = new Map();
+
+    public activatedValue: { value: string | null };
+
+    // -----------------------
+    // Batch / dirty flag
+    // -----------------------
+    private _navDirty = false;
+    private _flushQueued = false;
+
+    // -----------------------
+    // Type-ahead
+    // -----------------------
     private typedBuffer = '';
     private bufferResetTimeout: ReturnType<typeof setTimeout> | null = null;
     private bufferDelay = 500;
 
+    // -----------------------
+    // Reactive flags
+    // -----------------------
+    public pending: Pending;
     public searchThreshold: number;
 
-    public constructor(options: Options = {}) {
-        this.pending = Alpine.reactive<Pending>({ state: false });
-        this.activeIndex = Alpine.reactive<ActiveIndex>({ value: undefined });
+    constructor(options: Options) {
+        this.pending = Alpine.reactive<Pending>({ value: false });
+        this.activatedValue = Alpine.reactive<{ value: string | null }>({ value: null });
         this.searchThreshold = options.searchThreshold ?? 500;
     }
 
-    /* ----------------------------------------
-     * Collection Management
-     * ------------------------------------- */
+    // -----------------------
+    // Add / Forget
+    // -----------------------
 
     public add(value: string, searchable: string, disabled = false): void {
+        if (this.itemsMap.has(value)) return;
 
-        const item = { value, disabled, searchable };
+        this.itemsMap.set(value, { value, searchable, disabled });
 
-        console.log(item)
-        this.items.push(item);
-
-        console.log(this.items);
-
-        this.invalidate();
+        this._markDirty();
     }
 
     public forget(value: string): void {
-        const index = this.items.findIndex(item => item.value === value);
+        const item = this.itemsMap.get(value);
+        if (!item) return;
 
-        if (index === -1) return;
+        this.itemsMap.delete(value);
 
-        this.items.splice(index, 1);
+        const ri = this.currentResults.indexOf(item);
+        if (ri !== -1) this.currentResults.splice(ri, 1);
 
-        // Update active index if necessary
-        if (this.activeIndex.value === index) {
-            this.activeIndex.value = undefined;
-            this.activeNavPos = -1;
-        } else if (this.activeIndex.value !== undefined && this.activeIndex.value > index) {
-            this.activeIndex.value--;
+        if (this.activatedValue.value === value) {
+            this.activatedValue.value = null;
         }
 
-        this.invalidate();
+        this._markDirty();
     }
 
-    /* ----------------------------------------
-     * Indexing
-     * ------------------------------------- */
+    // -----------------------
+    // Search
+    // -----------------------
 
-    private invalidate(): void {
-        this.currentQuery = '';
-        this.currentResults = [];
-        this.scheduleBatchAsANextMicroTask();
+    /**
+     * Normalizes raw user query input.
+     * Item searchable strings are already normalized upstream in CreateRoverOption
+     * and are never re-normalized here.
+     */
+    public static _normalize(s: string): string {
+        const lower = s.toLowerCase();
+        // Skip NFD normalization if no non-ASCII characters present —
+        // avoids the most expensive part of the chain for typical Latin input.
+        if (!/[^\u0000-\u007f]/.test(lower)) return lower;
+        
+        return lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     }
 
-    private scheduleBatchAsANextMicroTask(): void {
-        if (this.isProcessing) return;
-
-        this.isProcessing = true;
-        this.pending.state = true;
-
-        queueMicrotask(() => {
-            this.rebuildNavIndex();
-            this.isProcessing = false;
-            this.pending.state = false;
-        });
-    }
-
-
-    private rebuildNavIndex(): void {
-        this.navIndex = [];
-
-        // Use search results if there's an active search, otherwise use all items
-        const itemsToIndex = this.currentResults.length > 0 ? this.currentResults : this.items;
-
-        for (let i = 0; i < this.items.length; i++) {
-            if (!this.items[i]?.disabled && itemsToIndex.includes(this.items[i] as Item)) {
-                this.navIndex.push(i);
-            }
-        }
-
-        console.log(this.navIndex);
-    }
-
-    public toggleIsPending(): void {
-        this.pending.state = !this.pending.state;
-    }
-
-    /* ----------------------------------------
-     * Search
-     * ------------------------------------- */
-
+    /**
+     * Two-pass substring search:
+     *   Pass 1 — prefix matches (searchable starts with query) → ranked first
+     *   Pass 2 — mid-string matches (searchable contains query)
+     * Single loop, two buckets, one concat. No sort pass needed.
+     */
     public search(query: string): Item[] {
-        if (query === '') {
-            this.currentQuery = '';
-            this.currentResults = [];
-            this.rebuildNavIndex();
-            return this.items;
+
+        const normalizedQuery = RoverCollection._normalize(query);
+
+        // Narrowing optimisation: if the new query extends the previous one,
+        // filter only the existing (smaller) result set instead of all items.
+        const narrowNewFilterToPreviousResultsSet = this.currentQuery && normalizedQuery.startsWith(this.currentQuery) && this.currentResults.length;
+
+        const source: Item[] = narrowNewFilterToPreviousResultsSet ? this.currentResults : Array.from(this.itemsMap.values());
+
+        const prefix: Item[] = [];
+        const mid: Item[] = [];
+
+        for (const item of source) {
+            const s = item.searchable;
+            if (s.startsWith(normalizedQuery)) prefix.push(item);
+            else if (s.includes(normalizedQuery)) mid.push(item);
         }
-
-        const normalizedQuery = query
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '');
-
-        // Incremental search optimization
-        if (this.currentQuery && normalizedQuery.startsWith(this.currentQuery) && this.currentResults.length > 0) {
-            const filtered = this.currentResults.filter(item => {
-                return item.searchable.includes(normalizedQuery);
-            });
-
-            this.currentQuery = normalizedQuery;
-            this.currentResults = filtered;
-            this.rebuildNavIndex();
-            return filtered;
-        }
-
-        // Full search - search items directly
-        const results = this.items.filter(item => {
-            return item.searchable.includes(normalizedQuery);
-        });
 
         this.currentQuery = normalizedQuery;
-        this.currentResults = results;
-        this.rebuildNavIndex();
+        this.currentResults = prefix.length || mid.length ? prefix.concat(mid) : [];
+        this._markDirty();
 
-        return results;
+        return this.currentResults;
     }
 
-    /* ----------------------------------------
-     * Queries
-     * ------------------------------------- */
+    public reset(): void {
+        this.currentQuery = '';
+        this.currentResults = [];
+        this._markDirty();
+    }
+
+    // -----------------------
+    // Lookup
+    // -----------------------
 
     public get(value: string): Item | undefined {
-        return this.items.find(item => item.value === value);
-    }
-
-    public getByIndex(index: number | null | undefined): Item | null {
-        if (index == null || index === undefined) return null;
-        return this.items[index] ?? null;
-    }
-
-    public all(): Item[] {
-        return this.items;
-    }
-
-    public get size(): number {
-        return this.items.length;
-    }
-
-    /* ----------------------------------------
-     * Activation
-     * ------------------------------------- */
-
-    public activate(value: string): void {
-        const index = this.items.findIndex(item => item.value === value);
-        if (index === -1) return;
-
-        const item = this.items[index];
-        if (item?.disabled) return;
-
-        this.rebuildNavIndex();
-
-        if (this.activeIndex.value === index) return;
-
-        this.activeIndex.value = index;
-        this.activeNavPos = this.navIndex.indexOf(index);
-    }
-
-    public deactivate(): void {
-        this.activeIndex.value = undefined;
-        this.activeNavPos = -1;
-    }
-
-    public isActivated(value: string): boolean {
-        const index = this.items.findIndex(item => item.value === value);
-        if (index === -1) return false;
-
-        return index === this.activeIndex.value;
+        return this.itemsMap.get(value);
     }
 
     public getActiveItem(): Item | null {
-        if (this.activeIndex.value === undefined) return null;
-        return this.items[this.activeIndex.value] ?? null;
+        return this.activatedValue.value
+            ? this.itemsMap.get(this.activatedValue.value) ?? null
+            : null;
     }
 
-    /* ----------------------------------------
-     * Keyboard Navigation
-     * ------------------------------------- */
+    public getAllValues(): string[] {
+        return this.VALUES_IN_DOM_ORDER;
+    }
+
+
+    public get size(): number {
+        return this.itemsMap.size;
+    }
+
+    // -----------------------
+    // NavIndex — lazy build
+    // -----------------------
+
+    private _markDirty(): void {
+        this._navDirty = true;
+        if (!this._flushQueued) {
+            this._flushQueued = true;
+
+            queueMicrotask(() => {
+                this._flushQueued = false;
+                if (this._navDirty) this._rebuildNavIndex();
+            });
+        }
+    }
+
+    private _ensureNavIndex(): void {
+        if (this._navDirty) this._rebuildNavIndex();
+    }
+
+    private _rebuildNavIndex(): void {
+        // Use VALUES_IN_DOM_ORDER as the traversal base so nav order always
+        // matches DOM order, even after morphdom forget → add cycles.
+        const resultSet: Set<Item> | null = this.currentResults.length
+            ? new Set(this.currentResults)
+            : null;
+
+        const next: string[] = [];
+
+        for (const value of this.VALUES_IN_DOM_ORDER) {
+
+            const item = this.itemsMap.get(value);
+
+            if (!item || item.disabled) continue;
+
+            if (resultSet !== null && !resultSet.has(item)) continue;
+
+            next.push(value);
+        }
+
+        this.navIndex = next;
+
+        this._navPosMap = new Map(next.map((v, i) => [v, i]));
+
+        this._navDirty = false;
+    }
+
+    public setValuesInDomOrder(values: Array<string>) {
+
+        this.VALUES_IN_DOM_ORDER = values;
+
+        this._navDirty = true;
+
+        this._rebuildNavIndex();
+    }
+
+    // -----------------------
+    // Activation
+    // -----------------------
+
+    public activate(value: string): void {
+        this._ensureNavIndex();
+        const item = this.itemsMap.get(value);
+        if (!item || item.disabled) return;
+        if (this.activatedValue.value === value) return;
+        this.activatedValue.value = value;
+    }
+
+    public deactivate(): void {
+        this.activatedValue.value = null;
+    }
+
+    public isActivated(value: string): boolean {
+        return this.activatedValue.value === value;
+    }
+
+    // -----------------------
+    // Keyboard Navigation
+    // -----------------------
+
+    private _setActiveByIndex(index: number): void {
+        const value = this.navIndex[index];
+        if (value !== undefined) this.activatedValue.value = value;
+    }
 
     public activateFirst(): void {
-        this.rebuildNavIndex();
-
+        this._ensureNavIndex();
         if (!this.navIndex.length) return;
-
-        const firstIndex = this.navIndex[0];
-        if (firstIndex !== undefined) {
-            this.activeIndex.value = firstIndex;
-            this.activeNavPos = 0;
-        }
+        this._setActiveByIndex(0);
     }
 
     public activateLast(): void {
-        this.rebuildNavIndex();
-
+        this._ensureNavIndex();
         if (!this.navIndex.length) return;
-
-        this.activeNavPos = this.navIndex.length - 1;
-
-        const lastIndex = this.navIndex[this.activeNavPos];
-        if (typeof lastIndex === 'number') {
-            this.activeIndex.value = lastIndex;
-        }
+        this._setActiveByIndex(this.navIndex.length - 1);
     }
 
     public activateNext(): void {
-        this.rebuildNavIndex();
-
+        this._ensureNavIndex();
         if (!this.navIndex.length) return;
 
-        if (this.activeNavPos === -1) {
-            this.activateFirst();
-            return;
-        }
+        const current = this.activatedValue.value !== null
+            ? (this._navPosMap.get(this.activatedValue.value) ?? -1)
+            : -1;
 
-        this.activeNavPos = (this.activeNavPos + 1) % this.navIndex.length;
-        const nextIndex = this.navIndex[this.activeNavPos];
-        if (nextIndex !== undefined) {
-            this.activeIndex.value = nextIndex;
-        }
+
+        this._setActiveByIndex(current === -1 ? 0 : (current + 1) % this.navIndex.length);
     }
 
     public activatePrev(): void {
-        this.rebuildNavIndex();
+        this._ensureNavIndex();
+        if (!this.navIndex.length) return;
+
+        const current = this.activatedValue.value !== null
+            ? (this._navPosMap.get(this.activatedValue.value) ?? -1)
+            : -1;
+
+        this._setActiveByIndex(current <= 0 ? this.navIndex.length - 1 : current - 1);
+    }
+
+    // -----------------------
+    // Type-ahead
+    // -----------------------
+
+    public activateByKey(key: string): void {
+        this._ensureNavIndex();
+
+        this.typedBuffer += key.toLowerCase();
+        if (this.bufferResetTimeout) clearTimeout(this.bufferResetTimeout);
+        this.bufferResetTimeout = setTimeout(() => (this.typedBuffer = ''), this.bufferDelay);
 
         if (!this.navIndex.length) return;
 
-        if (this.activeNavPos === -1) {
-            this.activateLast();
-            return;
-        }
+        const currentPos = this.activatedValue.value !== null
+            ? (this._navPosMap.get(this.activatedValue.value) ?? -1)
+            : -1;
 
-        this.activeNavPos = this.activeNavPos === 0
-            ? this.navIndex.length - 1
-            : this.activeNavPos - 1;
-
-        const prevIndex = this.navIndex[this.activeNavPos];
-        if (prevIndex !== undefined) {
-            this.activeIndex.value = prevIndex;
-        }
-    }
-
-    // type ahead algorithm
-    public activateByKey(key: string): void {
-
-        const normalizedKey = key.toLowerCase();
-
-        this.typedBuffer += normalizedKey;
-
-        if (this.bufferResetTimeout) clearTimeout(this.bufferResetTimeout);
-
-        this.bufferResetTimeout = setTimeout(() => {
-            this.typedBuffer = '';
-        }, this.bufferDelay);
-
-        const searchItems = this.currentResults.length > 0 ? this.currentResults : this.items;
-        const startIndex = this.activeIndex.value !== undefined ? this.activeIndex.value + 1 : 0;
-        const total = searchItems.length;
+        const startIndex = currentPos === -1 ? 0 : (currentPos + 1) % this.navIndex.length;
+        const total = this.navIndex.length;
 
         for (let i = 0; i < total; i++) {
-            const index = (startIndex + i) % total;
-            const item = searchItems[index];
-            if (!item?.disabled && item?.searchable.toLowerCase().startsWith(this.typedBuffer)) {
-                this.activate(item.value);
+            const value = this.navIndex[(startIndex + i) % total]!;
+            const item = this.itemsMap.get(value);
+            if (item && item.searchable.startsWith(this.typedBuffer)) {
+                this.activatedValue.value = value;
                 break;
             }
         }
     }
-
-
 }
