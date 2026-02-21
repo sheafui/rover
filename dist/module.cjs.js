@@ -514,13 +514,7 @@ function CreateRoverRoot({
         }
       });
       this.$nextTick(() => {
-        this.__optionsEls = Array.from(this.$el.querySelectorAll("[x-rover\\:option]"));
-        this.__optionIndex = new Map();
-        this.__optionsEls.forEach((el) => {
-          const v = el.dataset.value;
-          if (v)
-            this.__optionIndex.set(v, el);
-        });
+        this.cacheOptions();
         effect(() => {
           const activeItem = collection.getActiveItem();
           const activeValue = this.__activatedValue = activeItem == null ? void 0 : activeItem.value;
@@ -604,6 +598,15 @@ function CreateRoverRoot({
         }
       }
       this.__prevActiveValue = activeValue;
+    },
+    __cacheOptions() {
+      this.__optionsEls = Array.from(this.$el.querySelectorAll("[x-rover\\:option]"));
+      this.__optionIndex = new Map();
+      this.__optionsEls.forEach((el) => {
+        const v = el.dataset.value;
+        if (v)
+          this.__optionIndex.set(v, el);
+      });
     },
     __setupManagers() {
       this.__inputManager = createInputManager(this);

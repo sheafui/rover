@@ -84,8 +84,8 @@ export default function CreateRoverRoot(
                     if (query.length > 0) {
 
                         this.__filteredValues = this.__searchUsingQuery(query)
-                        // @todo: prevent this O(n) loop by return value at first place
-                        .map((r: Item) => r.value);
+                            // @todo: prevent this O(n) loop by return value at first place
+                            .map((r: Item) => r.value);
                     } else {
                         this.__filteredValues = null;
                         // on the true branch the reindex handled internally but since 
@@ -108,15 +108,8 @@ export default function CreateRoverRoot(
 
 
             this.$nextTick(() => {
-                this.__optionsEls = Array.from(this.$el.querySelectorAll('[x-rover\\:option]')) as Array<HTMLElement>;
-
-                this.__optionIndex = new Map();
-
-                this.__optionsEls.forEach((el: HTMLElement) => {
-                    const v = el.dataset.value;
-                    if (v) this.__optionIndex.set(v, el);
-                });
-
+                
+                this.cacheOptions();
                 effect(() => {
                     const activeItem = collection.getActiveItem();
 
@@ -131,7 +124,7 @@ export default function CreateRoverRoot(
                 });
             });
         },
-
+        
         __handleGroupsVisibility() {
             // todo this evenning with vs 
         },
@@ -140,7 +133,7 @@ export default function CreateRoverRoot(
 
         },
         patchItemsVisibility(visibleValuesArray: string[] | null) {
-            
+
             if (!this.__optionsEls || !this.__optionIndex) return;
 
             const prevArray = this.__prevVisibleArray;
@@ -223,6 +216,16 @@ export default function CreateRoverRoot(
             this.__prevActiveValue = activeValue;
         },
 
+        __cacheOptions() {
+            this.__optionsEls = Array.from(this.$el.querySelectorAll('[x-rover\\:option]')) as Array<HTMLElement>;
+
+            this.__optionIndex = new Map();
+
+            this.__optionsEls.forEach((el: HTMLElement) => {
+                const v = el.dataset.value;
+                if (v) this.__optionIndex.set(v, el);
+            });
+        },
         __setupManagers() {
             this.__inputManager = createInputManager(this);
             this.__optionManager = createOptionManager(this);

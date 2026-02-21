@@ -37,6 +37,7 @@ export const rover = (el: ElementWithXAttributes) => {
             // @todo
         },
         getOptionElByValue(value: string): HTMLElement | undefined {
+            // console.log(data.__optionIndex)
             return data.__optionIndex?.get(value);
         },
         activate(key: string) {

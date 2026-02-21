@@ -129,7 +129,7 @@ export default class RoverCollection {
         // Narrowing optimisation: if the new query extends the previous one,
         // filter only the existing (smaller) result set instead of all items.
         const narrowNewFilterToPreviousResultsSet = this.currentQuery && normalizedQuery.startsWith(this.currentQuery) && this.currentResults.length;
-        
+
         const source: Item[] = narrowNewFilterToPreviousResultsSet ? this.currentResults : Array.from(this.itemsMap.values());
 
         const prefix: Item[] = [];
@@ -185,6 +185,7 @@ export default class RoverCollection {
         this._navDirty = true;
         if (!this._flushQueued) {
             this._flushQueued = true;
+
             queueMicrotask(() => {
                 this._flushQueued = false;
                 if (this._navDirty) this._rebuildNavIndex();
