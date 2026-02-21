@@ -492,10 +492,8 @@
           const availableValues = this.__filteredValues ?? this.__collection.getAllValues();
           if (this.__activatedValue && !availableValues.includes(this.__activatedValue))
             this.__deactivate();
-          if (!this.__getActiveItem()) {
-            const first = this.__collection.all().find((i) => !i.disabled && availableValues.includes(i.value));
-            if (first)
-              this.__activate(first.value);
+          if (!this.__collection.getActiveItem()) {
+            this.__collection.activateFirst();
           }
         });
         this.$nextTick(() => {

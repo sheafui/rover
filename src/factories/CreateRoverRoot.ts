@@ -94,9 +94,8 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
 
                 if (this.__activatedValue && !availableValues.includes(this.__activatedValue)) this.__deactivate();
 
-                if (!this.__getActiveItem()) {
-                    const first = this.__collection.all().find((i: Item) => !i.disabled && availableValues.includes(i.value));
-                    if (first) this.__activate(first.value);
+                if (!this.__collection.getActiveItem()) {
+                    this.__collection.activateFirst();
                 }
             });
 
