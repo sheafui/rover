@@ -108,8 +108,8 @@ export default function CreateRoverRoot(
 
 
             this.$nextTick(() => {
-                
-                this.cacheOptions();
+
+                this.__buildOptions();
                 effect(() => {
                     const activeItem = collection.getActiveItem();
 
@@ -124,7 +124,7 @@ export default function CreateRoverRoot(
                 });
             });
         },
-        
+
         __handleGroupsVisibility() {
             // todo this evenning with vs 
         },
@@ -216,7 +216,15 @@ export default function CreateRoverRoot(
             this.__prevActiveValue = activeValue;
         },
 
-        __cacheOptions() {
+        __flush() {
+            this.__optionsEls = undefined;
+
+            this.__optionIndex = undefined;
+
+            this.__buildOptions();
+        },
+
+        __buildOptions() {
             this.__optionsEls = Array.from(this.$el.querySelectorAll('[x-rover\\:option]')) as Array<HTMLElement>;
 
             this.__optionIndex = new Map();

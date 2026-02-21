@@ -514,7 +514,7 @@ function CreateRoverRoot({
         }
       });
       this.$nextTick(() => {
-        this.cacheOptions();
+        this.__buildOptions();
         effect(() => {
           const activeItem = collection.getActiveItem();
           const activeValue = this.__activatedValue = activeItem == null ? void 0 : activeItem.value;
@@ -599,7 +599,12 @@ function CreateRoverRoot({
       }
       this.__prevActiveValue = activeValue;
     },
-    __cacheOptions() {
+    __flush() {
+      this.__optionsEls = void 0;
+      this.__optionIndex = void 0;
+      this.__buildOptions();
+    },
+    __buildOptions() {
       this.__optionsEls = Array.from(this.$el.querySelectorAll("[x-rover\\:option]"));
       this.__optionIndex = new Map();
       this.__optionsEls.forEach((el) => {
