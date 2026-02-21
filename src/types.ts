@@ -114,14 +114,14 @@ export interface InputManager extends Destroyable, Abortable {
             event: HTMLElementEventMap[K],
             activeKey: string | undefined
         ) => void
-    ): void
+    ): void;
 
     get value(): string
     set value(val: string)
     focus: (preventScroll: boolean) => void;
     get el(): HTMLInputElement | undefined;
 
-    enableDefaultInputHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'>): void
+    enableDefaultInputHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'>): void;
 }
 
 export interface OptionsManager extends Destroyable, Abortable {

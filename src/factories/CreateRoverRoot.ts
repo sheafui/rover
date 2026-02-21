@@ -217,6 +217,8 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
             this.__optionIndex = undefined;
 
             this.__buildOptions();
+
+            this.collection.DOM_ORDER;
         },
 
         __buildOptions() {

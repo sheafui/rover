@@ -8,12 +8,12 @@ export default class RoverCollection {
     private itemsMap: Map<string, Item> = new Map();
 
     /**
-     * Tracks DOM insertion order separately from the Map.
-     * Maps don't guarantee stable order across delete+re-add cycles —
-     * morphdom forget → add pushes the item to the end of Map iteration.
-     * This array is the canonical order for nav traversal.
+     * tracks DOM order separately from the Map. for external
+     *  search is very hard to track  morph dom reconcilation
+     *  to extract the order, so we will fill this
+     *  while flushing the index... 
      */
-    private _insertionOrder: string[] = [];
+    private VALUES_IN_DOM_ORDER: string[] = [];
 
     // -----------------------
     // Search state
@@ -27,7 +27,7 @@ export default class RoverCollection {
 
     /**
      * Ordered list of navigable value strings:
-     * - respects _insertionOrder (not Map iteration order)
+     * -IN_ respects VALUES_DOM_ORDER (not Map iteration order)
      * - excludes disabled items
      * - filtered to currentResults when a search is active
      */
@@ -75,10 +75,7 @@ export default class RoverCollection {
 
         this.itemsMap.set(value, { value, searchable, disabled });
 
-        this._insertionOrder.push(value);
-
         this._markDirty();
-        console.log('from add', this.itemsMap);
     }
 
     public forget(value: string): void {
@@ -86,9 +83,6 @@ export default class RoverCollection {
         if (!item) return;
 
         this.itemsMap.delete(value);
-
-        const oi = this._insertionOrder.indexOf(value);
-        if (oi !== -1) this._insertionOrder.splice(oi, 1);
 
         const ri = this.currentResults.indexOf(item);
         if (ri !== -1) this.currentResults.splice(ri, 1);
@@ -173,7 +167,7 @@ export default class RoverCollection {
 
     public all(): Item[] {
         // Return items in stable insertion order, not Map iteration order.
-        return this._insertionOrder.map(v => this.itemsMap.get(v)!);
+        return this.VALUES_IN_DOM_ORDER.map(v => this.itemsMap.get(v)!);
     }
 
     public get size(): number {
@@ -203,7 +197,7 @@ export default class RoverCollection {
     private _rebuildNavIndex(): void {
         this._navDirty = false;
 
-        // Use _insertionOrder as the traversal base so nav order always
+        // Use VALUES_IN_DOM_ORDER as the traversal base so nav order always
         // matches DOM order, even after morphdom forget → add cycles.
         const resultSet: Set<Item> | null = this.currentResults.length
             ? new Set(this.currentResults)
@@ -211,7 +205,7 @@ export default class RoverCollection {
 
         const next: string[] = [];
 
-        for (const value of this._insertionOrder) {
+        for (const value of this.VALUES_IN_DOM_ORDER) {
             const item = this.itemsMap.get(value);
             if (!item || item.disabled) continue;
             if (resultSet !== null && !resultSet.has(item)) continue;
@@ -220,7 +214,6 @@ export default class RoverCollection {
 
         this.navIndex = next;
 
-        // Rebuild the O(1) position lookup alongside navIndex.
         this._navPosMap = new Map(next.map((v, i) => [v, i]));
     }
 
@@ -272,6 +265,8 @@ export default class RoverCollection {
         const current = this.activatedValue.value !== null
             ? (this._navPosMap.get(this.activatedValue.value) ?? -1)
             : -1;
+
+        console.log(this.navIndex);
 
         this._setActiveByIndex(current === -1 ? 0 : (current + 1) % this.navIndex.length);
     }

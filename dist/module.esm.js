@@ -25,7 +25,7 @@ function CreateRoverOption(Alpine2) {
 var RoverCollection = class {
   constructor(options) {
     this.itemsMap = new Map();
-    this._insertionOrder = [];
+    this.VALUES_IN_DOM_ORDER = [];
     this.currentQuery = "";
     this.currentResults = [];
     this.navIndex = [];
@@ -43,18 +43,13 @@ var RoverCollection = class {
     if (this.itemsMap.has(value))
       return;
     this.itemsMap.set(value, {value, searchable, disabled});
-    this._insertionOrder.push(value);
     this._markDirty();
-    console.log("from add", this.itemsMap);
   }
   forget(value) {
     const item = this.itemsMap.get(value);
     if (!item)
       return;
     this.itemsMap.delete(value);
-    const oi = this._insertionOrder.indexOf(value);
-    if (oi !== -1)
-      this._insertionOrder.splice(oi, 1);
     const ri = this.currentResults.indexOf(item);
     if (ri !== -1)
       this.currentResults.splice(ri, 1);
@@ -100,7 +95,7 @@ var RoverCollection = class {
     return this.activatedValue.value ? this.itemsMap.get(this.activatedValue.value) ?? null : null;
   }
   all() {
-    return this._insertionOrder.map((v) => this.itemsMap.get(v));
+    return this.VALUES_IN_DOM_ORDER.map((v) => this.itemsMap.get(v));
   }
   get size() {
     return this.itemsMap.size;
@@ -124,7 +119,7 @@ var RoverCollection = class {
     this._navDirty = false;
     const resultSet = this.currentResults.length ? new Set(this.currentResults) : null;
     const next = [];
-    for (const value of this._insertionOrder) {
+    for (const value of this.VALUES_IN_DOM_ORDER) {
       const item = this.itemsMap.get(value);
       if (!item || item.disabled)
         continue;
@@ -172,6 +167,7 @@ var RoverCollection = class {
     if (!this.navIndex.length)
       return;
     const current = this.activatedValue.value !== null ? this._navPosMap.get(this.activatedValue.value) ?? -1 : -1;
+    console.log(this.navIndex);
     this._setActiveByIndex(current === -1 ? 0 : (current + 1) % this.navIndex.length);
   }
   activatePrev() {
@@ -586,6 +582,7 @@ function CreateRoverRoot({effect}) {
       this.__optionsEls = void 0;
       this.__optionIndex = void 0;
       this.__buildOptions();
+      this.collection.DOM_ORDER;
     },
     __buildOptions() {
       this.__optionsEls = Array.from(this.$el.querySelectorAll("[x-rover\\:option]"));
