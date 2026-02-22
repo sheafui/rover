@@ -902,9 +902,6 @@
     }
     function handleEmptyState(Alpine3, el) {
       Alpine3.bind(el, {
-        "x-bind:id"() {
-          return this.$id("rover-button");
-        },
         tabindex: "-1",
         "aria-haspopup": "true",
         "x-show"() {

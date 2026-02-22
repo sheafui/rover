@@ -143,7 +143,6 @@ export default function rover(Alpine: Alpine): void {
 
     function handleEmptyState(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
         Alpine.bind(el, {
-            'x-bind:id'() { return this.$id('rover-button') },
             'tabindex': '-1',
             'aria-haspopup': 'true',
             'x-show'() {
@@ -178,6 +177,7 @@ export default function rover(Alpine: Alpine): void {
                 this.__pushSeparatorToItems(id);
 
                 this.$el.setAttribute('role', 'separator');
+                
                 this.$el.setAttribute('aria-orientation', 'horizontal');
             }
         });
