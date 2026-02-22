@@ -77,12 +77,14 @@ export default function rover(Alpine: Alpine): void {
             'x-bind:id'() { return this.$id('rover-input') },
             'tabindex': '0',
             'aria-autocomplete': 'list',
-            'x-bind:aria-controls'() { return  },
+            'x-bind:aria-controls'() { return this.$id('rover-options') },
             'x-bind:aria-activedescendant'() {
-                const activeValue = this.__activatedValue;
-                if (!activeValue) return undefined;
 
-                return this.__optionIndex?.get(activeValue)?.id ?? undefined;
+                const activeValue = this.__activatedValue;
+
+                if (!activeValue) return false;
+
+                return this.__optionIndex?.get(activeValue)?.id ?? false;
             },
         });
     }

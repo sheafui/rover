@@ -837,13 +837,13 @@
         tabindex: "0",
         "aria-autocomplete": "list",
         "x-bind:aria-controls"() {
-          return;
+          return this.$id("rover-options");
         },
         "x-bind:aria-activedescendant"() {
           const activeValue = this.__activatedValue;
           if (!activeValue)
-            return void 0;
-          return this.__optionIndex?.get(activeValue)?.id ?? void 0;
+            return false;
+          return this.__optionIndex?.get(activeValue)?.id ?? false;
         }
       });
     }

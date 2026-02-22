@@ -864,14 +864,14 @@ function rover2(Alpine2) {
       tabindex: "0",
       "aria-autocomplete": "list",
       "x-bind:aria-controls"() {
-        return;
+        return this.$id("rover-options");
       },
       "x-bind:aria-activedescendant"() {
         var _a, _b, _c;
         const activeValue = this.__activatedValue;
         if (!activeValue)
-          return void 0;
-        return (_c = (_b = (_a = this.__optionIndex) == null ? void 0 : _a.get(activeValue)) == null ? void 0 : _b.id) != null ? _c : void 0;
+          return false;
+        return (_c = (_b = (_a = this.__optionIndex) == null ? void 0 : _a.get(activeValue)) == null ? void 0 : _b.id) != null ? _c : false;
       }
     });
   }
