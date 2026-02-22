@@ -75,9 +75,15 @@ export default function rover(Alpine: Alpine): void {
     ): void {
         Alpine.bind(el, {
             'x-bind:id'() { return this.$id('rover-input') },
-            'role': 'combobox',
             'tabindex': '0',
             'aria-autocomplete': 'list',
+            'x-bind:aria-controls'() { return  },
+            'x-bind:aria-activedescendant'() {
+                const activeValue = this.__activatedValue;
+                if (!activeValue) return undefined;
+
+                return this.__optionIndex?.get(activeValue)?.id ?? undefined;
+            },
         });
     }
 
@@ -85,6 +91,7 @@ export default function rover(Alpine: Alpine): void {
         Alpine.bind(el, {
             'x-bind:id'() { return this.$id('rover-options') },
             'role': 'listbox',
+            'aria-orientation': 'vertical',
             'x-bind:data-loading'() {
                 return this.__isLoading;
             }
@@ -99,6 +106,7 @@ export default function rover(Alpine: Alpine): void {
             'x-id'() { return ['rover-option'] },
             'x-bind:id'() { return this.$id('rover-option') },
             'role': 'option',
+            'x-bind:aria-disabled'() { return this.$el.hasAttribute('disabled') ? 'true' : 'false' },
             'x-data'(this: RoverOptionContext) {
                 return CreateRoverOption(Alpine);
             },
@@ -128,7 +136,6 @@ export default function rover(Alpine: Alpine): void {
             'x-ref': '__button',
             'x-bind:id'() { return this.$id('rover-button') },
             'tabindex': '-1',
-            'aria-haspopup': 'true',
         })
     }
 

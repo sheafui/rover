@@ -64,6 +64,7 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __nextSeparatorId: () => number;
     __flush: () => void;
     __buildOptions: () => void;
+    __getActiveItemEl: () => HTMLElement | undefined;
     // __handleGroupsVisibility: () => void,
     // __handleSeparatorsVisibility: () => void,
     patchItemsVisibility: (value: string[] | null) => void,

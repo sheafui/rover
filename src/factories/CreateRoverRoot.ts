@@ -273,7 +273,11 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
         __nextSeparatorId() {
             return ++this.__s_id;
         },
-
+        __getActiveItemEl() {
+            const activeValue = collection.getActiveItem()?.value;
+            if (!activeValue) return undefined;
+            return this.__optionIndex?.get(activeValue);
+        },
         destroy() {
             this.__inputManager?.destroy();
             this.__optionManager?.destroy();

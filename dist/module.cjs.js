@@ -653,6 +653,13 @@ function CreateRoverRoot({effect}) {
     __nextSeparatorId() {
       return ++this.__s_id;
     },
+    __getActiveItemEl() {
+      var _a, _b;
+      const activeValue = (_a = collection.getActiveItem()) == null ? void 0 : _a.value;
+      if (!activeValue)
+        return void 0;
+      return (_b = this.__optionIndex) == null ? void 0 : _b.get(activeValue);
+    },
     destroy() {
       var _a, _b, _c, _d;
       (_a = this.__inputManager) == null ? void 0 : _a.destroy();
@@ -687,6 +694,13 @@ var rover = (el) => {
     },
     get inputEl() {
       return data.$root.querySelector("[x-rover\\:input]");
+    },
+    getActiveItemEl() {
+      return data.__getActiveItemEl();
+    },
+    getActiveItemId() {
+      var _a;
+      return (_a = this.getActiveItemEl()) == null ? void 0 : _a.id;
     },
     reIndex() {
     },
@@ -847,9 +861,18 @@ function rover2(Alpine2) {
       "x-bind:id"() {
         return this.$id("rover-input");
       },
-      role: "combobox",
       tabindex: "0",
-      "aria-autocomplete": "list"
+      "aria-autocomplete": "list",
+      "x-bind:aria-controls"() {
+        return;
+      },
+      "x-bind:aria-activedescendant"() {
+        var _a, _b, _c;
+        const activeValue = this.__activatedValue;
+        if (!activeValue)
+          return void 0;
+        return (_c = (_b = (_a = this.__optionIndex) == null ? void 0 : _a.get(activeValue)) == null ? void 0 : _b.id) != null ? _c : void 0;
+      }
     });
   }
   function handleOptions(el) {
@@ -858,6 +881,7 @@ function rover2(Alpine2) {
         return this.$id("rover-options");
       },
       role: "listbox",
+      "aria-orientation": "vertical",
       "x-bind:data-loading"() {
         return this.__isLoading;
       }
@@ -872,6 +896,9 @@ function rover2(Alpine2) {
         return this.$id("rover-option");
       },
       role: "option",
+      "x-bind:aria-disabled"() {
+        return this.$el.hasAttribute("disabled") ? "true" : "false";
+      },
       "x-data"() {
         return CreateRoverOption(Alpine3);
       }
@@ -898,8 +925,7 @@ function rover2(Alpine2) {
       "x-bind:id"() {
         return this.$id("rover-button");
       },
-      tabindex: "-1",
-      "aria-haspopup": "true"
+      tabindex: "-1"
     });
   }
   function handleEmptyState(Alpine3, el) {

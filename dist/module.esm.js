@@ -629,6 +629,12 @@ function CreateRoverRoot({effect}) {
     __nextSeparatorId() {
       return ++this.__s_id;
     },
+    __getActiveItemEl() {
+      const activeValue = collection.getActiveItem()?.value;
+      if (!activeValue)
+        return void 0;
+      return this.__optionIndex?.get(activeValue);
+    },
     destroy() {
       this.__inputManager?.destroy();
       this.__optionManager?.destroy();
@@ -662,6 +668,12 @@ var rover = (el) => {
     },
     get inputEl() {
       return data.$root.querySelector("[x-rover\\:input]");
+    },
+    getActiveItemEl() {
+      return data.__getActiveItemEl();
+    },
+    getActiveItemId() {
+      return this.getActiveItemEl()?.id;
     },
     reIndex() {
     },
@@ -821,9 +833,17 @@ function rover2(Alpine2) {
       "x-bind:id"() {
         return this.$id("rover-input");
       },
-      role: "combobox",
       tabindex: "0",
-      "aria-autocomplete": "list"
+      "aria-autocomplete": "list",
+      "x-bind:aria-controls"() {
+        return;
+      },
+      "x-bind:aria-activedescendant"() {
+        const activeValue = this.__activatedValue;
+        if (!activeValue)
+          return void 0;
+        return this.__optionIndex?.get(activeValue)?.id ?? void 0;
+      }
     });
   }
   function handleOptions(el) {
@@ -832,6 +852,7 @@ function rover2(Alpine2) {
         return this.$id("rover-options");
       },
       role: "listbox",
+      "aria-orientation": "vertical",
       "x-bind:data-loading"() {
         return this.__isLoading;
       }
@@ -846,6 +867,9 @@ function rover2(Alpine2) {
         return this.$id("rover-option");
       },
       role: "option",
+      "x-bind:aria-disabled"() {
+        return this.$el.hasAttribute("disabled") ? "true" : "false";
+      },
       "x-data"() {
         return CreateRoverOption(Alpine3);
       }
@@ -872,8 +896,7 @@ function rover2(Alpine2) {
       "x-bind:id"() {
         return this.$id("rover-button");
       },
-      tabindex: "-1",
-      "aria-haspopup": "true"
+      tabindex: "-1"
     });
   }
   function handleEmptyState(Alpine3, el) {
