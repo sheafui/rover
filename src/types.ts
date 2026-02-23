@@ -70,6 +70,9 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     patchItemsVisibility: (value: string[] | null) => void,
     patchItemsActivity: (value: string | undefined) => void,
     __getItemByValue: (value: string) => Item | undefined,
+    __getLabelByValue: (value: string) => string | undefined,
+    __getSearchableByValue: (value: string) => string | undefined,
+    __getDisabledByValue: (value: string) => boolean | undefined,
 
 }
 

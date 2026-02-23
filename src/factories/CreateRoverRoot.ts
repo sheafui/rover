@@ -50,13 +50,17 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
         __activate: (value: string) => collection.activate(value),
         __deactivate: () => collection.deactivate(),
         __isActive: (value: string) => collection.isActivated(value),
-        __getActiveItem: () => collection.getActiveItem(),
-        __activateNext: () => collection.activateNext(),
-        __activatePrev: () => collection.activatePrev(),
-        __activateFirst: () => collection.activateFirst(),
-        __activateLast: () => collection.activateLast(),
+        __getActiveItem: (): Item | null => collection.getActiveItem(),
+        __activateNext: (): void => collection.activateNext(),
+        __activatePrev: (): void => collection.activatePrev(),
+        __activateFirst: (): void => collection.activateFirst(),
+        __activateLast: (): void => collection.activateLast(),
         __searchUsingQuery: (query: string) => collection.search(query),
         __getItemByValue: (value: string): Item | undefined => collection.get(value),
+        __getLabelByValue: (value: string): string | undefined => this.__getItemByValue(value).label,
+        __getSearchableByValue: (value: string): string | undefined => this.__getItemByValue(value).searchable,
+        __getDisabledByValue: (value: string): boolean | undefined => this.__getItemByValue(value).disabled,
+
 
         init() {
             this.__setupManagers();
