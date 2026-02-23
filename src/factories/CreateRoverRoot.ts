@@ -56,6 +56,7 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
         __activateFirst: () => collection.activateFirst(),
         __activateLast: () => collection.activateLast(),
         __searchUsingQuery: (query: string) => collection.search(query),
+        __getItemByValue: (value: string): Item | undefined => collection.get(value),
 
         init() {
             this.__setupManagers();
@@ -278,6 +279,7 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
             if (!activeValue) return undefined;
             return this.__optionIndex?.get(activeValue);
         },
+
         destroy() {
             this.__inputManager?.destroy();
             this.__optionManager?.destroy();

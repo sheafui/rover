@@ -69,6 +69,8 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     // __handleSeparatorsVisibility: () => void,
     patchItemsVisibility: (value: string[] | null) => void,
     patchItemsActivity: (value: string | undefined) => void,
+    __getItemByValue: (value: string) => Item | undefined,
+
 }
 
 export type RoverRootContext = RoverRootData & Magics<RoverRootData>;

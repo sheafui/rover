@@ -33,6 +33,9 @@ export const rover = (el: ElementWithXAttributes) => {
         getActiveItemEl(): HTMLElement | undefined {
             return data.__getActiveItemEl();
         },
+        getItemByValue(value: string): Item | undefined {
+            return data.__getItemByValue(value);
+        },
         getActiveItemId(): string | undefined {
             return this.getActiveItemEl()?.id;
         },

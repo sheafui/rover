@@ -109,7 +109,7 @@ export default class RoverCollection {
         // Skip NFD normalization if no non-ASCII characters present —
         // avoids the most expensive part of the chain for typical Latin input.
         if (!/[^\u0000-\u007f]/.test(lower)) return lower;
-        
+
         return lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     }
 
@@ -180,6 +180,7 @@ export default class RoverCollection {
 
     private _markDirty(): void {
         this._navDirty = true;
+
         if (!this._flushQueued) {
             this._flushQueued = true;
 
