@@ -1,7 +1,7 @@
 import type { Alpine as AlpineType } from 'alpinejs';
 import { RoverOptionData, RoverOptionContext } from 'src/types';
 
-// Per-option component approach: negligible perf cost, massive morphdom win.
+// Per-option component approach: negligible memory/erformnece cost, massive morphdom win.
 // Measurements show zero difference vs shared component, minimal memory overhead.
 // The tradeoff: automatic lifecycle integration with morphdom core
 // init registers options, destroy cleans them up. Critical for remote search
