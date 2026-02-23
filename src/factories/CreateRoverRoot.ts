@@ -45,7 +45,7 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
         __optionManager: undefined,
         __buttonManager: undefined,
 
-        __add: (value: string, search: string, disabled: boolean) => collection.add(value, search, disabled),
+        __add: (value: string, label: string, search: string, disabled: boolean) => collection.add(value, label, search, disabled),
         __forget: (value: string) => collection.forget(value),
         __activate: (value: string) => collection.activate(value),
         __deactivate: () => collection.deactivate(),
@@ -57,9 +57,9 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
         __activateLast: (): void => collection.activateLast(),
         __searchUsingQuery: (query: string) => collection.search(query),
         __getItemByValue: (value: string): Item | undefined => collection.get(value),
-        __getLabelByValue: (value: string): string | undefined => this.__getItemByValue(value).label,
-        __getSearchableByValue: (value: string): string | undefined => this.__getItemByValue(value).searchable,
-        __getDisabledByValue: (value: string): boolean | undefined => this.__getItemByValue(value).disabled,
+        __getLabelByValue(value: string): string | undefined { return this.__getItemByValue(value)?.label },
+        __getSearchableByValue(value: string): string | undefined { return this.__getItemByValue(value)?.searchable },
+        __getDisabledByValue(value: string): boolean | undefined { return this.__getItemByValue(value)?.disabled },
 
 
         init() {

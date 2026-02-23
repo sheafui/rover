@@ -71,10 +71,10 @@ export default class RoverCollection {
     // Add / Forget
     // -----------------------
 
-    public add(value: string, searchable: string, disabled = false): void {
+    public add(value: string, label: string, searchable: string, disabled = false): void {
         if (this.itemsMap.has(value)) return;
 
-        this.itemsMap.set(value, { value, searchable, disabled });
+        this.itemsMap.set(value, { value, label, searchable, disabled });
 
         this._markDirty();
     }

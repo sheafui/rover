@@ -5,10 +5,11 @@ function CreateRoverOption(Alpine2) {
     init() {
       let disabled = Alpine2.extractProp(this.$el, "disabled", false, false);
       let value = this.__value = Alpine2.extractProp(this.$el, "value", "");
+      let label = Alpine2.extractProp(this.$el, "data-label", "");
       const rawSearch = Alpine2.extractProp(this.$el, "data-search", value);
       const normalizedSearch = String(rawSearch).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
       this.$el.dataset.value = value;
-      this.__add(value, normalizedSearch, disabled);
+      this.__add(value, label, normalizedSearch, disabled);
       this.$nextTick(() => {
         if (disabled) {
           this.$el.setAttribute("tabindex", "-1");
@@ -39,10 +40,10 @@ var RoverCollection = class {
     this.activatedValue = Alpine.reactive({value: null});
     this.searchThreshold = options.searchThreshold ?? 500;
   }
-  add(value, searchable, disabled = false) {
+  add(value, label, searchable, disabled = false) {
     if (this.itemsMap.has(value))
       return;
-    this.itemsMap.set(value, {value, searchable, disabled});
+    this.itemsMap.set(value, {value, label, searchable, disabled});
     this._markDirty();
   }
   forget(value) {
@@ -457,7 +458,7 @@ function CreateRoverRoot({effect}) {
     __optionsManager: void 0,
     __optionManager: void 0,
     __buttonManager: void 0,
-    __add: (value, search, disabled) => collection.add(value, search, disabled),
+    __add: (value, label, search, disabled) => collection.add(value, label, search, disabled),
     __forget: (value) => collection.forget(value),
     __activate: (value) => collection.activate(value),
     __deactivate: () => collection.deactivate(),
@@ -468,6 +469,16 @@ function CreateRoverRoot({effect}) {
     __activateFirst: () => collection.activateFirst(),
     __activateLast: () => collection.activateLast(),
     __searchUsingQuery: (query) => collection.search(query),
+    __getItemByValue: (value) => collection.get(value),
+    __getLabelByValue(value) {
+      return this.__getItemByValue(value)?.label;
+    },
+    __getSearchableByValue(value) {
+      return this.__getItemByValue(value)?.searchable;
+    },
+    __getDisabledByValue(value) {
+      return this.__getItemByValue(value)?.disabled;
+    },
     init() {
       this.__setupManagers();
       effect(() => {
@@ -672,6 +683,18 @@ var rover = (el) => {
     getActiveItemEl() {
       return data.__getActiveItemEl();
     },
+    getItemByValue(value) {
+      return data.__getItemByValue(value);
+    },
+    getLabel(value) {
+      return data.__getLabelByValue(value);
+    },
+    isDisabled(value) {
+      return data.__getDisabledByValue(value);
+    },
+    getSearchable(value) {
+      return data.__getSearchableByValue(value);
+    },
     getActiveItemId() {
       return this.getActiveItemEl()?.id;
     },
@@ -773,7 +796,7 @@ function registerMagics(Alpine2) {
   });
   Alpine2.magic("roverOptions", (el) => {
     let optionEls = Alpine2.findClosest(el, (i) => {
-      return i.hasAttribute("x-option:options");
+      return i.hasAttribute("x-rover:options");
     });
     if (!optionEls)
       throw "No x-rover:options directive found, this magic meant to be used per options context...";
