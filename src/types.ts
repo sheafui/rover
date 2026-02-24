@@ -92,6 +92,10 @@ export interface RoverOptionData extends XDataContext {
 
 export type RoverOptionContext = RoverRootData & RoverOptionData & Magics<RoverOptionData>;
 
+export interface RoverCreateOptionData extends XDataContext {}
+
+export type RoverCreateOptionContext = RoverRootData & RoverCreateOptionData & Magics<RoverCreateOptionData>;
+
 export interface RoverOptionsData extends Partial<RoverRootData> {
     __handleClickAway: (this: RoverOptionsContext, event: MouseEvent) => void;
 }
