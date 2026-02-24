@@ -30,6 +30,24 @@ export const rover = (el: ElementWithXAttributes) => {
         get inputEl(): HTMLElement | null {
             return data.$root.querySelector('[x-rover\\:input]');
         },
+        getActiveItemEl(): HTMLElement | undefined {
+            return data.__getActiveItemEl();
+        },
+        getItemByValue(value: string): Item | undefined {
+            return data.__getItemByValue(value);
+        },
+        getLabel(value: string): string | undefined {
+            return data.__getLabelByValue(value);
+        },
+        isDisabled(value: string): boolean | undefined {
+            return data.__getDisabledByValue(value);
+        },
+        getSearchable(value: string): string | undefined {
+            return data.__getSearchableByValue(value);
+        },
+        getActiveItemId(): string | undefined {
+            return this.getActiveItemEl()?.id;
+        },
         // re wire up the internal index to catch changes on the dom
         reIndex() {
             // @todo

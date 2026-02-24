@@ -1,7 +1,7 @@
 import type { Alpine as AlpineType } from 'alpinejs';
 import { RoverOptionData, RoverOptionContext } from 'src/types';
 
-// Per-option component approach: negligible perf cost, massive morphdom win.
+// Per-option component approach: negligible memory/erformnece cost, massive morphdom win.
 // Measurements show zero difference vs shared component, minimal memory overhead.
 // The tradeoff: automatic lifecycle integration with morphdom core
 // init registers options, destroy cleans them up. Critical for remote search
@@ -14,6 +14,9 @@ export default function CreateRoverOption(Alpine: AlpineType): RoverOptionData {
 
             let value = this.__value = Alpine.extractProp(this.$el, 'value', '') as string;
 
+
+            let label = Alpine.extractProp(this.$el, 'data-label', '') as string;
+
             const rawSearch = Alpine.extractProp(this.$el, 'data-search', value) as string;
 
             // Normalize search string for i18n: strip diacritics, lowercase, trim.
@@ -22,7 +25,7 @@ export default function CreateRoverOption(Alpine: AlpineType): RoverOptionData {
 
             this.$el.dataset.value = value;
 
-            this.__add(value, normalizedSearch, disabled);
+            this.__add(value, label, normalizedSearch, disabled);
 
             this.$nextTick(() => {
                 if (disabled) {

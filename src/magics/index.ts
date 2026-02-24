@@ -35,7 +35,7 @@ export default function registerMagics(Alpine: Alpine) {
     Alpine.magic('roverOptions', (el) => {
 
         let optionEls = Alpine.findClosest(el, i => {
-            return i.hasAttribute('x-option:options')
+            return i.hasAttribute('x-rover:options')
         })
 
         if (!optionEls) throw 'No x-rover:options directive found, this magic meant to be used per options context...'

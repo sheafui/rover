@@ -45,17 +45,22 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
         __optionManager: undefined,
         __buttonManager: undefined,
 
-        __add: (value: string, search: string, disabled: boolean) => collection.add(value, search, disabled),
+        __add: (value: string, label: string, search: string, disabled: boolean) => collection.add(value, label, search, disabled),
         __forget: (value: string) => collection.forget(value),
         __activate: (value: string) => collection.activate(value),
         __deactivate: () => collection.deactivate(),
         __isActive: (value: string) => collection.isActivated(value),
-        __getActiveItem: () => collection.getActiveItem(),
-        __activateNext: () => collection.activateNext(),
-        __activatePrev: () => collection.activatePrev(),
-        __activateFirst: () => collection.activateFirst(),
-        __activateLast: () => collection.activateLast(),
+        __getActiveItem: (): Item | null => collection.getActiveItem(),
+        __activateNext: (): void => collection.activateNext(),
+        __activatePrev: (): void => collection.activatePrev(),
+        __activateFirst: (): void => collection.activateFirst(),
+        __activateLast: (): void => collection.activateLast(),
         __searchUsingQuery: (query: string) => collection.search(query),
+        __getItemByValue: (value: string): Item | undefined => collection.get(value),
+        __getLabelByValue(value: string): string | undefined { return this.__getItemByValue(value)?.label },
+        __getSearchableByValue(value: string): string | undefined { return this.__getItemByValue(value)?.searchable },
+        __getDisabledByValue(value: string): boolean | undefined { return this.__getItemByValue(value)?.disabled },
+
 
         init() {
             this.__setupManagers();
@@ -272,6 +277,11 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
 
         __nextSeparatorId() {
             return ++this.__s_id;
+        },
+        __getActiveItemEl() {
+            const activeValue = collection.getActiveItem()?.value;
+            if (!activeValue) return undefined;
+            return this.__optionIndex?.get(activeValue);
         },
 
         destroy() {

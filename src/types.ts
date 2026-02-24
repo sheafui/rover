@@ -8,6 +8,7 @@ export interface Options {
 
 export interface Item {
     value: string,
+    label: string,
     searchable: string,
     disabled: boolean
 }
@@ -45,7 +46,7 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __buttonManager: ButtonManager | undefined;
 
     // Methods
-    __add: (value: string, searchable: string | undefined, disabled: boolean) => void;
+    __add: (value: string, label: string, searchable: string | undefined, disabled: boolean) => void;
     __forget: (value: string) => void;
     __activate: (value: string) => void;
     __isActive: (value: string) => boolean;
@@ -64,10 +65,17 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __nextSeparatorId: () => number;
     __flush: () => void;
     __buildOptions: () => void;
+    __getActiveItemEl: () => HTMLElement | undefined;
     // __handleGroupsVisibility: () => void,
     // __handleSeparatorsVisibility: () => void,
     patchItemsVisibility: (value: string[] | null) => void,
     patchItemsActivity: (value: string | undefined) => void,
+    __getItemByValue: (value: string) => Item | undefined,
+    __getLabelByValue: (value: string) => string | undefined,
+    __getSearchableByValue: (value: string) => string | undefined,
+    __getDisabledByValue: (value: string) => boolean | undefined,
+    _x_activateCreateOptionEl?: () => void 
+
 }
 
 export type RoverRootContext = RoverRootData & Magics<RoverRootData>;
@@ -84,6 +92,12 @@ export interface RoverOptionData extends XDataContext {
 }
 
 export type RoverOptionContext = RoverRootData & RoverOptionData & Magics<RoverOptionData>;
+
+export interface RoverCreateOptionData extends XDataContext {
+    _x_activateCreateOptionEl: () => void
+}
+
+export type RoverCreateOptionContext = RoverRootData & RoverCreateOptionData & Magics<RoverCreateOptionData>;
 
 export interface RoverOptionsData extends Partial<RoverRootData> {
     __handleClickAway: (this: RoverOptionsContext, event: MouseEvent) => void;

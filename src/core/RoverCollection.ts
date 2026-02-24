@@ -71,10 +71,10 @@ export default class RoverCollection {
     // Add / Forget
     // -----------------------
 
-    public add(value: string, searchable: string, disabled = false): void {
+    public add(value: string, label: string, searchable: string, disabled = false): void {
         if (this.itemsMap.has(value)) return;
 
-        this.itemsMap.set(value, { value, searchable, disabled });
+        this.itemsMap.set(value, { value, label, searchable, disabled });
 
         this._markDirty();
     }
@@ -109,7 +109,7 @@ export default class RoverCollection {
         // Skip NFD normalization if no non-ASCII characters present —
         // avoids the most expensive part of the chain for typical Latin input.
         if (!/[^\u0000-\u007f]/.test(lower)) return lower;
-        
+
         return lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     }
 
@@ -180,6 +180,7 @@ export default class RoverCollection {
 
     private _markDirty(): void {
         this._navDirty = true;
+
         if (!this._flushQueued) {
             this._flushQueued = true;
 

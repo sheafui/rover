@@ -75,9 +75,17 @@ export default function rover(Alpine: Alpine): void {
     ): void {
         Alpine.bind(el, {
             'x-bind:id'() { return this.$id('rover-input') },
-            'role': 'combobox',
             'tabindex': '0',
             'aria-autocomplete': 'list',
+            'x-bind:aria-controls'() { return this.$id('rover-options') },
+            'x-bind:aria-activedescendant'() {
+
+                const activeValue = this.__activatedValue;
+
+                if (!activeValue) return false;
+
+                return this.__optionIndex?.get(activeValue)?.id ?? false;
+            },
         });
     }
 
@@ -85,6 +93,7 @@ export default function rover(Alpine: Alpine): void {
         Alpine.bind(el, {
             'x-bind:id'() { return this.$id('rover-options') },
             'role': 'listbox',
+            'aria-orientation': 'vertical',
             'x-bind:data-loading'() {
                 return this.__isLoading;
             }
@@ -99,12 +108,12 @@ export default function rover(Alpine: Alpine): void {
             'x-id'() { return ['rover-option'] },
             'x-bind:id'() { return this.$id('rover-option') },
             'role': 'option',
+            'x-bind:aria-disabled'() { return this.$el.hasAttribute('disabled') ? 'true' : 'false' },
             'x-data'(this: RoverOptionContext) {
                 return CreateRoverOption(Alpine);
             },
         });
     }
-
     function handleOptionsGroup(
         Alpine: Alpine,
         el: AlpineType.ElementWithXAttributes
@@ -128,13 +137,11 @@ export default function rover(Alpine: Alpine): void {
             'x-ref': '__button',
             'x-bind:id'() { return this.$id('rover-button') },
             'tabindex': '-1',
-            'aria-haspopup': 'true',
         })
     }
 
     function handleEmptyState(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
         Alpine.bind(el, {
-            'x-bind:id'() { return this.$id('rover-button') },
             'tabindex': '-1',
             'aria-haspopup': 'true',
             'x-show'() {
@@ -169,6 +176,7 @@ export default function rover(Alpine: Alpine): void {
                 this.__pushSeparatorToItems(id);
 
                 this.$el.setAttribute('role', 'separator');
+
                 this.$el.setAttribute('aria-orientation', 'horizontal');
             }
         });
