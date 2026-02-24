@@ -836,22 +836,6 @@ function registerMagics(Alpine2) {
   });
 }
 
-// src/factories/CreateRoverCreateOption.ts
-function CreateRoverCreateOption() {
-  return {
-    init() {
-      queueMicrotask(() => {
-        this.$el.dataset.active = "true";
-      });
-    },
-    destroy() {
-      delete this.$el.dataset.active;
-    },
-    _x_activateCreateOptionEl() {
-    }
-  };
-}
-
 // src/index.ts
 function rover2(Alpine2) {
   Alpine2.directive("rover", (el, {value, modifiers}, {Alpine: Alpine3, effect}) => {
@@ -870,9 +854,6 @@ function rover2(Alpine2) {
         break;
       case "option":
         handleOption(Alpine3, el);
-        break;
-      case "create-option":
-        handleCreateOption(el);
         break;
       case "group":
         handleOptionsGroup(Alpine3, el);
@@ -946,20 +927,6 @@ function rover2(Alpine2) {
       },
       "x-data"() {
         return CreateRoverOption(Alpine3);
-      }
-    });
-  }
-  function handleCreateOption(el) {
-    Alpine2.bind(el, {
-      "x-id"() {
-        return ["rover-create-option"];
-      },
-      "x-bind:id"() {
-        return this.$id("rover-create-option");
-      },
-      role: "option",
-      "x-data"() {
-        return CreateRoverCreateOption();
       }
     });
   }
