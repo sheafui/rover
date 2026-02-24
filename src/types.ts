@@ -92,7 +92,9 @@ export interface RoverOptionData extends XDataContext {
 
 export type RoverOptionContext = RoverRootData & RoverOptionData & Magics<RoverOptionData>;
 
-export interface RoverCreateOptionData extends XDataContext {}
+export interface RoverCreateOptionData extends XDataContext {
+    _x_activateCreateOptionEl: () => void
+}
 
 export type RoverCreateOptionContext = RoverRootData & RoverCreateOptionData & Magics<RoverCreateOptionData>;
 

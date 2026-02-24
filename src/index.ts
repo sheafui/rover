@@ -4,6 +4,7 @@ import CreateRoverOption from "./factories/CreateRoverOption";
 import CreateRoverRoot from "./factories/CreateRoverRoot";
 import { RoverOptionContext, RoverRootContext } from "./types";
 import registerMagics from "./magics";
+import CreateRoverCreateOption from "./factories/CreateRoverCreateOption";
 
 
 type RoverValue =
@@ -12,6 +13,7 @@ type RoverValue =
     | 'button'
     | 'options'
     | 'option'
+    | 'create-option'
     | 'group'
     | 'loading'
     | 'separator'
@@ -34,6 +36,8 @@ export default function rover(Alpine: Alpine): void {
             case 'options': handleOptions(el);
                 break;
             case 'option': handleOption(Alpine, el);
+                break;
+            case 'create-option': handleCreateOption(el);
                 break;
             case 'group': handleOptionsGroup(Alpine, el);
                 break;
@@ -115,6 +119,19 @@ export default function rover(Alpine: Alpine): void {
         });
     }
 
+    function handleCreateOption(
+        el: AlpineType.ElementWithXAttributes,
+    ) {
+        Alpine.bind(el, {
+            'x-id'() { return ['rover-create-option'] },
+            'x-bind:id'() { return this.$id('rover-create-option') },
+            'role': 'option',
+            'x-data'(this: RoverOptionContext) {
+                return CreateRoverCreateOption();
+            },
+        });
+    }
+
     function handleOptionsGroup(
         Alpine: Alpine,
         el: AlpineType.ElementWithXAttributes
@@ -177,7 +194,7 @@ export default function rover(Alpine: Alpine): void {
                 this.__pushSeparatorToItems(id);
 
                 this.$el.setAttribute('role', 'separator');
-                
+
                 this.$el.setAttribute('aria-orientation', 'horizontal');
             }
         });
