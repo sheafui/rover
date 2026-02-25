@@ -69,6 +69,10 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
                 this.__isLoading = collection.pending.value;
             });
 
+            this.$nextTick(()=>{
+                console.log(this.__items);
+            })
+
             // input search
             this.__inputManager.on('input', (event: InputEvent) => {
 
