@@ -60,6 +60,7 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __startTyping: () => void;
     __stopTyping: () => void;
     __flush: () => void;
+    __getItemElByValue: (value: string) => HTMLElement | undefined;
     __buildOptions: () => void;
     __getActiveItemEl: () => HTMLElement | undefined;
     patchItemsVisibility: (value: string[] | null) => void,

@@ -631,6 +631,9 @@ function CreateRoverRoot({effect}) {
     __startTyping() {
       this.__isTyping = true;
     },
+    __getItemElByValue(value) {
+      return this.__optionIndex.get(value);
+    },
     __stopTyping() {
       this.__isTyping = false;
     },
@@ -698,6 +701,9 @@ var rover = (el) => {
     },
     getActiveItemId() {
       return this.getActiveItemEl()?.id;
+    },
+    getElementByValue(value) {
+      return data.__getItemElByValue(value);
     },
     reIndex() {
     },
