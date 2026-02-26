@@ -485,9 +485,6 @@
         effect(() => {
           this.__isLoading = collection.pending.value;
         });
-        this.$nextTick(() => {
-          this.cleanInjectedStyles();
-        });
         this.__inputManager.on("input", (event) => {
           const inputEl = event?.target;
           const isRemoteSearch = inputEl._x_model?.get() !== void 0;
@@ -933,6 +930,7 @@
                         }
                     `;
             document.head.appendChild(style);
+            console.log(document.head);
           }
         }
       });

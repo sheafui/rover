@@ -509,9 +509,6 @@ function CreateRoverRoot({effect}) {
       effect(() => {
         this.__isLoading = collection.pending.value;
       });
-      this.$nextTick(() => {
-        this.cleanInjectedStyles();
-      });
       this.__inputManager.on("input", (event) => {
         var _a, _b;
         const inputEl = event == null ? void 0 : event.target;
@@ -964,6 +961,7 @@ function rover2(Alpine2) {
                         }
                     `;
           document.head.appendChild(style);
+          console.log(document.head);
         }
       }
     });

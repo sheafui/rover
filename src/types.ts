@@ -74,7 +74,7 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __getLabelByValue: (value: string) => string | undefined,
     __getSearchableByValue: (value: string) => string | undefined,
     __getDisabledByValue: (value: string) => boolean | undefined,
-    _x_activateCreateOptionEl?: () => void 
+    _x_activateCreateOptionEl?: () => void
 
 }
 

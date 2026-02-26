@@ -5,7 +5,6 @@ import CreateRoverRoot from "./factories/CreateRoverRoot";
 import { RoverOptionContext, RoverRootContext } from "./types";
 import registerMagics from "./magics";
 
-
 type RoverValue =
     | null
     | 'input'
@@ -137,7 +136,9 @@ export default function rover(Alpine: Alpine): void {
                             display: none;
                         }
                     `;
+                    
                     document.head.appendChild(style);
+                    console.log(document.head);
                 }
             },
         });

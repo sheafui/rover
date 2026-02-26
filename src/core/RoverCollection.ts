@@ -1,4 +1,4 @@
-import type { Item, Options, Pending } from "src/types";
+import type { Item, Options, Pending} from "src/types";
 
 export default class RoverCollection {
 
@@ -6,6 +6,7 @@ export default class RoverCollection {
     // Core storage
     // -----------------------
     private itemsMap: Map<string, Item> = new Map();
+
 
     /**
      * tracks DOM order separately from the Map. for external
