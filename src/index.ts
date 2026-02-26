@@ -138,7 +138,6 @@ export default function rover(Alpine: Alpine): void {
                     `;
                     
                     document.head.appendChild(style);
-                    console.log(document.head);
                 }
             },
         });
@@ -180,14 +179,6 @@ export default function rover(Alpine: Alpine): void {
     function handleSeparator(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
         Alpine.bind(el, {
             'x-init'(this: RoverRootContext) {
-
-                const id = String(this.__nextSeparatorId());
-
-                this.$el.dataset.key = id;
-
-                console.log(id);
-
-                this.__pushSeparatorToItems(id);
 
                 this.$el.setAttribute('role', 'separator');
 

@@ -514,14 +514,11 @@
             const visibleValuesArray = this.__filteredValues;
             requestAnimationFrame(() => {
               this.patchItemsVisibility(visibleValuesArray);
+              this.patchSeparatorVisibility(visibleValuesArray);
               this.patchItemsActivity(activeValue);
             });
           });
         });
-      },
-      __handleGroupsVisibility() {
-      },
-      __handleSeparatorsVisibility() {
       },
       patchItemsVisibility(visibleValuesArray) {
         if (!this.__optionsEls || !this.__optionIndex)
@@ -592,6 +589,15 @@
         }
         this.__prevActiveValue = activeValue;
       },
+      patchSeparatorVisibility(visibleValuesArray) {
+        const separators = this.$el.querySelectorAll("[x-rover\\:separator]");
+        if (!separators.length)
+          return;
+        const isSearching = visibleValuesArray !== null;
+        separators.forEach((sep) => {
+          sep.style.display = isSearching ? "none" : "";
+        });
+      },
       __flush() {
         this.__buildOptions();
         this.__setValuesInDomOrder();
@@ -623,26 +629,11 @@
           this.$refs?._x__input?.focus({preventScroll: true});
         });
       },
-      __pushSeparatorToItems(id) {
-        this.__items.push({type: "s", id});
-      },
-      __pushGroupToItems(id) {
-        this.__items.push({type: "g", id});
-      },
-      __pushOptionToItems(id) {
-        this.__items.push({type: "g", id});
-      },
       __startTyping() {
         this.__isTyping = true;
       },
       __stopTyping() {
         this.__isTyping = false;
-      },
-      __nextGroupId() {
-        return ++this.__g_id;
-      },
-      __nextSeparatorId() {
-        return ++this.__s_id;
       },
       __getActiveItemEl() {
         const activeValue = collection.getActiveItem()?.value;
@@ -930,7 +921,6 @@
                         }
                     `;
             document.head.appendChild(style);
-            console.log(document.head);
           }
         }
       });
@@ -967,10 +957,6 @@
     function handleSeparator(Alpine3, el) {
       Alpine3.bind(el, {
         "x-init"() {
-          const id = String(this.__nextSeparatorId());
-          this.$el.dataset.key = id;
-          console.log(id);
-          this.__pushSeparatorToItems(id);
           this.$el.setAttribute("role", "separator");
           this.$el.setAttribute("aria-orientation", "horizontal");
         }
