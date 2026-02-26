@@ -3,7 +3,7 @@ import RoverCollection from "./core/RoverCollection";
 
 export interface Options {
     searchThreshold?: number;
-    preventDuplication: boolean
+    preventDuplication?: boolean
 }
 
 export interface Item {
