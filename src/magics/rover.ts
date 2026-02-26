@@ -48,6 +48,9 @@ export const rover = (el: ElementWithXAttributes) => {
         getActiveItemId(): string | undefined {
             return this.getActiveItemEl()?.id;
         },
+        getElementByValue(value: string): HTMLElement | undefined {
+            return data.__getItemElByValue(value)
+        },
         // re wire up the internal index to catch changes on the dom
         reIndex() {
             // @todo

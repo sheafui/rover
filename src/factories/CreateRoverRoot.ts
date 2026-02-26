@@ -217,7 +217,7 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
             if (!separators.length) return;
 
             const isSearching = visibleValuesArray !== null;
-            
+
             separators.forEach((sep: HTMLElement) => {
                 sep.style.display = isSearching ? 'none' : '';
             });
@@ -262,6 +262,11 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
         },
         __startTyping() {
             this.__isTyping = true;
+        },
+
+        __getItemElByValue(value: string) {
+            // console.log('index', this.__optionIndex.get(value))
+            return this.__optionIndex.get(value);
         },
 
         __stopTyping() {
