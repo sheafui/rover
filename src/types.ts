@@ -59,22 +59,16 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __searchUsingQuery: (query: string) => Item[];
     __startTyping: () => void;
     __stopTyping: () => void;
-    __pushGroupToItems: (id: string) => void;
-    __pushSeparatorToItems: (id: string) => void;
-    __nextGroupId: () => number;
-    __nextSeparatorId: () => number;
     __flush: () => void;
     __buildOptions: () => void;
     __getActiveItemEl: () => HTMLElement | undefined;
-    // __handleGroupsVisibility: () => void,
-    // __handleSeparatorsVisibility: () => void,
     patchItemsVisibility: (value: string[] | null) => void,
     patchItemsActivity: (value: string | undefined) => void,
     __getItemByValue: (value: string) => Item | undefined,
     __getLabelByValue: (value: string) => string | undefined,
     __getSearchableByValue: (value: string) => string | undefined,
     __getDisabledByValue: (value: string) => boolean | undefined,
-    _x_activateCreateOptionEl?: () => void 
+    _x_activateCreateOptionEl?: () => void
 
 }
 

@@ -539,14 +539,11 @@ function CreateRoverRoot({effect}) {
           const visibleValuesArray = this.__filteredValues;
           requestAnimationFrame(() => {
             this.patchItemsVisibility(visibleValuesArray);
+            this.patchSeparatorVisibility(visibleValuesArray);
             this.patchItemsActivity(activeValue);
           });
         });
       });
-    },
-    __handleGroupsVisibility() {
-    },
-    __handleSeparatorsVisibility() {
     },
     patchItemsVisibility(visibleValuesArray) {
       if (!this.__optionsEls || !this.__optionIndex)
@@ -617,6 +614,15 @@ function CreateRoverRoot({effect}) {
       }
       this.__prevActiveValue = activeValue;
     },
+    patchSeparatorVisibility(visibleValuesArray) {
+      const separators = this.$el.querySelectorAll("[x-rover\\:separator]");
+      if (!separators.length)
+        return;
+      const isSearching = visibleValuesArray !== null;
+      separators.forEach((sep) => {
+        sep.style.display = isSearching ? "none" : "";
+      });
+    },
     __flush() {
       this.__buildOptions();
       this.__setValuesInDomOrder();
@@ -649,23 +655,11 @@ function CreateRoverRoot({effect}) {
         (_b = (_a = this.$refs) == null ? void 0 : _a._x__input) == null ? void 0 : _b.focus({preventScroll: true});
       });
     },
-    __pushSeparatorToItems(id) {
-      this.__items.push({type: "s", id});
-    },
-    __pushGroupToItems(id) {
-      this.__items.push({type: "g", id});
-    },
     __startTyping() {
       this.__isTyping = true;
     },
     __stopTyping() {
       this.__isTyping = false;
-    },
-    __nextGroupId() {
-      return ++this.__g_id;
-    },
-    __nextSeparatorId() {
-      return ++this.__s_id;
     },
     __getActiveItemEl() {
       var _a, _b;
@@ -680,6 +674,13 @@ function CreateRoverRoot({effect}) {
       (_b = this.__optionManager) == null ? void 0 : _b.destroy();
       (_c = this.__optionsManager) == null ? void 0 : _c.destroy();
       (_d = this.__buttonManager) == null ? void 0 : _d.destroy();
+      this.cleanInjectedStyles();
+    },
+    cleanInjectedStyles() {
+      let groupStyles = document.getElementById("rover-group-styles");
+      if (!groupStyles)
+        return;
+      groupStyles.remove();
     }
   };
 }
@@ -942,6 +943,16 @@ function rover2(Alpine2) {
       "x-init"() {
         const groupId = this.$id("rover-group");
         this.$el.setAttribute("aria-labelledby", `${groupId}-label`);
+        if (!document.getElementById("rover-group-styles")) {
+          const style = document.createElement("style");
+          style.id = "rover-group-styles";
+          style.textContent = `
+                        [x-rover\\:group]:not(:has([x-rover\\:option]:not([style*="display: none"]))) {
+                            display: none;
+                        }
+                    `;
+          document.head.appendChild(style);
+        }
       }
     });
   }
@@ -977,9 +988,6 @@ function rover2(Alpine2) {
   function handleSeparator(Alpine3, el) {
     Alpine3.bind(el, {
       "x-init"() {
-        const id = String(this.__nextSeparatorId());
-        this.$el.dataset.key = id;
-        this.__pushSeparatorToItems(id);
         this.$el.setAttribute("role", "separator");
         this.$el.setAttribute("aria-orientation", "horizontal");
       }

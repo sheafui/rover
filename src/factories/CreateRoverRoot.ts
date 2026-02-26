@@ -120,19 +120,13 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
 
                     requestAnimationFrame(() => {
                         this.patchItemsVisibility(visibleValuesArray);
+                        this.patchSeparatorVisibility(visibleValuesArray);
                         this.patchItemsActivity(activeValue);
                     });
                 });
             });
         },
 
-        __handleGroupsVisibility() {
-            // todo this evenning with vs 
-        },
-        __handleSeparatorsVisibility() {
-            // todo this evening vith vs
-
-        },
         patchItemsVisibility(visibleValuesArray: string[] | null) {
 
             if (!this.__optionsEls || !this.__optionIndex) return;
@@ -217,6 +211,18 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
             this.__prevActiveValue = activeValue;
         },
 
+        patchSeparatorVisibility(visibleValuesArray: string[]) {
+            const separators = this.$el.querySelectorAll('[x-rover\\:separator]');
+
+            if (!separators.length) return;
+
+            const isSearching = visibleValuesArray !== null;
+            
+            separators.forEach((sep: HTMLElement) => {
+                sep.style.display = isSearching ? 'none' : '';
+            });
+        },
+
         __flush() {
             this.__buildOptions();
             this.__setValuesInDomOrder();
@@ -254,15 +260,6 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
                 this.$refs?._x__input?.focus({ preventScroll: true });
             });
         },
-
-        __pushSeparatorToItems(id: string) {
-            this.__items.push({ type: 's', id });
-        },
-
-        __pushGroupToItems(id: string) {
-            this.__items.push({ type: 'g', id });
-        },
-
         __startTyping() {
             this.__isTyping = true;
         },
@@ -271,13 +268,6 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
             this.__isTyping = false;
         },
 
-        __nextGroupId() {
-            return ++this.__g_id;
-        },
-
-        __nextSeparatorId() {
-            return ++this.__s_id;
-        },
         __getActiveItemEl() {
             const activeValue = collection.getActiveItem()?.value;
             if (!activeValue) return undefined;
@@ -289,6 +279,15 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
             this.__optionManager?.destroy();
             this.__optionsManager?.destroy();
             this.__buttonManager?.destroy();
+            this.cleanInjectedStyles();
+        },
+
+        cleanInjectedStyles() {
+            let groupStyles = document.getElementById('rover-group-styles');
+
+            if (!groupStyles) return;
+
+            groupStyles.remove();
         }
     }
 }
