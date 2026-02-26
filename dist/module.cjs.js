@@ -509,6 +509,9 @@ function CreateRoverRoot({effect}) {
       effect(() => {
         this.__isLoading = collection.pending.value;
       });
+      this.$nextTick(() => {
+        this.cleanInjectedStyles();
+      });
       this.__inputManager.on("input", (event) => {
         var _a, _b;
         const inputEl = event == null ? void 0 : event.target;
@@ -655,6 +658,9 @@ function CreateRoverRoot({effect}) {
     __pushGroupToItems(id) {
       this.__items.push({type: "g", id});
     },
+    __pushOptionToItems(id) {
+      this.__items.push({type: "g", id});
+    },
     __startTyping() {
       this.__isTyping = true;
     },
@@ -680,6 +686,13 @@ function CreateRoverRoot({effect}) {
       (_b = this.__optionManager) == null ? void 0 : _b.destroy();
       (_c = this.__optionsManager) == null ? void 0 : _c.destroy();
       (_d = this.__buttonManager) == null ? void 0 : _d.destroy();
+      this.cleanInjectedStyles();
+    },
+    cleanInjectedStyles() {
+      let groupStyles = document.getElementById("rover-group-styles");
+      if (!groupStyles)
+        return;
+      groupStyles.remove();
     }
   };
 }
@@ -942,6 +955,16 @@ function rover2(Alpine2) {
       "x-init"() {
         const groupId = this.$id("rover-group");
         this.$el.setAttribute("aria-labelledby", `${groupId}-label`);
+        if (!document.getElementById("rover-group-styles")) {
+          const style = document.createElement("style");
+          style.id = "rover-group-styles";
+          style.textContent = `
+                        [x-rover\\:group]:not(:has([x-rover\\:option]:not([style*="display: none"]))) {
+                            display: none;
+                        }
+                    `;
+          document.head.appendChild(style);
+        }
       }
     });
   }
@@ -979,6 +1002,7 @@ function rover2(Alpine2) {
       "x-init"() {
         const id = String(this.__nextSeparatorId());
         this.$el.dataset.key = id;
+        console.log(id);
         this.__pushSeparatorToItems(id);
         this.$el.setAttribute("role", "separator");
         this.$el.setAttribute("aria-orientation", "horizontal");

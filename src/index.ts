@@ -128,6 +128,17 @@ export default function rover(Alpine: Alpine): void {
                 const groupId = this.$id('rover-group');
 
                 this.$el.setAttribute('aria-labelledby', `${groupId}-label`);
+
+                if (!document.getElementById('rover-group-styles')) {
+                    const style = document.createElement('style');
+                    style.id = 'rover-group-styles';
+                    style.textContent = `
+                        [x-rover\\:group]:not(:has([x-rover\\:option]:not([style*="display: none"]))) {
+                            display: none;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
             },
         });
     }
@@ -172,6 +183,8 @@ export default function rover(Alpine: Alpine): void {
                 const id = String(this.__nextSeparatorId());
 
                 this.$el.dataset.key = id;
+
+                console.log(id);
 
                 this.__pushSeparatorToItems(id);
 

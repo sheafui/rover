@@ -485,6 +485,9 @@
         effect(() => {
           this.__isLoading = collection.pending.value;
         });
+        this.$nextTick(() => {
+          this.cleanInjectedStyles();
+        });
         this.__inputManager.on("input", (event) => {
           const inputEl = event?.target;
           const isRemoteSearch = inputEl._x_model?.get() !== void 0;
@@ -629,6 +632,9 @@
       __pushGroupToItems(id) {
         this.__items.push({type: "g", id});
       },
+      __pushOptionToItems(id) {
+        this.__items.push({type: "g", id});
+      },
       __startTyping() {
         this.__isTyping = true;
       },
@@ -652,6 +658,13 @@
         this.__optionManager?.destroy();
         this.__optionsManager?.destroy();
         this.__buttonManager?.destroy();
+        this.cleanInjectedStyles();
+      },
+      cleanInjectedStyles() {
+        let groupStyles = document.getElementById("rover-group-styles");
+        if (!groupStyles)
+          return;
+        groupStyles.remove();
       }
     };
   }
@@ -911,6 +924,16 @@
         "x-init"() {
           const groupId = this.$id("rover-group");
           this.$el.setAttribute("aria-labelledby", `${groupId}-label`);
+          if (!document.getElementById("rover-group-styles")) {
+            const style = document.createElement("style");
+            style.id = "rover-group-styles";
+            style.textContent = `
+                        [x-rover\\:group]:not(:has([x-rover\\:option]:not([style*="display: none"]))) {
+                            display: none;
+                        }
+                    `;
+            document.head.appendChild(style);
+          }
         }
       });
     }
@@ -948,6 +971,7 @@
         "x-init"() {
           const id = String(this.__nextSeparatorId());
           this.$el.dataset.key = id;
+          console.log(id);
           this.__pushSeparatorToItems(id);
           this.$el.setAttribute("role", "separator");
           this.$el.setAttribute("aria-orientation", "horizontal");

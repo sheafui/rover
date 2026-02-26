@@ -69,9 +69,10 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
                 this.__isLoading = collection.pending.value;
             });
 
-            this.$nextTick(()=>{
-                console.log(this.__items);
+            this.$nextTick(() => {
+                this.cleanInjectedStyles()
             })
+
 
             // input search
             this.__inputManager.on('input', (event: InputEvent) => {
@@ -258,15 +259,15 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
                 this.$refs?._x__input?.focus({ preventScroll: true });
             });
         },
-
         __pushSeparatorToItems(id: string) {
             this.__items.push({ type: 's', id });
         },
-
         __pushGroupToItems(id: string) {
             this.__items.push({ type: 'g', id });
         },
-
+        __pushOptionToItems(id: string) {
+            this.__items.push({ type: 'g', id });
+        },
         __startTyping() {
             this.__isTyping = true;
         },
@@ -293,6 +294,15 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
             this.__optionManager?.destroy();
             this.__optionsManager?.destroy();
             this.__buttonManager?.destroy();
+            this.cleanInjectedStyles();
+        },
+
+        cleanInjectedStyles() {
+            let groupStyles = document.getElementById('rover-group-styles');
+
+            if (!groupStyles) return;
+
+            groupStyles.remove();
         }
     }
 }
