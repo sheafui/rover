@@ -124,12 +124,11 @@ export interface InputManager extends Destroyable, Abortable {
             activeKey: string | undefined
         ) => void
     ): void;
-
-    get value(): string
-    set value(val: string)
+    get value(): string;
+    set value(val: string);
+    reset(): void;
     focus: (preventScroll: boolean) => void;
     get el(): HTMLInputElement | undefined;
-
     enableDefaultInputHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'>): void;
 }
 
@@ -149,10 +148,7 @@ export interface OptionsManager extends Destroyable, Abortable {
     enableDefaultOptionsHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'>): void
 }
 
-
-export interface OptionManager extends Destroyable, Pick<InputManager, 'on'>, Abortable {
-}
-export interface ButtonManager extends Destroyable, Pick<InputManager, 'on'>, Abortable {
-}
+export interface OptionManager extends Destroyable, Pick<InputManager, 'on'>, Abortable {}
+export interface ButtonManager extends Destroyable, Pick<InputManager, 'on'>, Abortable {}
 
 

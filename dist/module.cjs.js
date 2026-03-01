@@ -257,6 +257,10 @@ function createInputManager(rootDataStack) {
       if (inputEl)
         inputEl.value = val;
     },
+    reset() {
+      if (inputEl)
+        inputEl.value = "";
+    },
     focus(preventScroll = true) {
       requestAnimationFrame(() => inputEl == null ? void 0 : inputEl.focus({preventScroll}));
     },
