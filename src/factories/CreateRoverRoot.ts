@@ -61,6 +61,11 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
         __getSearchableByValue(value: string): string | undefined { return this.__getItemByValue(value)?.searchable },
         __getDisabledByValue(value: string): boolean | undefined { return this.__getItemByValue(value)?.disabled },
 
+        utils: {
+            getLabel: (value: string) => collection.get(value)?.label,
+            getSearchable: (value: string) => collection.get(value)?.searchable,
+            isDisabled: (value: string) => collection.get(value)?.disabled ?? false,
+        },
 
         init() {
             this.__setupManagers();
