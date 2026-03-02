@@ -119,8 +119,8 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
                     const visibleValuesArray = this.__filteredValues;
 
                     requestAnimationFrame(() => {
-                        this.patchItemsVisibility(visibleValuesArray);
                         this.patchSeparatorVisibility(visibleValuesArray);
+                        this.patchItemsVisibility(visibleValuesArray);
                         this.patchItemsActivity(activeValue);
                     });
                 });
@@ -265,7 +265,6 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
         },
 
         __getItemElByValue(value: string) {
-            // console.log('index', this.__optionIndex.get(value))
             return this.__optionIndex.get(value);
         },
 

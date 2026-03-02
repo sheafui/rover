@@ -15,7 +15,8 @@ export default function registerMagics(Alpine: Alpine) {
         })
 
         if (!optionEl) throw 'No x-rover directive found, this magic meant to be used under x-rover root context...'
-
+        console.log('called', optionEl);
+        
         return roverMagic(optionEl as AlpineType.ElementWithXAttributes);
     });
 

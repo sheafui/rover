@@ -41,6 +41,8 @@ export function createInputManager(
         reset() { if (inputEl) inputEl.value = ''},
 
         focus(preventScroll: boolean = true): void {
+            console.log(rootDataStack.$root);
+
             requestAnimationFrame(() => inputEl?.focus({ preventScroll }))
         },
 
@@ -84,7 +86,6 @@ export function createInputManager(
                         case 'Tab':
                             rootDataStack.__stopTyping();
                             break;
-
                     }
                 });
             }

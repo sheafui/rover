@@ -244,6 +244,7 @@
           inputEl.value = "";
       },
       focus(preventScroll = true) {
+        console.log(rootDataStack.$root);
         requestAnimationFrame(() => inputEl?.focus({preventScroll}));
       },
       enableDefaultInputHandlers(disabledEvents = []) {
@@ -795,6 +796,7 @@
       });
       if (!optionEl)
         throw "No x-rover directive found, this magic meant to be used under x-rover root context...";
+      console.log("called", optionEl);
       return rover(optionEl);
     });
     Alpine2.magic("roverOption", (el) => {
