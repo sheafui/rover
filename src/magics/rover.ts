@@ -2,9 +2,9 @@ import { ElementWithXAttributes } from "alpinejs";
 import { ButtonManager, InputManager, Item, OptionManager, OptionsManager, RoverRootContext } from "src/types";
 
 export const rover = (el: ElementWithXAttributes) => {
+
     let data = Alpine.$data(el) as RoverRootContext;
 
-    console.log('data stack', data);
     return {
         get collection() {
             return data.__collection;
@@ -30,7 +30,7 @@ export const rover = (el: ElementWithXAttributes) => {
             return data.__isLoading;
         },
         get inputEl(): HTMLElement | null {
-            return data.$root.querySelector('[x-rover\\:input]');
+            return data.$el.querySelector('[x-rover\\:input]');
         },
         getActiveItemEl(): HTMLElement | undefined {
             return data.__getActiveItemEl();

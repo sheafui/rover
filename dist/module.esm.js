@@ -213,7 +213,7 @@ function bindListener(el, eventKey, listener, controller) {
 
 // src/Managers/InputManager.ts
 function createInputManager(rootDataStack) {
-  const inputEl = rootDataStack.$root.querySelector("[x-rover\\:input]");
+  const inputEl = rootDataStack.$el.querySelector("[x-rover\\:input]");
   const inputElExists = () => {
     if (!inputEl) {
       console.warn(`Input element with [x-rover\\:input] not found`);
@@ -243,7 +243,6 @@ function createInputManager(rootDataStack) {
         inputEl.value = "";
     },
     focus(preventScroll = true) {
-      console.log(rootDataStack.$root);
       requestAnimationFrame(() => inputEl?.focus({preventScroll}));
     },
     enableDefaultInputHandlers(disabledEvents = []) {
@@ -672,7 +671,6 @@ function CreateRoverRoot({effect}) {
 // src/magics/rover.ts
 var rover = (el) => {
   let data = Alpine.$data(el);
-  console.log("data stack", data);
   return {
     get collection() {
       return data.__collection;
@@ -693,7 +691,7 @@ var rover = (el) => {
       return data.__isLoading;
     },
     get inputEl() {
-      return data.$root.querySelector("[x-rover\\:input]");
+      return data.$el.querySelector("[x-rover\\:input]");
     },
     getActiveItemEl() {
       return data.__getActiveItemEl();

@@ -4,7 +4,7 @@ import { bindListener } from "./utils"
 export function createInputManager(
     rootDataStack: RoverRootContext
 ): InputManager {
-    const inputEl = rootDataStack.$root.querySelector('[x-rover\\:input]') as HTMLInputElement | undefined;
+    const inputEl = rootDataStack.$el.querySelector('[x-rover\\:input]') as HTMLInputElement | undefined;
 
     const inputElExists = (): boolean => {
         if (!inputEl) {
@@ -41,8 +41,6 @@ export function createInputManager(
         reset() { if (inputEl) inputEl.value = ''},
 
         focus(preventScroll: boolean = true): void {
-            console.log(rootDataStack.$root);
-
             requestAnimationFrame(() => inputEl?.focus({ preventScroll }))
         },
 
