@@ -3,6 +3,8 @@ import { ButtonManager, InputManager, Item, OptionManager, OptionsManager, Rover
 
 export const rover = (el: ElementWithXAttributes) => {
     let data = Alpine.$data(el) as RoverRootContext;
+
+    console.log('data stack', data);
     return {
         get collection() {
             return data.__collection;

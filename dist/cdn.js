@@ -485,6 +485,11 @@
       __getDisabledByValue(value) {
         return this.__getItemByValue(value)?.disabled;
       },
+      utils: {
+        getLabel: (value) => collection.get(value)?.label,
+        getSearchable: (value) => collection.get(value)?.searchable,
+        isDisabled: (value) => collection.get(value)?.disabled ?? false
+      },
       init() {
         this.__setupManagers();
         effect(() => {
@@ -518,8 +523,8 @@
             const activeValue = this.__activatedValue = activeItem?.value;
             const visibleValuesArray = this.__filteredValues;
             requestAnimationFrame(() => {
-              this.patchItemsVisibility(visibleValuesArray);
               this.patchSeparatorVisibility(visibleValuesArray);
+              this.patchItemsVisibility(visibleValuesArray);
               this.patchItemsActivity(activeValue);
             });
           });
@@ -668,6 +673,7 @@
   // src/magics/rover.ts
   var rover = (el) => {
     let data = Alpine.$data(el);
+    console.log("data stack", data);
     return {
       get collection() {
         return data.__collection;
@@ -796,7 +802,6 @@
       });
       if (!optionEl)
         throw "No x-rover directive found, this magic meant to be used under x-rover root context...";
-      console.log("called", optionEl);
       return rover(optionEl);
     });
     Alpine2.magic("roverOption", (el) => {
