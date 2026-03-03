@@ -74,7 +74,7 @@ export default function rover(Alpine: Alpine): void {
     ): void {
         Alpine.bind(el, {
             'x-bind:id'() { return this.$id('rover-input') },
-            'tabindex': '0',
+            // 'tabindex': '0',
             'aria-autocomplete': 'list',
             'x-bind:aria-controls'() { return this.$id('rover-options') },
             'x-bind:aria-activedescendant'() {

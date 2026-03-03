@@ -453,7 +453,6 @@
       __optionsEl: void 0,
       __prevActivatedValue: void 0,
       __activatedValue: void 0,
-      __items: [],
       __filteredValues: null,
       __prevVisibleArray: null,
       __prevActiveValue: void 0,
@@ -873,7 +872,6 @@
         "x-bind:id"() {
           return this.$id("rover-input");
         },
-        tabindex: "0",
         "aria-autocomplete": "list",
         "x-bind:aria-controls"() {
           return this.$id("rover-options");

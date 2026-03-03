@@ -28,10 +28,6 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
         __optionsEl: undefined,
         __prevActivatedValue: undefined,
         __activatedValue: undefined,
-        // items only is here for handling separators 
-        // and groups visibility 
-        __items: [],
-
         __filteredValues: null,
 
         __prevVisibleArray: null as string[] | null,

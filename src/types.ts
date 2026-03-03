@@ -30,7 +30,6 @@ export interface RoverRootData extends XDataContext, Record<string, unknown> {
     __s_id: number;
     __static: boolean;
     __keepActivated: boolean;
-    __items: UIItem[];
     __optionsEl: HTMLElement | undefined;
     __activatedValue: string | null | undefined;
     __filteredValues: string[] | null;
@@ -99,15 +98,6 @@ export interface RoverOptionsData extends Partial<RoverRootData> {
 }
 
 export type RoverOptionsContext = RoverRootData & RoverOptionsData & Magics<RoverOptionsData>;
-
-export type UIItem = {
-    type:
-    'o' | // option
-    'g' | // group
-    's'; // separator
-
-    key?: string;
-}
 
 export interface Destroyable {
     destroy(): void
