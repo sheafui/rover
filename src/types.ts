@@ -118,7 +118,7 @@ export interface InputManager extends Destroyable, Abortable {
     set value(val: string);
     reset(): void;
     focus: (preventScroll: boolean) => void;
-    get el(): HTMLInputElement | undefined;
+    get el(): HTMLInputElement | null;
     enableDefaultInputHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'>): void;
 }
 

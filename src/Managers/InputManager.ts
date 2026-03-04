@@ -4,7 +4,7 @@ import { bindListener } from "./utils"
 export function createInputManager(
     rootDataStack: RoverRootContext
 ): InputManager {
-    const inputEl = rootDataStack.$el.querySelector('[x-rover\\:input]') as HTMLInputElement | undefined;
+    const inputEl = rootDataStack.$el.querySelector('[x-rover\\:input]') as HTMLInputElement | null;
 
     const inputElExists = (): boolean => {
         if (!inputEl) {
@@ -88,7 +88,7 @@ export function createInputManager(
                 });
             }
         },
-        get el(): HTMLInputElement | undefined {
+        get el(): HTMLInputElement | null {
             return inputEl;
         },
         destroy() {

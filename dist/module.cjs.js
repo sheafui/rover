@@ -519,34 +519,37 @@ function CreateRoverRoot({effect}) {
       isDisabled: (value) => {
         var _a, _b;
         return (_b = (_a = collection.get(value)) == null ? void 0 : _a.disabled) != null ? _b : false;
-      }
+      },
+      allOptions: () => this.__optionIndex
     },
     init() {
       this.__setupManagers();
       effect(() => {
         this.__isLoading = collection.pending.value;
       });
-      this.__inputManager.on("input", (event) => {
-        var _a, _b;
-        const inputEl = event == null ? void 0 : event.target;
-        const isRemoteSearch = ((_a = inputEl._x_model) == null ? void 0 : _a.get()) !== void 0;
-        if (!isRemoteSearch) {
-          const query = inputEl.value;
-          if (query.length > 0) {
-            this.__filteredValues = this.__searchUsingQuery(query).map((r) => r.value);
-          } else {
-            this.__filteredValues = null;
-            collection.reset();
+      if (this.__inputManager.el !== null) {
+        this.__inputManager.on("input", (event) => {
+          var _a, _b;
+          const inputEl = event == null ? void 0 : event.target;
+          const isRemoteSearch = ((_a = inputEl._x_model) == null ? void 0 : _a.get()) !== void 0;
+          if (!isRemoteSearch) {
+            const query = inputEl.value;
+            if (query.length > 0) {
+              this.__filteredValues = this.__searchUsingQuery(query).map((r) => r.value);
+            } else {
+              this.__filteredValues = null;
+              collection.reset();
+            }
+            ;
           }
-          ;
-        }
-        const availableValues = (_b = this.__filteredValues) != null ? _b : this.__collection.getAllValues();
-        if (this.__activatedValue && !availableValues.includes(this.__activatedValue))
-          this.__deactivate();
-        if (!this.__collection.getActiveItem()) {
-          this.__collection.activateFirst();
-        }
-      });
+          const availableValues = (_b = this.__filteredValues) != null ? _b : this.__collection.getAllValues();
+          if (this.__activatedValue && !availableValues.includes(this.__activatedValue))
+            this.__deactivate();
+          if (!this.__collection.getActiveItem()) {
+            this.__collection.activateFirst();
+          }
+        });
+      }
       this.$nextTick(() => {
         this.__buildOptions();
         this.__setValuesInDomOrder();

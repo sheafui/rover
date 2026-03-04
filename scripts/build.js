@@ -38,7 +38,7 @@ function bundleFile(file) {
                 platform: 'browser',
                 define: { CDN: true },
             }).then(() => {
-                outputSize('alpine-animation', `dist/${file.replace('.js', '.min.js')}`)
+                outputSize('rover-engine', `dist/${file.replace('.js', '.min.js')}`)
             })
 
         },

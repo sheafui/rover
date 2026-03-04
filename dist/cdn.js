@@ -486,33 +486,36 @@
       utils: {
         getLabel: (value) => collection.get(value)?.label,
         getSearchable: (value) => collection.get(value)?.searchable,
-        isDisabled: (value) => collection.get(value)?.disabled ?? false
+        isDisabled: (value) => collection.get(value)?.disabled ?? false,
+        allOptions: () => this.__optionIndex
       },
       init() {
         this.__setupManagers();
         effect(() => {
           this.__isLoading = collection.pending.value;
         });
-        this.__inputManager.on("input", (event) => {
-          const inputEl = event?.target;
-          const isRemoteSearch = inputEl._x_model?.get() !== void 0;
-          if (!isRemoteSearch) {
-            const query = inputEl.value;
-            if (query.length > 0) {
-              this.__filteredValues = this.__searchUsingQuery(query).map((r) => r.value);
-            } else {
-              this.__filteredValues = null;
-              collection.reset();
+        if (this.__inputManager.el !== null) {
+          this.__inputManager.on("input", (event) => {
+            const inputEl = event?.target;
+            const isRemoteSearch = inputEl._x_model?.get() !== void 0;
+            if (!isRemoteSearch) {
+              const query = inputEl.value;
+              if (query.length > 0) {
+                this.__filteredValues = this.__searchUsingQuery(query).map((r) => r.value);
+              } else {
+                this.__filteredValues = null;
+                collection.reset();
+              }
+              ;
             }
-            ;
-          }
-          const availableValues = this.__filteredValues ?? this.__collection.getAllValues();
-          if (this.__activatedValue && !availableValues.includes(this.__activatedValue))
-            this.__deactivate();
-          if (!this.__collection.getActiveItem()) {
-            this.__collection.activateFirst();
-          }
-        });
+            const availableValues = this.__filteredValues ?? this.__collection.getAllValues();
+            if (this.__activatedValue && !availableValues.includes(this.__activatedValue))
+              this.__deactivate();
+            if (!this.__collection.getActiveItem()) {
+              this.__collection.activateFirst();
+            }
+          });
+        }
         this.$nextTick(() => {
           this.__buildOptions();
           this.__setValuesInDomOrder();
