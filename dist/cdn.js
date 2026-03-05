@@ -856,7 +856,7 @@
           handleSeparator(Alpine3, el);
           break;
         case "empty":
-          handleEmptyState(Alpine3, el);
+          handleEmptyState(Alpine3, el, modifiers);
           break;
         default:
           console.error("invalid x-rover value", value, "use input, button, option, options, group or leave mepty for root level instead");
@@ -953,12 +953,14 @@
         tabindex: "-1"
       });
     }
-    function handleEmptyState(Alpine3, el) {
+    function handleEmptyState(Alpine3, el, modifiers) {
+      const shouldHide = modifiers.includes("hide");
       Alpine3.bind(el, {
         tabindex: "-1",
         "aria-haspopup": "true",
         "x-show"() {
-          return Array.isArray(this.__filteredValues) && this.__filteredValues.length === 0 && this.__inputManager.value.length > 0;
+          const isEmpty = Array.isArray(this.__filteredValues) && this.__filteredValues.length === 0 && this.__inputManager.value.length > 0;
+          return shouldHide ? !isEmpty : isEmpty;
         }
       });
     }

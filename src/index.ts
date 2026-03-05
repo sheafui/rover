@@ -40,7 +40,7 @@ export default function rover(Alpine: Alpine): void {
                 break;
             case 'separator': handleSeparator(Alpine, el);
                 break;
-            case 'empty': handleEmptyState(Alpine, el);
+            case 'empty': handleEmptyState(Alpine, el, modifiers);
                 break;
             default:
                 console.error('invalid x-rover value', value, 'use input, button, option, options, group or leave mepty for root level instead');
@@ -136,7 +136,7 @@ export default function rover(Alpine: Alpine): void {
                             display: none;
                         }
                     `;
-                    
+
                     document.head.appendChild(style);
                 }
             },
@@ -151,12 +151,16 @@ export default function rover(Alpine: Alpine): void {
         })
     }
 
-    function handleEmptyState(Alpine: Alpine, el: AlpineType.ElementWithXAttributes) {
+    function handleEmptyState(Alpine: Alpine, el: AlpineType.ElementWithXAttributes, modifiers: AlpineType.DirectiveData['modifiers']) {
+
+        const shouldHide = modifiers.includes('hide');
+
         Alpine.bind(el, {
             'tabindex': '-1',
             'aria-haspopup': 'true',
             'x-show'() {
-                return Array.isArray(this.__filteredValues) && this.__filteredValues.length === 0 && this.__inputManager.value.length > 0;
+                const isEmpty = Array.isArray(this.__filteredValues) && this.__filteredValues.length === 0 && this.__inputManager.value.length > 0;
+                return shouldHide ? !isEmpty : isEmpty;
             }
         });
     }
