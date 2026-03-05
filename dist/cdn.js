@@ -457,6 +457,7 @@
       __prevActivatedValue: void 0,
       __activatedValue: void 0,
       __filteredValues: null,
+      __hasVisibleOptions: true,
       __prevVisibleArray: null,
       __prevActiveValue: void 0,
       __externalQuery: null,
@@ -526,6 +527,7 @@
             const activeItem = collection.getActiveItem();
             const activeValue = this.__activatedValue = activeItem?.value;
             const visibleValuesArray = this.__filteredValues;
+            this.__hasVisibleOptions = (visibleValuesArray ?? this.__collection.getAllValues()).length > 0;
             requestAnimationFrame(() => {
               this.patchSeparatorVisibility(visibleValuesArray);
               this.patchItemsVisibility(visibleValuesArray);
@@ -748,6 +750,12 @@
       },
       activateByKey(key) {
         data.__collection.activateByKey(key);
+      },
+      isEmpty() {
+        return !data.__hasVisibleOptions;
+      },
+      hasVisibleOptions() {
+        return data.__hasVisibleOptions;
       },
       searchUsing(query) {
         return data.__collection.search(query);

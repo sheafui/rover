@@ -82,8 +82,13 @@ export const rover = (el: ElementWithXAttributes) => {
             data.__collection.activateLast()
         },
         activateByKey(key: string) {
-           
             data.__collection.activateByKey(key);
+        },
+        isEmpty() {
+            return !data.__hasVisibleOptions
+        },
+        hasVisibleOptions() {
+            return data.__hasVisibleOptions
         },
         searchUsing(query: string): Item[] {
             return data.__collection.search(query)

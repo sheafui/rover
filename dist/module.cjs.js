@@ -478,6 +478,7 @@ function CreateRoverRoot({effect}) {
     __prevActivatedValue: void 0,
     __activatedValue: void 0,
     __filteredValues: null,
+    __hasVisibleOptions: true,
     __prevVisibleArray: null,
     __prevActiveValue: void 0,
     __externalQuery: null,
@@ -560,6 +561,7 @@ function CreateRoverRoot({effect}) {
           const activeItem = collection.getActiveItem();
           const activeValue = this.__activatedValue = activeItem == null ? void 0 : activeItem.value;
           const visibleValuesArray = this.__filteredValues;
+          this.__hasVisibleOptions = (visibleValuesArray != null ? visibleValuesArray : this.__collection.getAllValues()).length > 0;
           requestAnimationFrame(() => {
             this.patchSeparatorVisibility(visibleValuesArray);
             this.patchItemsVisibility(visibleValuesArray);
@@ -787,6 +789,12 @@ var rover = (el) => {
     },
     activateByKey(key) {
       data.__collection.activateByKey(key);
+    },
+    isEmpty() {
+      return !data.__hasVisibleOptions;
+    },
+    hasVisibleOptions() {
+      return data.__hasVisibleOptions;
     },
     searchUsing(query) {
       return data.__collection.search(query);

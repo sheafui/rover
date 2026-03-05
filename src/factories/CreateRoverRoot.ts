@@ -29,7 +29,7 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
         __prevActivatedValue: undefined,
         __activatedValue: undefined,
         __filteredValues: null,
-
+        __hasVisibleOptions: true,
         __prevVisibleArray: null as string[] | null,
         __prevActiveValue: undefined,
         __externalQuery: null,
@@ -61,7 +61,7 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
             getLabel: (value: string) => collection.get(value)?.label,
             getSearchable: (value: string) => collection.get(value)?.searchable,
             isDisabled: (value: string) => collection.get(value)?.disabled ?? false,
-            allOptions:() => this.__optionIndex,
+            allOptions: () => this.__optionIndex,
         },
 
         init() {
@@ -72,23 +72,23 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
             });
 
             // input search only when it searchable (the rover:input is in the dom)
-            if(this.__inputManager.el !== null){
+            if (this.__inputManager.el !== null) {
 
                 this.__inputManager.on('input', (event: InputEvent) => {
-                    
+
                     const inputEl = event?.target as HTMLInputElement & { _x_model?: undefined | GetterSetter<unknown> };
-                    
-                    
+
+
                     const isRemoteSearch = inputEl._x_model?.get() !== undefined;
-                    
+
                     if (!isRemoteSearch) {
                         const query = inputEl.value;
-                        
+
                         if (query.length > 0) {
-                            
+
                             this.__filteredValues = this.__searchUsingQuery(query)
-                            // @todo: prevent this O(n) loop by return value at first place
-                            .map((r: Item) => r.value);
+                                // @todo: prevent this O(n) loop by return value at first place
+                                .map((r: Item) => r.value);
                         } else {
                             this.__filteredValues = null;
                             // on the true branch the reindex handled internally but since 
@@ -97,12 +97,12 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
                             collection.reset();
                         };
                     }
-                    
-                    
+
+
                     const availableValues = this.__filteredValues ?? this.__collection.getAllValues();
-                    
+
                     if (this.__activatedValue && !availableValues.includes(this.__activatedValue)) this.__deactivate();
-                    
+
                     if (!this.__collection.getActiveItem()) {
                         this.__collection.activateFirst();
                     }
@@ -122,6 +122,8 @@ export default function CreateRoverRoot({ effect }: { effect: AlpineType.Directi
                     const activeValue = this.__activatedValue = activeItem?.value;
 
                     const visibleValuesArray = this.__filteredValues;
+
+                    this.__hasVisibleOptions = (visibleValuesArray ?? this.__collection.getAllValues()).length > 0;
 
                     requestAnimationFrame(() => {
                         this.patchSeparatorVisibility(visibleValuesArray);
