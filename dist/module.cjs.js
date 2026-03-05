@@ -363,6 +363,9 @@ function createOptionsManager(root) {
       bindListener(optionsEl, eventKey, listener, this.controller);
     },
     findClosestOption,
+    focus(preventScroll = true) {
+      requestAnimationFrame(() => optionsEl == null ? void 0 : optionsEl.focus({preventScroll}));
+    },
     enableDefaultOptionsHandlers(disabledEvents = []) {
       if (!optionsEl)
         return;

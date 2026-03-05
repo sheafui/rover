@@ -38,6 +38,11 @@ export function createOptionsManager(root: RoverRootContext): OptionsManager {
         },
 
         findClosestOption,
+        
+        focus(preventScroll: boolean = true): void {
+            requestAnimationFrame(() => optionsEl?.focus({ preventScroll }))
+        },
+
 
         enableDefaultOptionsHandlers(disabledEvents: string[] = []) {
             if (!optionsEl) return;
@@ -69,7 +74,7 @@ export function createOptionsManager(root: RoverRootContext): OptionsManager {
 
             if (!disabledEvents.includes('keydown')) {
                 this.on('keydown', (event: KeyboardEvent) => {
-                    
+
                     event.stopPropagation();
                     switch (event.key) {
                         case 'ArrowDown':

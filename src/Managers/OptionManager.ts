@@ -31,7 +31,6 @@ export function createOptionManager(root: RoverRootContext): OptionManager {
             })
         },
 
-        
 
         destroy() {
             this.controller.abort();

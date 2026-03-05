@@ -1,4 +1,4 @@
-import type { Item, Options, Pending} from "src/types";
+import type { Item, Options, Pending } from "src/types";
 
 export default class RoverCollection {
 
@@ -313,9 +313,10 @@ export default class RoverCollection {
             ? (this._navPosMap.get(this.activatedValue.value) ?? -1)
             : -1;
 
+
         const startIndex = currentPos === -1 ? 0 : (currentPos + 1) % this.navIndex.length;
         const total = this.navIndex.length;
-
+        
         for (let i = 0; i < total; i++) {
             const value = this.navIndex[(startIndex + i) % total]!;
             const item = this.itemsMap.get(value);

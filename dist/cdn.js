@@ -343,6 +343,9 @@
         bindListener(optionsEl, eventKey, listener, this.controller);
       },
       findClosestOption,
+      focus(preventScroll = true) {
+        requestAnimationFrame(() => optionsEl?.focus({preventScroll}));
+      },
       enableDefaultOptionsHandlers(disabledEvents = []) {
         if (!optionsEl)
           return;

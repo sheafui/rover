@@ -134,11 +134,11 @@ export interface OptionsManager extends Destroyable, Abortable {
     get all(): Array<HTMLElement>;
     flush(): void;
     findClosestOption(el: HTMLElement | null): HTMLElement | undefined
-
+    focus: (preventScroll: boolean) => void;
     enableDefaultOptionsHandlers(disabledEvents: Array<'focus' | 'blur' | 'input' | 'keydown'>): void
 }
 
-export interface OptionManager extends Destroyable, Pick<InputManager, 'on'>, Abortable {}
-export interface ButtonManager extends Destroyable, Pick<InputManager, 'on'>, Abortable {}
+export interface OptionManager extends Destroyable, Pick<InputManager, 'on'>, Abortable { }
+export interface ButtonManager extends Destroyable, Pick<InputManager, 'on'>, Abortable { }
 
 
