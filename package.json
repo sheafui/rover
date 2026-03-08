@@ -1,7 +1,19 @@
 {
-  "name": "rover",
+  "name": "@sheaf/rover",
+  "description": "Headless DOM navigation engine for Alpine.js — powers keyboard navigation, search, and activation state for combobox, select, and listbox patterns.",
+  "keywords": [
+    "alpinejs",
+    "alpine",
+    "combobox",
+    "listbox",
+    "select",
+    "keyboard-navigation",
+    "headless",
+    "accessibility",
+    "aria",
+    "rover"
+  ],
   "version": "1.0.0",
-  "description": "full combobox pattern implementation with alpine for alpine users",
   "main": "dist/module.cjs.js",
   "module": "dist/module.esm.js",
   "type": "module",
@@ -17,9 +29,6 @@
     "type": "git",
     "url": "git+https://github.com/sheafui/combobox.git"
   },
-  "keywords": [
-    "alpine"
-  ],
   "author": "mohamed charrafi",
   "license": "MIT",
   "bugs": {
