@@ -13,7 +13,7 @@
     "aria",
     "rover"
   ],
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0-beta.3",
   "main": "dist/module.cjs.js",
   "module": "dist/module.esm.js",
   "type": "module",
