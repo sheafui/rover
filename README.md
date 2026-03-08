@@ -105,4 +105,3 @@ Part of [SheafUI](https://sheafui.dev) — accessible, headless components for L
 Built by [Mohamed Charrafi](https://github.com/charrafimed).
 
 Made with ❤️ for the Laravel community.
-```
