@@ -1,101 +1,91 @@
-Here’s a polished, updated README reflecting your latest changes and new API patterns:
-
----
-
 # Alpine Rover
 
 > **One directive. Many components. Fully declarative. Zero JavaScript required.**
 
-The most powerful and flexible selection engine for Alpine.js and Laravel Blade. Build comboboxes, selects, autocompletes, command palettes, tag inputs, and more—fully declarative, keyboard-friendly, and virtual-scroll ready.
+The most powerful and flexible activation engine for Alpine.js. Build comboboxes, selects, autocompletes, command palettes, tag inputs, time pickers and more,  fully declarative, keyboard-friendly, and accessible.
 
 ## The Why
 
-At SheafUI, we kept duplicating selection logic across multiple components: selects, command palettes, autocompletes, tag inputs… Each needed keyboard navigation, search filtering, activation management, and accessibility. **This plugin consolidates it all.**
+At SheafUI, we kept duplicating activation logic across multiple components: selects, command palettes, autocompletes, tag inputs… Each needed keyboard navigation, search filtering, activation management, and accessibility. **This plugin consolidates it all.**
 
-In short: Alpine Rover brings the **$combobox$ pattern** to any component in a clean, declarative way.
+In short: Alpine Rover brings the **combobox pattern** to any component in a clean, declarative way.
 
 ## Features
 
 * **One Engine, Many Components** – A single directive powers all selection patterns.
 * **Keyboard Navigation** – Arrows, Enter, Escape, Home, End fully supported.
-* **Smart Search** – Built-in filtering optimized for large datasets.
-* **Virtual Scrolling** – Handle massive lists efficiently.
-* **WCAG Accessible** – ARIA-compliant out of the box.
+* **Smart Search** – Built-in filtering with unicode and accent normalization.
+* **WCAG Accessible** – ARIA attributes managed automatically.
 * **Headless** – Style freely with Tailwind or custom CSS.
 * **Zero Dependencies** – Only requires Alpine.js.
 * **Livewire Ready** – Works seamlessly with Livewire.
 * **Flexible Modes** – Single-select, multi-select, tags, autocomplete, command palette, and more.
-* **Enable/Disable Defaults** – Users can selectively enable default input and options behaviors.
 
-Here’s a clean, concise “Combobox Component Example” section for the README using only the relevant parts for users to understand and get started quickly:
-
----
-
-## Combobox Component Example
-
-Use Alpine Rover to build a full-featured combobox:
+## Combobox Example
 
 ```html
 <div x-data="selectComponent" x-rover>
-    <!-- Control -->
+
     <input x-rover:input placeholder="Search..." />
-    <button x-rover:button type="button">Toggle</button>
+    <button x-rover:button type="button">▼</button>
 
-    <!-- Options -->
     <ul x-rover:options>
-        <!-- Empty state -->
         <li x-rover:empty>No results found</li>
+        <li x-rover:loading>Searching...</li>
 
-        <!-- Options -->
-        <template x-for="(item, index) in items" x-bind:key="index">
-            <li x-rover:option="item" x-text="item"></li>
+        <template x-for="item in items" :key="item.value">
+            <li
+                x-rover:option
+                x-bind:value="item.value"
+                x-bind:data-label="item.label"
+                x-text="item.label"
+            ></li>
         </template>
     </ul>
+    
 </div>
 ```
 
-### Enabling Default Handlers
-
 ```js
-document.addEventListener('alpine:init', () => {
-    Alpine.data('selectComponent', () => ({
-        state: null,
-        items: ['tenjarine','apple','banana','cherry'],
-        selectedKeys: null,
+Alpine.data('selectComponent', () => ({
+    items: [
+        { value: 'apple',  label: 'Apple'  },
+        { value: 'banana', label: 'Banana' },
+        { value: 'cherry', label: 'Cherry' },
+    ],
+    selected: null,
 
-        init() {
-            // Activate first or selected item when the dropdown opens
-            this.$rover.onOpen(() => this.activateSelectedOrFirst());
+    init() {
+        // keyboard navigation, typing, focus/blur
+        this.$rover.input.enableDefaultInputHandlers();
 
-            // Enable default input behaviors: focus, typing, keyboard navigation
-            this.$rover.input.enableDefaultInputHandlers();
+        // hover activation, mouse, keyboard on the list
+        this.$rover.options.enableDefaultOptionsHandlers();
 
-            // Enable default option behaviors: hover, click, activation
-            this.$rover.options.enableDefaultOptionsHandlers();
+        // select on Enter
+        this.$rover.input.on('keydown', (e, activeValue) => {
+            if (e.key === 'Enter' && activeValue) {
+                this.selected = activeValue;
+            }
+        });
 
-            // Custom behavior: select on Enter
-            this.$rover.input.on('keydown', (event, activeKey) => {
-                if (event.key === 'Enter' && activeKey !== undefined) {
-                    this.handleSelection(activeKey);
-                    this.$rover.options.close();
-                }
-            });
-
-            // Custom behavior: select on click
-            this.$rover.options.on('click', (event, closestOptionEl, activeKey) => {
-                if (closestOptionEl !== undefined) {
-                    this.handleSelection(closestOptionEl.dataset.key);
-                    this.$rover.options.close();
-                }
-            });
-        }
-    }));
-});
+        // select on click
+        this.$rover.options.on('click', (e, optionEl) => {
+            if (optionEl?.dataset.value) {
+                this.selected = optionEl.dataset.value;
+            }
+        });
+    }
+}));
 ```
 
-Users can **selectively disable** any default behavior when needed for custom interactions.
+**What rover handles automatically:**
+- Hiding/showing options based on search results
+- Hiding groups with no visible children (`x-rover:group`)
+- Scroll into view on keyboard navigation
+- Full ARIA attributes (`role`, `aria-activedescendant`, `aria-controls`)
+- Normalized search — accents, unicode, case insensitive
 
----
 
 ## 🚧 Development Status
 
@@ -103,7 +93,7 @@ Users can **selectively disable** any default behavior when needed for custom in
 
 ## License
 
-MIT License - see [LICENSE.md](LICENSE.md)
+MIT License — see [LICENSE.md](LICENSE.md)
 
 ## Contributing
 
@@ -111,7 +101,8 @@ Contributions are welcome **after the first stable release**. Your patience is a
 
 ## Credits
 
-Part of [SheafUI](https://sheafui.dev) accessible, headless components for Laravel and Alpine.js.
+Part of [SheafUI](https://sheafui.dev) — accessible, headless components for Laravel and Alpine.js.
 Built by [Mohamed Charrafi](https://github.com/charrafimed).
 
 Made with ❤️ for the Laravel community.
+```
