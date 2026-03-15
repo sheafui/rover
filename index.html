@@ -154,7 +154,6 @@
                     this.activateSelectedOrFirst();
                 }
 
-                this.$refs._x__input?.focus();
             },
 
             open() {
@@ -178,7 +177,7 @@
                         this.selected = value;
                     }
 
-                    this.$refs._x__input.value = String(value).toUpperCase();
+                    this.$rover.input.value = String(value).toUpperCase();
                 } else {
                     // Multi-select
                     if (!Array.isArray(this.selected)) {
