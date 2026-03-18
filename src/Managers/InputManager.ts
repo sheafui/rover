@@ -36,9 +36,12 @@ export function createInputManager(
         },
 
         set value(val: string) {
-            if (inputEl) inputEl.value = val;
+            if (inputEl) {
+                inputEl.value = val;
+                inputEl.dispatchEvent(new Event('input'))
+            }
         },
-        reset() { if (inputEl) inputEl.value = ''},
+        reset() { this.value = '' },
 
         focus(preventScroll: boolean = true): void {
             requestAnimationFrame(() => inputEl?.focus({ preventScroll }))
