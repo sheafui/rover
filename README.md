@@ -85,19 +85,13 @@ Alpine.data('selectComponent', () => ({
 - Scroll into view on keyboard navigation
 - Full ARIA attributes (`role`, `aria-activedescendant`, `aria-controls`)
 - Normalized search — accents, unicode, case insensitive
-
-
-## 🚧 Development Status
-
-**Alpine Rover is actively developed** and will reach its first stable release soon.
-
 ## License
 
 MIT License — see [LICENSE.md](LICENSE.md)
 
 ## Contributing
 
-Contributions are welcome **after the first stable release**. Your patience is appreciated while the core API stabilizes.
+Contributions are welcome 
 
 ## Credits
 
