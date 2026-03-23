@@ -25,7 +25,7 @@ export default function CreateRoverOption(Alpine: AlpineType): RoverOptionData {
 
             this.$el.dataset.value = value;
 
-            this.__add(value, label, normalizedSearch, disabled);
+            this.__add(String(value), String(label), normalizedSearch, disabled);
 
             this.$nextTick(() => {
                 if (disabled) {

@@ -9,7 +9,7 @@ function CreateRoverOption(Alpine2) {
       const rawSearch = Alpine2.extractProp(this.$el, "data-search", value);
       const normalizedSearch = String(rawSearch).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
       this.$el.dataset.value = value;
-      this.__add(value, label, normalizedSearch, disabled);
+      this.__add(String(value), String(label), normalizedSearch, disabled);
       this.$nextTick(() => {
         if (disabled) {
           this.$el.setAttribute("tabindex", "-1");
